@@ -1,83 +1,134 @@
-# Onix - کلاینت Sing-box
+# Onix - Sing-box Client
 
-Onix یک کلاینت گرافیکی (GUI) برای Sing-box است که به شما امکان می‌دهد اتصالات Sing-box خود را به راحتی مدیریت کنید. این برنامه با استفاده از `customtkinter` ساخته شده و یک رابط کاربری مدرن و کاربرپسند را ارائه می‌دهد.
+Onix is a graphical user interface (GUI) client for Sing-box, designed to help you easily manage your Sing-box connections. Built with `customtkinter`, it offers a modern and user-friendly interface.
 
-## ویژگی‌ها
+## Features
 
--   **مدیریت سرورها:** سرورهای VLESS، Vmess و Shadowsocks را از طریق لینک‌های اشتراک یا به صورت دستی اضافه و مدیریت کنید.
--   **گروه‌بندی سرورها:** سرورهای خود را در گروه‌های مختلف سازماندهی کنید.
--   **تست اتصال:** پینگ (TCP) و تست URL را برای سرورهای خود انجام دهید تا عملکرد آن‌ها را بررسی کنید.
--   **تنظیمات سیستم پروکسی:** به راحتی پروکسی سیستم ویندوز را فعال یا غیرفعال کنید.
--   **تنظیمات پیشرفته:** DNS، دامنه‌های بای‌پس و IPهای بای‌پس را پیکربندی کنید.
--   **حالت Tray:** برنامه را در حالت Tray سیستم اجرا کنید.
--   **پشتیبانی از Windows:** به طور خاص برای سیستم‌عامل ویندوز طراحی شده است.
+-   **Server Management:** Add and manage VLESS, Vmess, and Shadowsocks servers via subscription links or manually.
+-   **Server Grouping:** Organize your servers into different groups for better management.
+-   **Connection Testing:** Perform TCP pings and URL tests for your servers to check their performance and latency.
+-   **System Proxy Settings:** Easily enable or disable Windows system proxy settings.
+-   **Advanced Settings:** Configure custom DNS servers, bypass domains, and bypass IPs.
+-   **Tray Mode:** Run the application in the system tray for discreet operation.
+-   **Windows Support:** Specifically designed and optimized for the Windows operating system.
 
-## شروع به کار
+## Getting Started
 
-### دانلود و اجرا (برای کاربران)
+### Download and Run (For Users)
 
-برای استفاده از Onix، نیازی به نصب پایتون ندارید. کافیست آخرین نسخه اجرایی (EXE) را از بخش [Releases](https://github.com/YOUR_USERNAME/onix/releases) در گیت‌هاب دانلود کنید.
+You don't need Python installed to use Onix. Simply download the latest executable (EXE) from the [Releases](https://github.com/YOUR_USERNAME/onix/releases) section on GitHub.
 
-1.  به صفحه [Releases](https://github.com/YOUR_USERNAME/onix/releases) بروید.
-2.  آخرین نسخه را پیدا کنید و فایل `onix-windows-exe.zip` را دانلود کنید.
-3.  فایل ZIP را از حالت فشرده خارج کنید.
-4.  فایل `main.exe` را اجرا کنید.
+1.  Go to the [Releases page](https://github.com/YOUR_USERNAME/onix/releases).
+2.  Find the latest release and download the `onix-windows-exe.zip` file.
+3.  Extract the ZIP file.
+4.  Run the `main.exe` file.
 
-**توجه:** فایل `sing-box.exe` به صورت خودکار در کنار `main.exe` قرار می‌گیرد و نیازی به دانلود جداگانه آن نیست.
+**Note:** The `sing-box.exe` file is automatically bundled with `main.exe`, so you do not need to download it separately.
 
-### برای توسعه‌دهندگان
+### For Developers
 
-#### پیش‌نیازها
+#### Prerequisites
 
 -   Python 3.8+
--   `pip` (مدیر بسته پایتون)
+-   `pip` (Python package installer)
 
-#### نصب
+#### Installation
 
-1.  مخزن را کلون کنید:
+1.  Clone the repository:
     ```bash
     git clone https://github.com/YOUR_USERNAME/onix.git
     cd onix
     ```
-2.  یک محیط مجازی ایجاد و فعال کنید:
+2.  Create and activate a virtual environment:
     ```bash
     python -m venv venv
-    # در ویندوز
+    # On Windows
     .\venv\Scripts\activate
-    # در لینوکس/macOS
+    # On Linux/macOS
     source venv/bin/activate
     ```
-3.  وابستگی‌ها را نصب کنید:
+3.  Install dependencies:
     ```bash
     pip install -r requirements.txt
     ```
-4.  فایل `sing-box.exe` را دانلود کنید. می‌توانید آن را از [صفحه Releases رسمی Sing-box](https://github.com/SagerNet/sing-box/releases) دریافت کنید. فایل `sing-box-X.Y.Z-windows-amd64.zip` را دانلود کرده و `sing-box.exe` را از داخل آن استخراج کنید و در کنار فایل `main.py` قرار دهید.
+4.  Download the `sing-box.exe` file. You can get it from the [official Sing-box Releases page](https://github.com/SagerNet/sing-box/releases). Download the `sing-box-X.Y.Z-windows-amd64.zip` file, extract `sing-box.exe` from it, and place it next to your `main.py` file.
 
-#### اجرا
+#### Running the Application
 
 ```bash
 python main.py
 ```
 
-## ساخت فایل اجرایی (EXE)
+## Building the Executable (EXE)
 
-برای ساخت یک فایل اجرایی مستقل ویندوز (EXE) با استفاده از PyInstaller:
+To build a standalone Windows executable (EXE) using PyInstaller:
 
-1.  مطمئن شوید که `pyinstaller` نصب شده است (`pip install pyinstaller`).
-2.  مطمئن شوید که `sing-box.exe` در کنار `main.py` قرار دارد.
-3.  دستور زیر را اجرا کنید:
+1.  Ensure PyInstaller is installed (`pip install pyinstaller`).
+2.  Make sure `sing-box.exe` is located next to `main.py`.
+3.  Run the following command:
     ```bash
     pyinstaller --noconfirm --onefile --windowed --add-data "sing-box.exe;." main.py
     ```
-    فایل اجرایی در پوشه `dist` ایجاد خواهد شد.
+    The executable will be created in the `dist` folder.
 
-## مشارکت
+## Contributing
 
-ما از مشارکت شما استقبال می‌کنیم! لطفاً قبل از ارسال Pull Request، فایل `CONTRIBUTING.md` را مطالعه کنید.
+We welcome contributions to Onix! To ensure a smooth and collaborative development process, please follow these guidelines:
 
-## مجوز
+### How to Contribute
 
-این پروژه تحت مجوز MIT منتشر شده است. برای جزئیات بیشتر به فایل `LICENSE` مراجعه کنید.
+1.  **Fork the Repository:** Start by forking the Onix repository to your GitHub account.
+2.  **Clone Your Fork:** Clone your forked repository to your local machine.
+    ```bash
+    git clone https://github.com/YOUR_USERNAME/onix.git
+    cd onix
+    ```
+3.  **Create a New Branch:** Create a new branch for your feature or bug fix. Use a descriptive name (e.g., `feature/add-new-protocol`, `bugfix/connection-issue`).
+    ```bash
+    git checkout -b feature/your-feature-name
+    ```
+4.  **Make Your Changes:** Implement your changes, ensuring they adhere to the project's coding style and conventions.
+5.  **Test Your Changes:** Thoroughly test your changes to ensure they work as expected and do not introduce new bugs. If applicable, add new unit tests.
+6.  **Commit Your Changes:** Write clear and concise commit messages. Follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification (e.g., `feat: Add new feature`, `fix: Resolve bug`).
+    ```bash
+    git commit -m "feat: Briefly describe your changes"
+    ```
+7.  **Push to Your Fork:** Push your local branch to your forked repository on GitHub.
+    ```bash
+    git push origin feature/your-feature-name
+    ```
+8.  **Create a Pull Request (PR):** Go to the original Onix repository on GitHub and create a new Pull Request from your forked branch.
+    *   Provide a clear title and detailed description of your changes.
+    *   Reference any related issues.
+    *   Ensure your PR passes all CI checks.
+
+### Code Style
+
+-   Follow [PEP 8](https://www.python.org/dev/peps/pep-0008/) for Python code style.
+-   Use clear and descriptive variable/function names.
+-   Add comments where necessary to explain complex logic.
+
+### Reporting Bugs
+
+If you find a bug, please open an issue on GitHub. Provide as much detail as possible, including:
+
+-   A clear and concise description of the bug.
+-   Steps to reproduce the behavior.
+-   Expected behavior.
+-   Screenshots or error messages (if applicable).
+-   Your operating system and Onix version.
+
+### Feature Requests
+
+We welcome ideas for new features! Please open an issue on GitHub to suggest new features. Describe:
+
+-   The problem your feature solves.
+-   How you envision the feature working.
+-   Any potential benefits or use cases.
+
+## License
+
+This project is licensed under the MIT License. See the `LICENSE` file for more details.
 
 ---
-**توجه:** لطفاً `YOUR_USERNAME` را در لینک‌های گیت‌هاب با نام کاربری واقعی خود جایگزین کنید.
+**Note:** Please replace `YOUR_USERNAME` in the GitHub links with your actual GitHub username.
