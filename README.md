@@ -16,9 +16,9 @@ Onix is a graphical user interface (GUI) client for Sing-box, designed to help y
 
 ### Download and Run (For Users)
 
-You don't need Python installed to use Onix. Simply download the latest executable (EXE) from the [Releases](https://github.com/YOUR_USERNAME/onix/releases) section on GitHub.
+You don't need Python installed to use Onix. Simply download the latest executable (EXE) from the [Releases](https://github.com/AhmadAkd/onix/releases) section on GitHub.
 
-1.  Go to the [Releases page](https://github.com/YOUR_USERNAME/onix/releases).
+1.  Go to the [Releases page](https://github.com/AhmadAkd/onix/releases).
 2.  Find the latest release and download the `onix-windows-exe.zip` file.
 3.  Extract the ZIP file.
 4.  Run the `main.exe` file.
@@ -36,7 +36,7 @@ You don't need Python installed to use Onix. Simply download the latest executab
 
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/YOUR_USERNAME/onix.git
+    git clone https://github.com/AhmadAkd/onix.git
     cd onix
     ```
 2.  Create and activate a virtual environment:
@@ -80,7 +80,7 @@ We welcome contributions to Onix! To ensure a smooth and collaborative developme
 1.  **Fork the Repository:** Start by forking the Onix repository to your GitHub account.
 2.  **Clone Your Fork:** Clone your forked repository to your local machine.
     ```bash
-    git clone https://github.com/YOUR_USERNAME/onix.git
+    git clone https://github.com/AhmadAkd/onix.git
     cd onix
     ```
 3.  **Create a New Branch:** Create a new branch for your feature or bug fix. Use a descriptive name (e.g., `feature/add-new-protocol`, `bugfix/connection-issue`).
