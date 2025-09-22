@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -22,13 +22,19 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install ruff
 
-    - name: Lint with ruff
+    - name: Download sing-box.exe
       run: |
-        ruff check .
+        Invoke-WebRequest -Uri "https://github.com/SagerNet/sing-box/releases/download/v1.12.8/sing-box-1.12.8-windows-amd64.zip" -OutFile "sing-box.zip"
+        Expand-Archive -Path "sing-box.zip" -DestinationPath "."
+        Move-Item "sing-box-1.12.8-windows-amd64/sing-box.exe" "sing-box.exe"
 
-    # Add tests here in the future
-    # - name: Test with pytest
-    #   run: |
-    #     pytest
+    - name: Build with PyInstaller
+      run: |
+        pyinstaller --noconfirm --onefile --windowed --add-data "sing-box.exe;." main.py
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: onix-windows-exe
+        path: dist/main.exe

@@ -1,59 +1,83 @@
-# Sing-box Client
+# Onix - کلاینت Sing-box
 
-A graphical user interface (GUI) for the [sing-box](https://github.com/SagerNet/sing-box) universal proxy tool, built with Python and customtkinter.
+Onix یک کلاینت گرافیکی (GUI) برای Sing-box است که به شما امکان می‌دهد اتصالات Sing-box خود را به راحتی مدیریت کنید. این برنامه با استفاده از `customtkinter` ساخته شده و یک رابط کاربری مدرن و کاربرپسند را ارائه می‌دهد.
 
-This client allows you to easily manage and switch between different server configurations from subscription links.
+## ویژگی‌ها
 
-![Screenshot](placeholder.png) <!-- Add a screenshot of the application -->
+-   **مدیریت سرورها:** سرورهای VLESS، Vmess و Shadowsocks را از طریق لینک‌های اشتراک یا به صورت دستی اضافه و مدیریت کنید.
+-   **گروه‌بندی سرورها:** سرورهای خود را در گروه‌های مختلف سازماندهی کنید.
+-   **تست اتصال:** پینگ (TCP) و تست URL را برای سرورهای خود انجام دهید تا عملکرد آن‌ها را بررسی کنید.
+-   **تنظیمات سیستم پروکسی:** به راحتی پروکسی سیستم ویندوز را فعال یا غیرفعال کنید.
+-   **تنظیمات پیشرفته:** DNS، دامنه‌های بای‌پس و IPهای بای‌پس را پیکربندی کنید.
+-   **حالت Tray:** برنامه را در حالت Tray سیستم اجرا کنید.
+-   **پشتیبانی از Windows:** به طور خاص برای سیستم‌عامل ویندوز طراحی شده است.
 
-## Features
+## شروع به کار
 
--   **Subscription Management**: Update server lists from subscription links.
--   **VLESS Protocol Support**: Parses `vless://` links.
--   **Server Grouping**: Automatically groups servers based on their names.
--   **Latency Testing**:
-    -   Test servers via TCP Ping.
-    -   Test real-world latency with a URL test.
--   **System Proxy**: Automatically sets/unsets the Windows system proxy.
--   **System Tray**: Can be minimized to the system tray.
--   **Light/Dark Mode**: Supports system appearance settings.
+### دانلود و اجرا (برای کاربران)
 
-## Prerequisites
+برای استفاده از Onix، نیازی به نصب پایتون ندارید. کافیست آخرین نسخه اجرایی (EXE) را از بخش [Releases](https://github.com/YOUR_USERNAME/onix/releases) در گیت‌هاب دانلود کنید.
+
+1.  به صفحه [Releases](https://github.com/YOUR_USERNAME/onix/releases) بروید.
+2.  آخرین نسخه را پیدا کنید و فایل `onix-windows-exe.zip` را دانلود کنید.
+3.  فایل ZIP را از حالت فشرده خارج کنید.
+4.  فایل `main.exe` را اجرا کنید.
+
+**توجه:** فایل `sing-box.exe` به صورت خودکار در کنار `main.exe` قرار می‌گیرد و نیازی به دانلود جداگانه آن نیست.
+
+### برای توسعه‌دهندگان
+
+#### پیش‌نیازها
 
 -   Python 3.8+
--   The `sing-box.exe` executable in the project's root directory. You can download the latest version from the [official releases](https://github.com/SagerNet/sing-box/releases).
+-   `pip` (مدیر بسته پایتون)
 
-## Installation & Usage
+#### نصب
 
-1.  **Clone the repository:**
+1.  مخزن را کلون کنید:
     ```bash
-    git clone https://github.com/Ahmad/SingboxClient.git
-    cd SingboxClient
+    git clone https://github.com/YOUR_USERNAME/onix.git
+    cd onix
     ```
-
-2.  **Create a virtual environment and install dependencies:**
+2.  یک محیط مجازی ایجاد و فعال کنید:
     ```bash
-    # For Windows
     python -m venv venv
+    # در ویندوز
     .\venv\Scripts\activate
-    
-    # Install requirements
+    # در لینوکس/macOS
+    source venv/bin/activate
+    ```
+3.  وابستگی‌ها را نصب کنید:
+    ```bash
     pip install -r requirements.txt
     ```
+4.  فایل `sing-box.exe` را دانلود کنید. می‌توانید آن را از [صفحه Releases رسمی Sing-box](https://github.com/SagerNet/sing-box/releases) دریافت کنید. فایل `sing-box-X.Y.Z-windows-amd64.zip` را دانلود کرده و `sing-box.exe` را از داخل آن استخراج کنید و در کنار فایل `main.py` قرار دهید.
 
-3.  **Download `sing-box.exe`:**
-    Make sure you have `sing-box.exe` in the root folder of the project.
+#### اجرا
 
-4.  **Run the application:**
+```bash
+python main.py
+```
+
+## ساخت فایل اجرایی (EXE)
+
+برای ساخت یک فایل اجرایی مستقل ویندوز (EXE) با استفاده از PyInstaller:
+
+1.  مطمئن شوید که `pyinstaller` نصب شده است (`pip install pyinstaller`).
+2.  مطمئن شوید که `sing-box.exe` در کنار `main.py` قرار دارد.
+3.  دستور زیر را اجرا کنید:
     ```bash
-    python main.py
+    pyinstaller --noconfirm --onefile --windowed --add-data "sing-box.exe;." main.py
     ```
+    فایل اجرایی در پوشه `dist` ایجاد خواهد شد.
 
-## How to Contribute
+## مشارکت
 
-Contributions are welcome! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) file for details on how to get started.
+ما از مشارکت شما استقبال می‌کنیم! لطفاً قبل از ارسال Pull Request، فایل `CONTRIBUTING.md` را مطالعه کنید.
 
-## License
+## مجوز
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+این پروژه تحت مجوز MIT منتشر شده است. برای جزئیات بیشتر به فایل `LICENSE` مراجعه کنید.
 
+---
+**توجه:** لطفاً `YOUR_USERNAME` را در لینک‌های گیت‌هاب با نام کاربری واقعی خود جایگزین کنید.
