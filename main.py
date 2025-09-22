@@ -2,6 +2,7 @@ import customtkinter
 import subprocess
 import threading
 import os
+import sys # Added for PyInstaller path handling
 import winreg
 import ctypes
 import requests
@@ -15,6 +16,12 @@ import pystray
 from pystray import MenuItem as item
 from concurrent.futures import ThreadPoolExecutor
 from tkinter import messagebox
+
+def get_resource_path(relative_path):
+    """Get absolute path to resource, works for dev and for PyInstaller."""
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.getcwd(), relative_path)
 
 # Local imports
 from constants import *
@@ -608,7 +615,7 @@ class SingboxApp(customtkinter.CTk):
 
             # 2. Validate config
             self.after(0, self.log, "Validating configuration...")
-            check_command = [os.path.join(os.getcwd(), 'sing-box.exe'), 'check', '-c', config_filename]
+            check_command = [get_resource_path('sing-box.exe'), 'check', '-c', config_filename]
             result = subprocess.run(check_command, capture_output=True, text=True, encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW)
 
             if result.returncode != 0:
@@ -621,8 +628,7 @@ class SingboxApp(customtkinter.CTk):
             self.after(0, self.log, "Configuration is valid. Starting process...")
             
             # 3. Run process
-            command = [os.path.join(
-                os.getcwd(), 'sing-box.exe'), 'run', '-c', config_filename]
+            command = [get_resource_path('sing-box.exe'), 'run', '-c', config_filename]
             self.singbox_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                                     text=True, encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW)
             self.singbox_pid = self.singbox_process.pid # Store PID

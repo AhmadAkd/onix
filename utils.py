@@ -7,7 +7,14 @@ import base64
 import re
 from urllib.parse import urlparse, parse_qs, unquote
 import subprocess
+import sys # Added for PyInstaller path handling
 from constants import PROXY_HOST, PROXY_PORT, PROXY_SERVER_ADDRESS
+
+def get_resource_path(relative_path):
+    """Get absolute path to resource, works for dev and for PyInstaller."""
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.getcwd(), relative_path)
 
 
 def tcp_ping(host, port, timeout=2):
@@ -73,7 +80,7 @@ def run_single_url_test(config):
         with open(temp_config_file, 'w', encoding='utf-8') as f:
             json.dump(full_config, f, indent=2)
 
-        command = [os.path.join(os.getcwd(), 'sing-box.exe'),
+        command = [get_resource_path('sing-box.exe'),
                    'run', '-c', temp_config_file]
         temp_proc = subprocess.Popen(command, stdout=subprocess.DEVNULL,
                                      stderr=subprocess.DEVNULL, creationflags=subprocess.CREATE_NO_WINDOW)
