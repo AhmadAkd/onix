@@ -1,8 +1,18 @@
 # Onix - Sing-box Client
 
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![GitHub Stars](https://img.shields.io/github/stars/AhmadAkd/onix?style=social)](https://github.com/AhmadAkd/onix/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/AhmadAkd/onix?style=social)](https://github.com/AhmadAkd/onix/network/members)
+
+---
+
+**Languages:** [English](README.md) | [فارسی](README_fa.md) | [Русский](README_ru.md) | [简体中文](README_zh.md)
+
+---
+
 Onix is a graphical user interface (GUI) client for Sing-box, designed to help you easily manage your Sing-box connections. Built with `customtkinter`, it offers a modern and user-friendly interface.
 
-## Features
+## ✨ Features
 
 -   **Server Management:** Add and manage VLESS, Vmess, and Shadowsocks servers via subscription links or manually.
 -   **Server Grouping:** Organize your servers into different groups for better management.
@@ -12,7 +22,7 @@ Onix is a graphical user interface (GUI) client for Sing-box, designed to help y
 -   **Tray Mode:** Run the application in the system tray for discreet operation.
 -   **Windows Support:** Specifically designed and optimized for the Windows operating system.
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Download and Run (For Users)
 
@@ -59,7 +69,7 @@ You don't need Python installed to use Onix. Simply download the latest executab
 python main.py
 ```
 
-## Building the Executable (EXE)
+## 📦 Building the Executable (EXE)
 
 To build a standalone Windows executable (EXE) using PyInstaller:
 
@@ -71,7 +81,7 @@ To build a standalone Windows executable (EXE) using PyInstaller:
     ```
     The executable will be created in the `dist` folder.
 
-## User Interface and Usage
+## 🖥️ User Interface and Usage
 
 Onix features two main tabs: "Connection" and "Settings".
 
@@ -84,7 +94,8 @@ This tab is for managing your servers and connections.
     *   **Server List:** Shows the servers within the selected group. Click on a server to select it.
     *   **Start/Stop Buttons:** To start or stop the Sing-box connection with the selected server.
     *   **Status Bar:** Displays the current connection status, IP address, and latency.
--   **Management Panel (Right Panel):n    *   **Subscription Management:**
+-   **Management Panel (Right Panel):**
+    *   **Subscription Management:**
         *   **Subscription Link:** Enter your server subscription link here.
         *   **Group Name (Optional):** Enter a name for the new server group.
         *   **Update Button:** To update the server list from the subscription link.
@@ -110,7 +121,7 @@ This tab is for configuring application settings.
     *   **Bypass Domains:** Enter domains that should bypass the proxy (comma-separated).
     *   **Bypass IPs:** Enter IP addresses that should bypass the proxy (comma-separated).
 
-## Contributing
+## 🤝 Contributing
 
 We welcome contributions to Onix! To ensure a smooth and collaborative development process, please follow these guidelines:
 
@@ -165,6 +176,6 @@ We welcome ideas for new features! Please open an issue on GitHub to suggest new
 -   How you envision the feature working.
 -   Any potential benefits or use cases.
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License. See the `LICENSE` file for more details.
