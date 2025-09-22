@@ -34,7 +34,7 @@ jobs:
         pyinstaller --noconfirm --onefile --windowed --add-data "sing-box.exe;." main.py
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: onix-windows-exe
         path: dist/main.exe
