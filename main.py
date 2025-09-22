@@ -296,8 +296,6 @@ class SingboxApp(customtkinter.CTk):
         self.bind_all(
             "<Control-c>", lambda e: handle_text_shortcut(self.focus_get(), 'copy'))
         self.bind_all(
-            "<Control-v>", lambda e: handle_text_shortcut(self.focus_get(), 'paste'))
-        self.bind_all(
             "<Control-a>", lambda e: handle_text_shortcut(self.focus_get(), 'select_all'))
 
         self.bind_all("<Control-s>", self.start_stop_toggle)
