@@ -71,6 +71,45 @@ To build a standalone Windows executable (EXE) using PyInstaller:
     ```
     The executable will be created in the `dist` folder.
 
+## User Interface and Usage
+
+Onix features two main tabs: "Connection" and "Settings".
+
+### Connection Tab
+
+This tab is for managing your servers and connections.
+
+-   **Server List (Left Panel):**
+    *   **Group Dropdown:** Displays your server groups. Select a group to view its servers.
+    *   **Server List:** Shows the servers within the selected group. Click on a server to select it.
+    *   **Start/Stop Buttons:** To start or stop the Sing-box connection with the selected server.
+    *   **Status Bar:** Displays the current connection status, IP address, and latency.
+-   **Management Panel (Right Panel):n    *   **Subscription Management:**
+        *   **Subscription Link:** Enter your server subscription link here.
+        *   **Group Name (Optional):** Enter a name for the new server group.
+        *   **Update Button:** To update the server list from the subscription link.
+    *   **Group Actions:**
+        *   **Ping Group:** Performs a TCP ping test for all servers in the current group.
+        *   **URL Test Group:** Performs a URL test for all servers in the current group (this can be time-consuming).
+        *   **Sort by Ping:** Sorts the servers by their ping latency.
+        *   **URL Test (Active):** Performs a URL test on the currently active connection.
+    *   **Manual Add:**
+        *   **Add Single Server:** Manually add a server by pasting its link.
+    *   **Log Textbox:** Displays messages related to application activities.
+
+### Settings Tab
+
+This tab is for configuring application settings.
+
+-   **Appearance Settings:**
+    *   **Appearance Mode:** Changes the display mode (Light, Dark, System).
+    *   **Color Theme:** Changes the application's color theme (requires app restart for full effect).
+-   **Network Settings:**
+    *   **Connection Mode:** Sets the connection mode (Rule-Based or Global).
+    *   **DNS Servers:** Enter custom DNS servers (comma-separated).
+    *   **Bypass Domains:** Enter domains that should bypass the proxy (comma-separated).
+    *   **Bypass IPs:** Enter IP addresses that should bypass the proxy (comma-separated).
+
 ## Contributing
 
 We welcome contributions to Onix! To ensure a smooth and collaborative development process, please follow these guidelines:
@@ -129,6 +168,3 @@ We welcome ideas for new features! Please open an issue on GitHub to suggest new
 ## License
 
 This project is licensed under the MIT License. See the `LICENSE` file for more details.
-
----
-**Note:** Please replace `YOUR_USERNAME` in the GitHub links with your actual GitHub username.

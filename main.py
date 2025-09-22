@@ -291,10 +291,17 @@ class SingboxApp(customtkinter.CTk):
         self.group_name_entry.bind("<Button-3>", right_click_menu.popup)
         self.log_textbox.bind("<Button-3>", right_click_menu.popup)
 
+        self.manual_add_entry.bind("<Button-3>", right_click_menu.popup)
+        self.dns_entry.bind("<Button-3>", right_click_menu.popup)
+        self.bypass_domains_entry.bind("<Button-3>", right_click_menu.popup)
+        self.bypass_ips_entry.bind("<Button-3>", right_click_menu.popup)
+
         self.bind_all(
             "<Control-x>", lambda e: handle_text_shortcut(self.focus_get(), 'cut'))
         self.bind_all(
             "<Control-c>", lambda e: handle_text_shortcut(self.focus_get(), 'copy'))
+        self.bind_all(
+            "<Control-v>", lambda e: handle_text_shortcut(self.focus_get(), 'paste'))
         self.bind_all(
             "<Control-a>", lambda e: handle_text_shortcut(self.focus_get(), 'select_all'))
 
@@ -635,9 +642,10 @@ class SingboxApp(customtkinter.CTk):
                 self.after(0, self.log, line.strip())
 
         except FileNotFoundError:
-            self.after(0, self.log, "Error: sing-box.exe not found!")
+            singbox_path = get_resource_path('sing-box.exe') # Get path again for logging
+            self.after(0, self.log, f"Error: sing-box.exe not found at '{singbox_path}'!")
         except Exception as e:
-            self.after(0, self.log, f"An error occurred: {e}")
+            self.after(0, self.log, f"An unexpected error occurred: {type(e).__name__}: {e}")
 
     def stop_singbox(self):
         pid_to_kill = self.singbox_pid
