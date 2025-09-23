@@ -72,20 +72,23 @@ def wait_for_proxy(host, port, timeout=5):
     return False
 
 
-def run_single_url_test(config):
+def run_single_url_test(config, settings={}):
     """Runs a URL test for a single server configuration."""
     temp_proc = None
     temp_config_file = "temp_url_test_config.json"
     try:
-        # Pass empty settings to avoid using custom rules during URL test
-        full_config = generate_config_json(config, settings={})
+        # Pass app settings to ensure a valid config is generated
+        full_config = generate_config_json(config, settings)
         with open(temp_config_file, 'w', encoding='utf-8') as f:
             json.dump(full_config, f, indent=2)
 
         command = [get_resource_path('sing-box.exe'),
                    'run', '-c', temp_config_file]
+        env = os.environ.copy()
+        env["ENABLE_DEPRECATED_SPECIAL_OUTBOUNDS"] = "true"
         temp_proc = subprocess.Popen(command, stdout=subprocess.DEVNULL,
-                                     stderr=subprocess.DEVNULL, creationflags=subprocess.CREATE_NO_WINDOW)
+                                     stderr=subprocess.DEVNULL, creationflags=subprocess.CREATE_NO_WINDOW,
+                                     env=env)
 
         if wait_for_proxy(PROXY_HOST, PROXY_PORT):
             return url_test(PROXY_SERVER_ADDRESS)
@@ -219,23 +222,20 @@ def generate_config_json(server_config, settings={}):
     user_dns_str = settings.get("dns_servers", "1.1.1.1,8.8.8.8")
     user_dns_list = [s.strip() for s in user_dns_str.split(',') if s.strip()]
 
-    # Define DNS outbounds (without address field for type "dns")
+    # Define DNS outbounds with addresses (new format)
     dns_outbounds = []
-    dns_outbounds.append({"type": "dns", "tag": "dns_proxy"})
-    dns_outbounds.append({"type": "dns", "tag": "dns_direct"})
-
-    # DNS servers for the dns section
-    dns_servers_config = []
     if user_dns_list:
-        dns_servers_config.append(
-            {"address": user_dns_list[0], "tag": "dns_proxy"})
+        dns_outbounds.append(
+            {"type": "dns", "tag": "dns_proxy", "address": user_dns_list[0]})
     else:
-        dns_servers_config.append({"address": "1.1.1.1", "tag": "dns_proxy"})
-    dns_servers_config.append({"address": "8.8.8.8", "tag": "dns_direct"})
+        dns_outbounds.append(
+            {"type": "dns", "tag": "dns_proxy", "address": "1.1.1.1"})
+    dns_outbounds.append(
+        {"type": "dns", "tag": "dns_direct", "address": "8.8.8.8"})
 
     # --- Route & DNS Rules ---
     bypass_domains_str = settings.get(
-        "bypass_domains", "geosite:ir,*.ir,*.local")
+        "bypass_domains", "domain:geosite:ir,*.ir,*.local")
     bypass_domains_list = [d.strip()
                            for d in bypass_domains_str.split(',') if d.strip()]
 
@@ -244,41 +244,31 @@ def generate_config_json(server_config, settings={}):
     bypass_ips_list = [i.strip()
                        for i in bypass_ips_str.split(',') if i.strip()]
 
-    # Separate geosite/geoip from normal domains/ips for correct rule generation
-    geosite_rules = [d.replace("geosite:", "")
-                     for d in bypass_domains_list if d.startswith("geosite:")]
-    domain_suffix_rules = [
-        d for d in bypass_domains_list if not d.startswith("geosite:")]
+    # Separate geoip rules from ip_cidr rules
     geoip_rules = [i.replace("geoip:", "")
                    for i in bypass_ips_list if i.startswith("geoip:")]
     ip_cidr_rules = [i for i in bypass_ips_list if not i.startswith("geoip:")]
 
-    route_rules = [{"protocol": ["dns"], "outbound": "dns"}]
-
-    if geosite_rules:
-        route_rules.append({"geosite": geosite_rules, "outbound": "direct"})
-    if domain_suffix_rules:
+    route_rules = [{"protocol": ["dns"], "action": "hijack-dns"}]
+    if bypass_domains_list:
         route_rules.append(
-            {"domain_suffix": domain_suffix_rules, "outbound": "direct"})
+            {"domain": bypass_domains_list, "outbound": "direct"})
     if geoip_rules:
         route_rules.append({"geoip": geoip_rules, "outbound": "direct"})
     if ip_cidr_rules:
         route_rules.append({"ip_cidr": ip_cidr_rules, "outbound": "direct"})
 
-    route_rules.append({"protocol": ["quic"], "outbound": "block"})
+    route_rules.append({"protocol": ["quic"], "action": "reject"})
 
     dns_rules = []
-    if geosite_rules:
-        dns_rules.append({"geosite": geosite_rules, "server": "dns_direct"})
-    if domain_suffix_rules:
+    if bypass_domains_list:
         dns_rules.append(
-            {"domain_suffix": domain_suffix_rules, "server": "dns_direct"})
+            {"domain": bypass_domains_list, "server": "dns_direct"})
 
     config_template = {
         "log": {"level": "info"},
         "dns": {
-            "servers": dns_servers_config,
-            "rules": dns_rules,
+            "rules": dns_rules,  # The 'servers' key is removed
             "strategy": "prefer_ipv4",
             "final": "dns_proxy"
         },
@@ -289,8 +279,7 @@ def generate_config_json(server_config, settings={}):
                 "listen": PROXY_HOST, "listen_port": PROXY_PORT}
         ],
         "outbounds": [
-            {"type": "direct", "tag": "direct"},
-            {"type": "block", "tag": "block"}
+            {"type": "direct", "tag": "direct"}
         ] + dns_outbounds,
         "route": {
             "rules": route_rules,
@@ -348,7 +337,8 @@ def generate_config_json(server_config, settings={}):
             "uuid": server_config["uuid"],
             "security": server_config.get("security", "auto"),
             "alter_id": server_config.get("alter_id", 0),
-            "network": server_config.get("transport", "tcp"), # Add network field
+            # Add network field
+            "network": server_config.get("transport", "tcp"),
             "tls": tls_config
         }
 

@@ -31,9 +31,9 @@ You don't need Python installed to use Onix. Simply download the latest executab
 1. Go to the [Releases page](https://github.com/AhmadAkd/onix/releases).
 2. Find the latest release and download the `onix-windows-exe.zip` file.
 3. Extract the ZIP file.
-4. Run the `main.exe` file.
+4. Run the `onix.exe` file.
 
-**Note:** The `sing-box.exe` file is automatically bundled with `main.exe`, so you do not need to download it separately.
+**Note:** The `sing-box.exe` file is automatically bundled with `onix.exe`, so you do not need to download it separately.
 
 ### For Developers
 
@@ -79,15 +79,10 @@ python main.py
 
 To build a standalone Windows executable (EXE) using PyInstaller:
 
-1. Ensure PyInstaller is installed (`pip install pyinstaller`).
-2. Make sure `sing-box.exe` is located next to `main.py`.
-3. Run the following command:
+1. Ensure all development prerequisites are met (like `pyinstaller` and `sing-box.exe`).
+2. Simply run the `build.bat` script by double-clicking it.
 
-    ```bash
-    pyinstaller --noconfirm --onefile --windowed --add-data "sing-box.exe;." --icon="assets/icon.ico" main.py
-    ```
-
-    The executable will be created in the `dist` folder.
+The script will automatically handle all steps, and the final executable (`onix.exe`) will be created in the `dist` folder.
 
 ## 🖥️ User Interface and Usage
 
@@ -169,6 +164,47 @@ We welcome contributions to Onix! To ensure a smooth and collaborative developme
     - Ensure your PR passes all CI checks.
 
 ### Code Style
+
+- Follow [PEP 8](https://www.python.org/dev/peps/pep-0008/) for Python code style.
+- Use clear and descriptive variable/function names.
+- Add comments where necessary to explain complex logic.
+
+### Commit Message Convention
+
+We use the **Conventional Commits** specification for our commit messages. This leads to more readable messages that are easy to follow and allows us to automate the generation of changelogs.
+
+Each commit message consists of a **header**, a **body**, and a **footer**.
+
+```
+<type>(<scope>): <subject>
+<BLANK LINE>
+<body>
+<BLANK LINE>
+<footer>
+```
+
+**Type**
+
+The type must be one of the following:
+
+- **feat**: A new feature for the user.
+- **fix**: A bug fix for the user.
+- **docs**: Changes to documentation.
+- **style**: Code style changes (formatting, white-space, etc.).
+- **refactor**: A code change that neither fixes a bug nor adds a feature.
+- **perf**: A code change that improves performance.
+- **test**: Adding missing tests or correcting existing tests.
+- **build**: Changes that affect the build system or external dependencies.
+- **ci**: Changes to our CI configuration files and scripts.
+- **chore**: Other changes that don't modify source or test files.
+
+**Examples**
+
+- `feat(ui): Add a new 'About' window`
+- `fix(proxy): Correctly handle system proxy disabling on exit`
+- `docs: Update contribution guidelines with commit conventions`
+- `refactor(settings): Simplify settings loading logic`
+- `ci: Automate changelog generation on release`
 
 - Follow [PEP 8](https://www.python.org/dev/peps/pep-0008/) for Python code style.
 - Use clear and descriptive variable/function names.

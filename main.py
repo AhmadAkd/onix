@@ -19,6 +19,7 @@ import io
 import pystray
 from pystray import MenuItem as item
 from concurrent.futures import ThreadPoolExecutor
+import webbrowser
 from tkinter import messagebox
 
 
@@ -27,6 +28,17 @@ def get_resource_path(relative_path):
     if hasattr(sys, '_MEIPASS'):
         return os.path.join(sys._MEIPASS, relative_path)
     return os.path.join(os.getcwd(), relative_path)
+
+
+def get_app_version():
+    """Reads the version from the version.txt file."""
+    try:
+        version_file_path = get_resource_path('version.txt')
+        with open(version_file_path, 'r', encoding='utf-8') as f:
+            version = f.read().strip()
+            return version
+    except FileNotFoundError:
+        return "dev"  # Default version for local development
 
 
 # Local imports
@@ -58,7 +70,8 @@ class SingboxApp(customtkinter.CTk):
 
         # --- Configure Window ---
         self.geometry("1024x600")
-        self.title("Sing-box Client")
+        self.app_version = get_app_version()
+        self.title(f"Onix - {self.app_version}")
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         # --- Build UI ---
@@ -316,7 +329,7 @@ class SingboxApp(customtkinter.CTk):
         self.bypass_domains_entry.grid(
             row=2, column=1, padx=10, pady=5, sticky="ew")
         self.bypass_domains_entry.insert(0, self.settings.get(
-            "bypass_domains", "geosite:ir,*.ir,*.local"))
+            "bypass_domains", "domain:geosite:ir,*.ir,*.local"))
 
         # Bypass IPs
         customtkinter.CTkLabel(network_frame, text="Bypass IPs:", font=APP_FONT).grid(
@@ -327,6 +340,14 @@ class SingboxApp(customtkinter.CTk):
             row=3, column=1, padx=10, pady=5, sticky="ew")
         self.bypass_ips_entry.insert(0, self.settings.get(
             "bypass_ips", "geoip:ir,192.168.0.0/16,127.0.0.1,10.0.0.0/8"))
+
+        # --- About Button ---
+        about_button = customtkinter.CTkButton(
+            parent_tab,
+            text="About Onix",
+            command=self.show_about_window
+        )
+        about_button.grid(row=5, column=0, padx=20, pady=20, sticky="s")
 
     def bind_shortcuts(self):
         right_click_menu = RightClickMenu(self)
@@ -668,16 +689,10 @@ class SingboxApp(customtkinter.CTk):
 
             # 2. Validate config
             self.after(0, self.log, "Validating configuration...")
-            # Set environment variables to allow deprecated features
-            env = os.environ.copy()
-            env["ENABLE_DEPRECATED_LEGACY_DNS_SERVERS"] = "true"
-            env["ENABLE_DEPRECATED_SPECIAL_OUTBOUNDS"] = "true"
-            env["ENABLE_DEPRECATED_MISSING_DOMAIN_RESOLVER"] = "true"
-
             check_command = [get_resource_path(
                 'sing-box.exe'), 'check', '-c', config_filename]
             result = subprocess.run(check_command, capture_output=True, text=True,
-                                    encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW, env=env)
+                                    encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW)
 
             if result.returncode != 0:
                 error_message = result.stdout.strip() or result.stderr.strip()
@@ -693,7 +708,8 @@ class SingboxApp(customtkinter.CTk):
             command = [get_resource_path(
                 'sing-box.exe'), 'run', '-c', config_filename]
             self.singbox_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                                    text=True, encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW, env=env)
+                                                    text=True, encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW,
+                                                    env=env)
             self.singbox_pid = self.singbox_process.pid  # Store PID
 
             for line in iter(self.singbox_process.stdout.readline, ''):
@@ -814,7 +830,7 @@ class SingboxApp(customtkinter.CTk):
 
     def _url_test_thread_task(self, config, ping_label):
         ping_label.configure(text="...", text_color="gray")
-        result = utils.run_single_url_test(config)
+        result = utils.run_single_url_test(config, self.settings)
         config["ping"] = result
 
         def update_ui():
@@ -956,6 +972,41 @@ class SingboxApp(customtkinter.CTk):
         self.tray_icon = pystray.Icon(
             "Sing-box Client", image, "Sing-box Client", menu)
         self.tray_icon.run()
+
+    def show_about_window(self):
+        """Displays the About window."""
+        # Prevent multiple about windows
+        if hasattr(self, 'about_win') and self.about_win.winfo_exists():
+            self.about_win.lift()
+            return
+
+        self.about_win = customtkinter.CTkToplevel(self)
+        self.about_win.title("About Onix")
+        self.about_win.geometry("350x220")
+        self.about_win.resizable(False, False)
+        self.about_win.transient(self)  # Keep on top of the main window
+
+        self.about_win.grid_columnconfigure(0, weight=1)
+
+        title_label = customtkinter.CTkLabel(
+            self.about_win, text="Onix", font=customtkinter.CTkFont(size=24, weight="bold"))
+        title_label.grid(row=0, column=0, padx=20, pady=(20, 10))
+
+        version_label = customtkinter.CTkLabel(
+            self.about_win, text=f"Version: {self.app_version}", font=APP_FONT)
+        version_label.grid(row=1, column=0, padx=20, pady=0)
+
+        def open_releases_page(e):
+            webbrowser.open_new("https://github.com/AhmadAkd/onix/releases")
+
+        link_label = customtkinter.CTkLabel(
+            self.about_win, text="GitHub Releases Page", text_color=("blue", "cyan"), cursor="hand2", font=customtkinter.CTkFont(underline=True))
+        link_label.grid(row=2, column=0, padx=20, pady=10)
+        link_label.bind("<Button-1>", open_releases_page)
+
+        ok_button = customtkinter.CTkButton(
+            self.about_win, text="OK", command=self.about_win.destroy, width=100)
+        ok_button.grid(row=3, column=0, padx=20, pady=20)
 
 
 if __name__ == "__main__":

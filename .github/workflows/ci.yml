@@ -1,7 +1,10 @@
-name: Python CI
+name: Build and Release
 
 on:
   push:
+    branches: [ "main" ]
+    tags:
+      - 'v*' # Trigger on version tags like v1.0, v1.1.1
   pull_request:
     branches: [ "main" ]
 
@@ -10,7 +13,10 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Fetches all history for all tags
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -31,12 +37,54 @@ jobs:
         Expand-Archive -Path "sing-box.zip" -DestinationPath "sing-box-latest"
         Move-Item "sing-box-latest/sing-box-*-windows-amd64/sing-box.exe" "sing-box.exe"
 
+    - name: Download GeoIP database
+      run: Invoke-WebRequest -Uri "https://github.com/SagerNet/sing-geoip/releases/latest/download/geoip.db" -OutFile "geoip.db"
+
+    - name: Create version file
+      shell: pwsh
+      run: |
+        $version = "dev"
+        if ($env:GITHUB_REF -like "refs/tags/v*") {
+          $version = $env:GITHUB_REF_NAME
+        }
+        Set-Content -Path "version.txt" -Value $version
+
     - name: Build with PyInstaller
       run: |
-        pyinstaller --noconfirm --onefile --windowed --add-data "sing-box.exe;." --icon="assets/icon.ico" main.py
+        pyinstaller --noconfirm --onefile --windowed --name onix --add-data "sing-box.exe;." --add-data "version.txt;." --add-data "geoip.db;." --icon="assets/icon.ico" main.py
 
-    - name: Upload artifact
+    - name: Package executable for release
+      run: Compress-Archive -Path dist/onix.exe -DestinationPath onix-windows-exe.zip
+
+    - name: Upload build artifact (for PRs and main branch)
+      if: "!startsWith(github.ref, 'refs/tags/')"
       uses: actions/upload-artifact@v4
       with:
         name: onix-windows-exe
-        path: dist/main.exe
+        path: onix-windows-exe.zip
+
+    - name: Generate Changelog Body
+      if: startsWith(github.ref, 'refs/tags/')
+      run: python generate_changelog.py ${{ github.ref_name }} --update-file CHANGELOG.md
+
+    - name: Commit and push updated CHANGELOG.md
+      if: startsWith(github.ref, 'refs/tags/')
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add CHANGELOG.md
+        # Check if there are changes to commit
+        if (-not (git diff --staged --quiet)); then
+          git commit -m "docs: Update CHANGELOG.md for ${{ github.ref_name }}"
+          git push
+        fi
+      shell: pwsh
+
+    - name: Create Release and Upload Asset (for tags)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        body_path: changelog_body.md
+        files: onix-windows-exe.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
