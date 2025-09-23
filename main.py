@@ -1,8 +1,12 @@
+from ui_components import RightClickMenu, ServerContextMenu, handle_text_shortcut
+import settings_manager
+import utils
+from constants import *
 import customtkinter
 import subprocess
 import threading
 import os
-import sys # Added for PyInstaller path handling
+import sys  # Added for PyInstaller path handling
 import winreg
 import ctypes
 import requests
@@ -17,25 +21,23 @@ from pystray import MenuItem as item
 from concurrent.futures import ThreadPoolExecutor
 from tkinter import messagebox
 
+
 def get_resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller."""
     if hasattr(sys, '_MEIPASS'):
         return os.path.join(sys._MEIPASS, relative_path)
     return os.path.join(os.getcwd(), relative_path)
 
+
 # Local imports
-from constants import *
-import utils
-import settings_manager
-from ui_components import RightClickMenu, ServerContextMenu, handle_text_shortcut
 
 
 class SingboxApp(customtkinter.CTk):
     def __init__(self):
         super().__init__()
 
-        # --- Cleanup ---
-        self._cleanup_temp_files()
+        # --- Load Settings ---
+        self.settings = settings_manager.load_settings()
 
         # --- Initialize State Variables ---
         self.singbox_process = None
@@ -52,8 +54,6 @@ class SingboxApp(customtkinter.CTk):
         self.ip_label = None
         self.latency_label = None
 
-        # --- Load Settings ---
-        self.settings = settings_manager.load_settings()
         self.setup_appearance()
 
         # --- Configure Window ---
@@ -64,6 +64,9 @@ class SingboxApp(customtkinter.CTk):
         # --- Build UI ---
         self.create_widgets()
         self.bind_shortcuts()
+
+        # --- Cleanup ---
+        self._cleanup_temp_files()
 
         # --- Load Data ---
         self.load_data()
@@ -79,10 +82,12 @@ class SingboxApp(customtkinter.CTk):
         connection_tab, settings_tab = self._create_main_layout()
 
         # --- Connection Tab Layout ---
-        connection_tab.grid_columnconfigure(0, weight=2, minsize=250) # Server list column
-        connection_tab.grid_columnconfigure(1, weight=1, minsize=300) # Management column
+        connection_tab.grid_columnconfigure(
+            0, weight=2, minsize=250)  # Server list column
+        connection_tab.grid_columnconfigure(
+            1, weight=1, minsize=300)  # Management column
         connection_tab.grid_rowconfigure(0, weight=1)
-        connection_tab.grid_rowconfigure(1, weight=0) # For status bar
+        connection_tab.grid_rowconfigure(1, weight=0)  # For status bar
 
         # --- Create and Place Widgets ---
         self._create_server_list_ui(connection_tab)
@@ -99,9 +104,12 @@ class SingboxApp(customtkinter.CTk):
 
     def _create_server_list_ui(self, parent_tab):
         """Creates the UI for the left column (server list)."""
-        server_list_container = customtkinter.CTkFrame(parent_tab, fg_color="transparent")
-        server_list_container.grid(row=0, column=0, sticky="nsew", padx=(10, 5), pady=10)
-        server_list_container.grid_rowconfigure(2, weight=1) # Make row 2 (server list) expandable
+        server_list_container = customtkinter.CTkFrame(
+            parent_tab, fg_color="transparent")
+        server_list_container.grid(
+            row=0, column=0, sticky="nsew", padx=(10, 5), pady=10)
+        # Make row 2 (server list) expandable
+        server_list_container.grid_rowconfigure(2, weight=1)
         server_list_container.grid_columnconfigure(0, weight=1)
 
         # --- Group Dropdown (Row 0) ---
@@ -112,21 +120,24 @@ class SingboxApp(customtkinter.CTk):
         # --- Connection Controls (Row 1) ---
         conn_frame = customtkinter.CTkFrame(server_list_container)
         conn_frame.grid(row=1, column=0, sticky="ew", pady=(0, 10))
-        conn_frame.grid_columnconfigure(0, weight=1) # Label
-        conn_frame.grid_columnconfigure((1, 2), weight=0) # Buttons
+        conn_frame.grid_columnconfigure(0, weight=1)  # Label
+        conn_frame.grid_columnconfigure((1, 2), weight=0)  # Buttons
 
         self.status_label = customtkinter.CTkLabel(
             conn_frame, text="No Server Selected", font=(APP_FONT[0], 14), text_color="orange", wraplength=250, justify="left")
-        self.status_label.grid(row=0, column=0, padx=10, pady=(5,5), sticky="w")
+        self.status_label.grid(row=0, column=0, padx=10,
+                               pady=(5, 5), sticky="w")
 
         self.start_button = customtkinter.CTkButton(
             conn_frame, text="Start", command=self.start_singbox, font=APP_FONT)
-        self.start_button.grid(row=0, column=1, padx=(0,5), pady=5, sticky="e")
+        self.start_button.grid(
+            row=0, column=1, padx=(0, 5), pady=5, sticky="e")
 
         self.stop_button = customtkinter.CTkButton(
             conn_frame, text="Stop", command=self.stop_singbox, state="disabled", font=APP_FONT)
-        self.stop_button.grid(row=0, column=2, padx=(0,10), pady=5, sticky="e")
-        
+        self.stop_button.grid(
+            row=0, column=2, padx=(0, 10), pady=5, sticky="e")
+
         # --- Server List (Row 2) ---
         self.server_list_frame = customtkinter.CTkScrollableFrame(
             server_list_container, label_text="Servers", label_font=APP_FONT)
@@ -135,8 +146,10 @@ class SingboxApp(customtkinter.CTk):
 
     def _create_management_ui(self, parent_tab):
         """Creates the UI for the right column (management panel)."""
-        management_container = customtkinter.CTkScrollableFrame(parent_tab, fg_color="transparent")
-        management_container.grid(row=0, column=1, sticky="nsew", padx=(5, 10), pady=10)
+        management_container = customtkinter.CTkScrollableFrame(
+            parent_tab, fg_color="transparent")
+        management_container.grid(
+            row=0, column=1, sticky="nsew", padx=(5, 10), pady=10)
         management_container.grid_columnconfigure(0, weight=1)
 
         # --- Subscription Management ---
@@ -148,42 +161,49 @@ class SingboxApp(customtkinter.CTk):
             row=0, column=0, padx=10, pady=(10, 0), sticky="w")
         self.sub_link_entry = customtkinter.CTkEntry(
             sub_frame, placeholder_text="Paste your subscription link here", font=APP_FONT)
-        self.sub_link_entry.grid(row=1, column=0, padx=10, pady=(0, 5), sticky="ew")
+        self.sub_link_entry.grid(
+            row=1, column=0, padx=10, pady=(0, 5), sticky="ew")
 
         customtkinter.CTkLabel(sub_frame, text="Group Name (Optional):", font=APP_FONT).grid(
             row=2, column=0, padx=10, pady=(10, 0), sticky="w")
         self.group_name_entry = customtkinter.CTkEntry(
             sub_frame, placeholder_text="e.g., My Servers", font=APP_FONT)
-        self.group_name_entry.grid(row=3, column=0, padx=10, pady=(0, 10), sticky="ew")
+        self.group_name_entry.grid(
+            row=3, column=0, padx=10, pady=(0, 10), sticky="ew")
 
         self.update_button = customtkinter.CTkButton(
             sub_frame, text="Update", command=self.update_subscription, font=APP_FONT)
         self.update_button.grid(row=4, column=0, padx=10, pady=10, sticky="ew")
 
-        self.progress_bar = customtkinter.CTkProgressBar(sub_frame, mode="indeterminate")
+        self.progress_bar = customtkinter.CTkProgressBar(
+            sub_frame, mode="indeterminate")
         self.progress_bar.grid(row=5, column=0, padx=10, pady=5, sticky="ew")
         self.progress_bar.grid_remove()
 
         # --- Group Actions ---
         actions_frame = customtkinter.CTkFrame(management_container)
         actions_frame.grid(row=1, column=0, sticky="ew", pady=10)
-        actions_frame.grid_columnconfigure((0,1,2), weight=1)
+        actions_frame.grid_columnconfigure((0, 1, 2), weight=1)
 
         self.ping_button = customtkinter.CTkButton(
             actions_frame, text="Ping Group", command=self.test_all_pings, font=APP_FONT)
-        self.ping_button.grid(row=0, column=0, padx=(10,5), pady=10, sticky="ew")
+        self.ping_button.grid(row=0, column=0, padx=(
+            10, 5), pady=10, sticky="ew")
 
         self.url_test_all_button = customtkinter.CTkButton(
             actions_frame, text="URL Test Group", command=self.test_all_urls, font=APP_FONT)
-        self.url_test_all_button.grid(row=0, column=1, padx=5, pady=10, sticky="ew")
+        self.url_test_all_button.grid(
+            row=0, column=1, padx=5, pady=10, sticky="ew")
 
         self.sort_button = customtkinter.CTkButton(
             actions_frame, text="Sort by Ping", command=self.sort_servers, font=APP_FONT)
-        self.sort_button.grid(row=0, column=2, padx=(5,10), pady=10, sticky="ew")
+        self.sort_button.grid(row=0, column=2, padx=(
+            5, 10), pady=10, sticky="ew")
 
         self.url_test_button = customtkinter.CTkButton(
             actions_frame, text="URL Test (Active)", command=self.run_url_test, font=APP_FONT, state="disabled")
-        self.url_test_button.grid(row=1, column=0, columnspan=3, padx=10, pady=(0,10), sticky="ew")
+        self.url_test_button.grid(
+            row=1, column=0, columnspan=3, padx=10, pady=(0, 10), sticky="ew")
 
         # --- Manual Add ---
         manual_frame = customtkinter.CTkFrame(management_container)
@@ -194,14 +214,17 @@ class SingboxApp(customtkinter.CTk):
             row=0, column=0, padx=10, pady=(10, 0), sticky="w")
         self.manual_add_entry = customtkinter.CTkEntry(
             manual_frame, placeholder_text="Paste vmess://, vless://, etc.", font=APP_FONT)
-        self.manual_add_entry.grid(row=1, column=0, padx=10, pady=(0, 5), sticky="ew")
+        self.manual_add_entry.grid(
+            row=1, column=0, padx=10, pady=(0, 5), sticky="ew")
         self.manual_add_button = customtkinter.CTkButton(
             manual_frame, text="Add Server", command=self.add_manual_server, font=APP_FONT)
-        self.manual_add_button.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
+        self.manual_add_button.grid(
+            row=2, column=0, padx=10, pady=10, sticky="ew")
 
         # --- Log Textbox ---
-        log_frame = customtkinter.CTkFrame(management_container, fg_color="transparent")
-        log_frame.grid(row=3, column=0, sticky="nsew", pady=(10,0))
+        log_frame = customtkinter.CTkFrame(
+            management_container, fg_color="transparent")
+        log_frame.grid(row=3, column=0, sticky="nsew", pady=(10, 0))
         log_frame.grid_rowconfigure(0, weight=1)
         log_frame.grid_columnconfigure(0, weight=1)
         management_container.grid_rowconfigure(3, weight=1)
@@ -211,28 +234,38 @@ class SingboxApp(customtkinter.CTk):
 
     def _create_status_bar(self, parent_tab):
         status_bar_frame = customtkinter.CTkFrame(parent_tab, height=30)
-        status_bar_frame.grid(row=1, column=0, columnspan=2, sticky="ew", padx=10, pady=(5,0))
+        status_bar_frame.grid(row=1, column=0, columnspan=2,
+                              sticky="ew", padx=10, pady=(5, 0))
         status_bar_frame.grid_columnconfigure((1, 3, 5), weight=1)
 
-        customtkinter.CTkLabel(status_bar_frame, text="Status:", font=APP_FONT, anchor="w").grid(row=0, column=0, padx=(10, 2), pady=5)
-        self.conn_status_label = customtkinter.CTkLabel(status_bar_frame, text="Disconnected", text_color="orange", font=APP_FONT, anchor="w")
-        self.conn_status_label.grid(row=0, column=1, padx=(0, 10), pady=5, sticky="w")
+        customtkinter.CTkLabel(status_bar_frame, text="Status:", font=APP_FONT, anchor="w").grid(
+            row=0, column=0, padx=(10, 2), pady=5)
+        self.conn_status_label = customtkinter.CTkLabel(
+            status_bar_frame, text="Disconnected", text_color="orange", font=APP_FONT, anchor="w")
+        self.conn_status_label.grid(
+            row=0, column=1, padx=(0, 10), pady=5, sticky="w")
 
-        customtkinter.CTkLabel(status_bar_frame, text="IP Address:", font=APP_FONT, anchor="w").grid(row=0, column=2, padx=(10, 2), pady=5)
-        self.ip_label = customtkinter.CTkLabel(status_bar_frame, text="N/A", font=APP_FONT, anchor="w")
+        customtkinter.CTkLabel(status_bar_frame, text="IP Address:", font=APP_FONT, anchor="w").grid(
+            row=0, column=2, padx=(10, 2), pady=5)
+        self.ip_label = customtkinter.CTkLabel(
+            status_bar_frame, text="N/A", font=APP_FONT, anchor="w")
         self.ip_label.grid(row=0, column=3, padx=(0, 10), pady=5, sticky="w")
 
-        customtkinter.CTkLabel(status_bar_frame, text="Latency:", font=APP_FONT, anchor="w").grid(row=0, column=4, padx=(10, 2), pady=5)
-        self.latency_label = customtkinter.CTkLabel(status_bar_frame, text="N/A", font=APP_FONT, anchor="w")
-        self.latency_label.grid(row=0, column=5, padx=(0, 10), pady=5, sticky="w")
+        customtkinter.CTkLabel(status_bar_frame, text="Latency:", font=APP_FONT, anchor="w").grid(
+            row=0, column=4, padx=(10, 2), pady=5)
+        self.latency_label = customtkinter.CTkLabel(
+            status_bar_frame, text="N/A", font=APP_FONT, anchor="w")
+        self.latency_label.grid(
+            row=0, column=5, padx=(0, 10), pady=5, sticky="w")
 
     def _create_settings_tab_widgets(self, parent_tab):
         parent_tab.grid_columnconfigure(0, weight=1)
-        parent_tab.grid_rowconfigure(4, weight=1) # Allow extra space to expand
+        # Allow extra space to expand
+        parent_tab.grid_rowconfigure(4, weight=1)
 
         # --- Appearance Settings ---
         customtkinter.CTkLabel(parent_tab, text="Appearance Settings", font=(
-            APP_FONT[0], 16)).grid(row=0, column=0, padx=20, pady=(20,10), sticky="w")
+            APP_FONT[0], 16)).grid(row=0, column=0, padx=20, pady=(20, 10), sticky="w")
 
         theme_frame = customtkinter.CTkFrame(parent_tab)
         theme_frame.grid(row=1, column=0, padx=20, pady=10, sticky="ew")
@@ -260,30 +293,40 @@ class SingboxApp(customtkinter.CTk):
         # Connection Mode
         customtkinter.CTkLabel(network_frame, text="Connection Mode:", font=APP_FONT).grid(
             row=0, column=0, padx=10, pady=5, sticky="w")
-        self.connection_mode_menu = customtkinter.CTkOptionMenu(network_frame, values=["Rule-Based", "Global"], font=APP_FONT)
-        self.connection_mode_menu.grid(row=0, column=1, padx=10, pady=5, sticky="ew")
-        self.connection_mode_menu.set(self.settings.get("connection_mode", "Rule-Based"))
+        self.connection_mode_menu = customtkinter.CTkOptionMenu(
+            network_frame, values=["Rule-Based", "Global"], font=APP_FONT)
+        self.connection_mode_menu.grid(
+            row=0, column=1, padx=10, pady=5, sticky="ew")
+        self.connection_mode_menu.set(
+            self.settings.get("connection_mode", "Rule-Based"))
 
         # DNS Servers
         customtkinter.CTkLabel(network_frame, text="DNS Servers:", font=APP_FONT).grid(
             row=1, column=0, padx=10, pady=5, sticky="w")
         self.dns_entry = customtkinter.CTkEntry(network_frame, font=APP_FONT)
         self.dns_entry.grid(row=1, column=1, padx=10, pady=5, sticky="ew")
-        self.dns_entry.insert(0, self.settings.get("dns_servers", "1.1.1.1,8.8.8.8"))
+        self.dns_entry.insert(0, self.settings.get(
+            "dns_servers", "1.1.1.1,8.8.8.8"))
 
         # Bypass Domains
         customtkinter.CTkLabel(network_frame, text="Bypass Domains:", font=APP_FONT).grid(
             row=2, column=0, padx=10, pady=5, sticky="w")
-        self.bypass_domains_entry = customtkinter.CTkEntry(network_frame, font=APP_FONT)
-        self.bypass_domains_entry.grid(row=2, column=1, padx=10, pady=5, sticky="ew")
-        self.bypass_domains_entry.insert(0, self.settings.get("bypass_domains", "geosite:ir,*.ir,*.local"))
+        self.bypass_domains_entry = customtkinter.CTkEntry(
+            network_frame, font=APP_FONT)
+        self.bypass_domains_entry.grid(
+            row=2, column=1, padx=10, pady=5, sticky="ew")
+        self.bypass_domains_entry.insert(0, self.settings.get(
+            "bypass_domains", "geosite:ir,*.ir,*.local"))
 
         # Bypass IPs
         customtkinter.CTkLabel(network_frame, text="Bypass IPs:", font=APP_FONT).grid(
             row=3, column=0, padx=10, pady=5, sticky="w")
-        self.bypass_ips_entry = customtkinter.CTkEntry(network_frame, font=APP_FONT)
-        self.bypass_ips_entry.grid(row=3, column=1, padx=10, pady=5, sticky="ew")
-        self.bypass_ips_entry.insert(0, self.settings.get("bypass_ips", "geoip:ir,192.168.0.0/16,127.0.0.1,10.0.0.0/8"))
+        self.bypass_ips_entry = customtkinter.CTkEntry(
+            network_frame, font=APP_FONT)
+        self.bypass_ips_entry.grid(
+            row=3, column=1, padx=10, pady=5, sticky="ew")
+        self.bypass_ips_entry.insert(0, self.settings.get(
+            "bypass_ips", "geoip:ir,192.168.0.0/16,127.0.0.1,10.0.0.0/8"))
 
     def bind_shortcuts(self):
         right_click_menu = RightClickMenu(self)
@@ -315,7 +358,7 @@ class SingboxApp(customtkinter.CTk):
             # Use glob to find all temp config files
             temp_files = glob.glob("temp_config_*.json")
             temp_files.extend(glob.glob("temp_url_test_config.json"))
-            
+
             if not temp_files:
                 return
 
@@ -421,10 +464,11 @@ class SingboxApp(customtkinter.CTk):
         """Deletes a server from the list and saves the changes."""
         if not messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete server '{config_to_delete.get('name')}'?"):
             return
-            
+
         group_name = config_to_delete.get("group")
         if not group_name or group_name not in self.server_groups:
-            self.log(f"Error: Could not find group for server {config_to_delete.get('name')}.")
+            self.log(
+                f"Error: Could not find group for server {config_to_delete.get('name')}.")
             return
 
         # Find and remove the server
@@ -448,20 +492,20 @@ class SingboxApp(customtkinter.CTk):
             current_group = self.group_dropdown.get()
             if current_group == group_name:
                 self.filter_servers_by_group(current_group)
-            elif not self.server_groups: # If all groups are gone
-                 self.filter_servers_by_group("No Groups")
-
+            elif not self.server_groups:  # If all groups are gone
+                self.filter_servers_by_group("No Groups")
 
             # If the deleted server was the selected one, clear selection
             if self.selected_config == config_to_delete:
                 self.selected_config = None
                 self.selected_server_button = None
-                self.status_label.configure(text="No Server Selected", text_color="orange")
-
+                self.status_label.configure(
+                    text="No Server Selected", text_color="orange")
 
             self.save_all_settings()
         else:
-            self.log(f"Error: Could not find server {config_to_delete.get('name')} to delete.")
+            self.log(
+                f"Error: Could not find server {config_to_delete.get('name')} to delete.")
 
     def edit_server(self, config_to_edit):
         """Opens a dialog to edit the server's name."""
@@ -477,11 +521,11 @@ class SingboxApp(customtkinter.CTk):
             old_name = config_to_edit['name']
             config_to_edit['name'] = new_name.strip()
             self.log(f"Renamed server '{old_name}' to '{new_name.strip()}'.")
-            
+
             # Refresh the UI
             current_group = self.group_dropdown.get()
             self.filter_servers_by_group(current_group)
-            
+
             # Save changes
             self.save_all_settings()
 
@@ -501,22 +545,24 @@ class SingboxApp(customtkinter.CTk):
         for group in self.server_groups.values():
             for s_config in group:
                 if f"{s_config.get('server')}:{s_config.get('port')}" == server_id:
-                    self.log(f"Server {config.get('name')} already exists. Skipping.")
+                    self.log(
+                        f"Server {config.get('name')} already exists. Skipping.")
                     return
         # --- End Duplicate Check ---
 
         group_name = config.get("group", "Manual Servers")
         if group_name not in self.server_groups:
             self.server_groups[group_name] = []
-        
+
         self.server_groups[group_name].append(config)
-        self.log(f"Added server '{config.get('name')}' to group '{group_name}'.")
+        self.log(
+            f"Added server '{config.get('name')}' to group '{group_name}'.")
 
         # Refresh UI and save
         self.populate_group_dropdown()
-        self.filter_servers_by_group(self.group_dropdown.get()) # Refresh list
+        self.filter_servers_by_group(self.group_dropdown.get())  # Refresh list
         self.save_all_settings()
-        self.manual_add_entry.delete(0, "end") # Clear entry
+        self.manual_add_entry.delete(0, "end")  # Clear entry
 
     # --- Core Functionality ---
     def update_subscription(self, event=None):
@@ -567,7 +613,8 @@ class SingboxApp(customtkinter.CTk):
                         continue
                     # --- End Duplicate Check ---
 
-                    existing_server_ids.add(server_id) # Add to set to check against others in the same subscription
+                    # Add to set to check against others in the same subscription
+                    existing_server_ids.add(server_id)
                     server_count += 1
                     group_name = custom_group_name if custom_group_name else config["group"]
                     if group_name not in temp_groups:
@@ -577,12 +624,12 @@ class SingboxApp(customtkinter.CTk):
 
             self.server_groups.update(temp_groups)
             self.after(0, self.populate_group_dropdown)
-            
+
             log_message = f"Successfully loaded {server_count} new servers."
             if skipped_count > 0:
                 log_message += f" Skipped {skipped_count} duplicate(s)."
             self.after(0, self.log, log_message)
-            
+
             self.save_all_settings()
 
         except Exception as e:
@@ -614,38 +661,51 @@ class SingboxApp(customtkinter.CTk):
     def _run_singbox_and_log_output(self, config_to_run, config_filename):
         try:
             # 1. Generate config
-            full_config = utils.generate_config_json(config_to_run, self.settings)
+            full_config = utils.generate_config_json(
+                config_to_run, self.settings)
             with open(config_filename, 'w', encoding='utf-8') as f:
                 json.dump(full_config, f, indent=2)
 
             # 2. Validate config
             self.after(0, self.log, "Validating configuration...")
-            check_command = [get_resource_path('sing-box.exe'), 'check', '-c', config_filename]
-            result = subprocess.run(check_command, capture_output=True, text=True, encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW)
+            # Set environment variables to allow deprecated features
+            env = os.environ.copy()
+            env["ENABLE_DEPRECATED_LEGACY_DNS_SERVERS"] = "true"
+            env["ENABLE_DEPRECATED_SPECIAL_OUTBOUNDS"] = "true"
+
+            check_command = [get_resource_path(
+                'sing-box.exe'), 'check', '-c', config_filename]
+            result = subprocess.run(check_command, capture_output=True, text=True,
+                                    encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW, env=env)
 
             if result.returncode != 0:
                 error_message = result.stdout.strip() or result.stderr.strip()
                 self.after(0, self.log, "Configuration check failed!")
                 self.after(0, self.log, f"Error: {error_message}")
-                self.after(0, self.stop_singbox) # Clean up
+                self.after(0, self.stop_singbox)  # Clean up
                 return
 
-            self.after(0, self.log, "Configuration is valid. Starting process...")
-            
+            self.after(
+                0, self.log, "Configuration is valid. Starting process...")
+
             # 3. Run process
-            command = [get_resource_path('sing-box.exe'), 'run', '-c', config_filename]
+            command = [get_resource_path(
+                'sing-box.exe'), 'run', '-c', config_filename]
             self.singbox_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                                    text=True, encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW)
-            self.singbox_pid = self.singbox_process.pid # Store PID
+                                                    text=True, encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW, env=env)
+            self.singbox_pid = self.singbox_process.pid  # Store PID
 
             for line in iter(self.singbox_process.stdout.readline, ''):
                 self.after(0, self.log, line.strip())
 
         except FileNotFoundError:
-            singbox_path = get_resource_path('sing-box.exe') # Get path again for logging
-            self.after(0, self.log, f"Error: sing-box.exe not found at '{singbox_path}'!")
+            singbox_path = get_resource_path(
+                'sing-box.exe')  # Get path again for logging
+            self.after(
+                0, self.log, f"Error: sing-box.exe not found at '{singbox_path}'!")
         except Exception as e:
-            self.after(0, self.log, f"An unexpected error occurred: {type(e).__name__}: {e}")
+            self.after(
+                0, self.log, f"An unexpected error occurred: {type(e).__name__}: {e}")
 
     def stop_singbox(self):
         pid_to_kill = self.singbox_pid
@@ -660,21 +720,27 @@ class SingboxApp(customtkinter.CTk):
                 process_to_kill.kill()
                 self.log("Sing-box process terminated.")
             except Exception as e:
-                self.log(f"Failed to terminate process object: {e}. Falling back to PID kill.")
+                self.log(
+                    f"Failed to terminate process object: {e}. Falling back to PID kill.")
                 if pid_to_kill:
                     try:
-                        subprocess.run(["taskkill", "/F", "/PID", str(pid_to_kill)], check=False, capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
-                        self.log(f"Killed process with PID {pid_to_kill} as a fallback.")
+                        subprocess.run(["taskkill", "/F", "/PID", str(pid_to_kill)], check=False,
+                                       capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+                        self.log(
+                            f"Killed process with PID {pid_to_kill} as a fallback.")
                     except Exception as kill_e:
                         self.log(f"Fallback PID kill failed: {kill_e}")
         elif pid_to_kill:
-            self.log(f"Process object not active, attempting to clean up PID {pid_to_kill}.")
+            self.log(
+                f"Process object not active, attempting to clean up PID {pid_to_kill}.")
             try:
                 # Use timeout to prevent hanging, capture output to hide it
-                result = subprocess.run(["taskkill", "/F", "/PID", str(pid_to_kill)], check=False, capture_output=True, timeout=5, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+                result = subprocess.run(["taskkill", "/F", "/PID", str(pid_to_kill)], check=False,
+                                        capture_output=True, timeout=5, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
                 # taskkill exit code is 0 on success, 128 if process not found.
                 if result.returncode == 0:
-                    self.log(f"Cleaned up lingering process with PID {pid_to_kill}.")
+                    self.log(
+                        f"Cleaned up lingering process with PID {pid_to_kill}.")
             except Exception as e:
                 self.log(f"Error during lingering process cleanup: {e}")
 
@@ -690,12 +756,14 @@ class SingboxApp(customtkinter.CTk):
         self.start_button.configure(state="normal")
         self.stop_button.configure(state="disabled")
         self.url_test_button.configure(state="disabled")
-        self.conn_status_label.configure(text="Disconnected", text_color="orange")
+        self.conn_status_label.configure(
+            text="Disconnected", text_color="orange")
         self.ip_label.configure(text="N/A")
         self.latency_label.configure(text="N/A")
 
     def _fetch_ip_and_update_statusbar(self):
         ip_address = utils.get_external_ip(PROXY_SERVER_ADDRESS)
+
         def update_ui():
             self.ip_label.configure(text=ip_address)
         self.after(0, update_ui)
@@ -710,9 +778,11 @@ class SingboxApp(customtkinter.CTk):
             self.start_button.configure(state="disabled")
             self.stop_button.configure(state="normal")
             self.url_test_button.configure(state="normal")
-            self.conn_status_label.configure(text="Connected", text_color="lightgreen")
+            self.conn_status_label.configure(
+                text="Connected", text_color="lightgreen")
             self.latency_label.configure(text=f"{result} ms")
-            threading.Thread(target=self._fetch_ip_and_update_statusbar, daemon=True).start()
+            threading.Thread(
+                target=self._fetch_ip_and_update_statusbar, daemon=True).start()
         else:
             self.status_label.configure(
                 text="Connection Failed", text_color="red")
@@ -825,7 +895,8 @@ class SingboxApp(customtkinter.CTk):
                 bypass_list = PROXY_BYPASS
                 if user_domains:
                     # System proxy bypass list is semicolon-separated
-                    user_domains_semicolon = ";".join(d.strip() for d in user_domains.split(','))
+                    user_domains_semicolon = ";".join(
+                        d.strip() for d in user_domains.split(','))
                     bypass_list = f"{PROXY_BYPASS};{user_domains_semicolon}"
 
                 winreg.SetValueEx(internet_settings,

@@ -217,10 +217,18 @@ def generate_config_json(server_config, settings={}):
     user_dns_str = settings.get("dns_servers", "1.1.1.1,8.8.8.8")
     user_dns_list = [s.strip() for s in user_dns_str.split(',') if s.strip()]
 
-    dns_servers = [
-        {"tag": "dns_proxy", "address": user_dns_list[0] if user_dns_list else "1.1.1.1", "detour": "proxy-out"},
-        {"tag": "dns_direct", "address": "8.8.8.8", "detour": "direct"}
-    ]
+    # Define DNS outbounds (without address field for type "dns")
+    dns_outbounds = []
+    dns_outbounds.append({"type": "dns", "tag": "dns_proxy"})
+    dns_outbounds.append({"type": "dns", "tag": "dns_direct"})
+
+    # DNS servers for the dns section
+    dns_servers_config = []
+    if user_dns_list:
+        dns_servers_config.append({"address": user_dns_list[0], "tag": "dns_proxy"})
+    else:
+        dns_servers_config.append({"address": "1.1.1.1", "tag": "dns_proxy"})
+    dns_servers_config.append({"address": "8.8.8.8", "tag": "dns_direct"})
 
     # --- Route & DNS Rules ---
     bypass_domains_str = settings.get("bypass_domains", "geosite:ir,*.ir,*.local")
@@ -253,13 +261,13 @@ def generate_config_json(server_config, settings={}):
         dns_rules.append({"geosite": geosite_rules, "server": "dns_direct"})
     if domain_suffix_rules:
         dns_rules.append({"domain_suffix": domain_suffix_rules, "server": "dns_direct"})
-    dns_rules.append({"outbound": "any", "server": "dns_proxy"})
+    
 
 
     config_template = {
         "log": {"level": "info"},
         "dns": {
-            "servers": dns_servers,
+            "servers": dns_servers_config,
             "rules": dns_rules,
             "strategy": "prefer_ipv4",
             "final": "dns_proxy"
@@ -270,9 +278,8 @@ def generate_config_json(server_config, settings={}):
         ],
         "outbounds": [
             {"type": "direct", "tag": "direct"},
-            {"type": "dns", "tag": "dns"},
             {"type": "block", "tag": "block"}
-        ],
+        ] + dns_outbounds,
         "route": {
             "rules": route_rules,
             "final": "proxy-out"
