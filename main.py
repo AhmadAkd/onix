@@ -672,6 +672,7 @@ class SingboxApp(customtkinter.CTk):
             env = os.environ.copy()
             env["ENABLE_DEPRECATED_LEGACY_DNS_SERVERS"] = "true"
             env["ENABLE_DEPRECATED_SPECIAL_OUTBOUNDS"] = "true"
+            env["ENABLE_DEPRECATED_MISSING_DOMAIN_RESOLVER"] = "true"
 
             check_command = [get_resource_path(
                 'sing-box.exe'), 'check', '-c', config_filename]
