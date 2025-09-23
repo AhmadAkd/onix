@@ -2,7 +2,6 @@ name: Python CI
 
 on:
   push:
-    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -11,7 +10,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -24,10 +23,13 @@ jobs:
         pip install -r requirements.txt
 
     - name: Download sing-box.exe
+      shell: pwsh
       run: |
-        Invoke-WebRequest -Uri "https://github.com/SagerNet/sing-box/releases/download/v1.12.8/sing-box-1.12.8-windows-amd64.zip" -OutFile "sing-box.zip"
-        Expand-Archive -Path "sing-box.zip" -DestinationPath "."
-        Move-Item "sing-box-1.12.8-windows-amd64/sing-box.exe" "sing-box.exe"
+        $latest_release = Invoke-RestMethod -Uri "https://api.github.com/repos/SagerNet/sing-box/releases/latest"
+        $download_url = $latest_release.assets | Where-Object { $_.name -like 'sing-box-*-windows-amd64.zip' } | Select-Object -ExpandProperty browser_download_url
+        Invoke-WebRequest -Uri $download_url -OutFile "sing-box.zip"
+        Expand-Archive -Path "sing-box.zip" -DestinationPath "sing-box-latest"
+        Move-Item "sing-box-latest/sing-box-*-windows-amd64/sing-box.exe" "sing-box.exe"
 
     - name: Build with PyInstaller
       run: |

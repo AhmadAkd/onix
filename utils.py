@@ -7,8 +7,9 @@ import base64
 import re
 from urllib.parse import urlparse, parse_qs, unquote
 import subprocess
-import sys # Added for PyInstaller path handling
+import sys  # Added for PyInstaller path handling
 from constants import PROXY_HOST, PROXY_PORT, PROXY_SERVER_ADDRESS
+
 
 def get_resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller."""
@@ -51,7 +52,8 @@ def get_external_ip(proxy_address, timeout=5):
     proxies = {'http': f'http://{proxy_address}',
                'https': f'http://{proxy_address}'}
     try:
-        response = requests.get("https://api.ipify.org", proxies=proxies, timeout=timeout)
+        response = requests.get("https://api.ipify.org",
+                                proxies=proxies, timeout=timeout)
         response.raise_for_status()
         return response.text
     except requests.exceptions.RequestException:
@@ -225,30 +227,39 @@ def generate_config_json(server_config, settings={}):
     # DNS servers for the dns section
     dns_servers_config = []
     if user_dns_list:
-        dns_servers_config.append({"address": user_dns_list[0], "tag": "dns_proxy"})
+        dns_servers_config.append(
+            {"address": user_dns_list[0], "tag": "dns_proxy"})
     else:
         dns_servers_config.append({"address": "1.1.1.1", "tag": "dns_proxy"})
     dns_servers_config.append({"address": "8.8.8.8", "tag": "dns_direct"})
 
     # --- Route & DNS Rules ---
-    bypass_domains_str = settings.get("bypass_domains", "geosite:ir,*.ir,*.local")
-    bypass_domains_list = [d.strip() for d in bypass_domains_str.split(',') if d.strip()]
-    
-    bypass_ips_str = settings.get("bypass_ips", "geoip:ir,192.168.0.0/16,127.0.0.1,10.0.0.0/8")
-    bypass_ips_list = [i.strip() for i in bypass_ips_str.split(',') if i.strip()]
+    bypass_domains_str = settings.get(
+        "bypass_domains", "geosite:ir,*.ir,*.local")
+    bypass_domains_list = [d.strip()
+                           for d in bypass_domains_str.split(',') if d.strip()]
+
+    bypass_ips_str = settings.get(
+        "bypass_ips", "geoip:ir,192.168.0.0/16,127.0.0.1,10.0.0.0/8")
+    bypass_ips_list = [i.strip()
+                       for i in bypass_ips_str.split(',') if i.strip()]
 
     # Separate geosite/geoip from normal domains/ips for correct rule generation
-    geosite_rules = [d.replace("geosite:", "") for d in bypass_domains_list if d.startswith("geosite:")]
-    domain_suffix_rules = [d for d in bypass_domains_list if not d.startswith("geosite:")]
-    geoip_rules = [i.replace("geoip:", "") for i in bypass_ips_list if i.startswith("geoip:")]
+    geosite_rules = [d.replace("geosite:", "")
+                     for d in bypass_domains_list if d.startswith("geosite:")]
+    domain_suffix_rules = [
+        d for d in bypass_domains_list if not d.startswith("geosite:")]
+    geoip_rules = [i.replace("geoip:", "")
+                   for i in bypass_ips_list if i.startswith("geoip:")]
     ip_cidr_rules = [i for i in bypass_ips_list if not i.startswith("geoip:")]
 
     route_rules = [{"protocol": ["dns"], "outbound": "dns"}]
-    
+
     if geosite_rules:
         route_rules.append({"geosite": geosite_rules, "outbound": "direct"})
     if domain_suffix_rules:
-        route_rules.append({"domain_suffix": domain_suffix_rules, "outbound": "direct"})
+        route_rules.append(
+            {"domain_suffix": domain_suffix_rules, "outbound": "direct"})
     if geoip_rules:
         route_rules.append({"geoip": geoip_rules, "outbound": "direct"})
     if ip_cidr_rules:
@@ -260,9 +271,8 @@ def generate_config_json(server_config, settings={}):
     if geosite_rules:
         dns_rules.append({"geosite": geosite_rules, "server": "dns_direct"})
     if domain_suffix_rules:
-        dns_rules.append({"domain_suffix": domain_suffix_rules, "server": "dns_direct"})
-    
-
+        dns_rules.append(
+            {"domain_suffix": domain_suffix_rules, "server": "dns_direct"})
 
     config_template = {
         "log": {"level": "info"},
@@ -273,8 +283,10 @@ def generate_config_json(server_config, settings={}):
             "final": "dns_proxy"
         },
         "inbounds": [
-            {"type": "socks", "tag": "socks-in", "listen": "127.0.0.1", "listen_port": 0},
-            {"type": "http", "tag": "http-in", "listen": PROXY_HOST, "listen_port": PROXY_PORT}
+            {"type": "socks", "tag": "socks-in",
+                "listen": "127.0.0.1", "listen_port": 0},
+            {"type": "http", "tag": "http-in",
+                "listen": PROXY_HOST, "listen_port": PROXY_PORT}
         ],
         "outbounds": [
             {"type": "direct", "tag": "direct"},
@@ -336,6 +348,7 @@ def generate_config_json(server_config, settings={}):
             "uuid": server_config["uuid"],
             "security": server_config.get("security", "auto"),
             "alter_id": server_config.get("alter_id", 0),
+            "network": server_config.get("transport", "tcp"), # Add network field
             "tls": tls_config
         }
 
