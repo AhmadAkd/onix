@@ -84,7 +84,7 @@ python main.py
 3. Выполните следующую команду:
 
     ```bash
-    pyinstaller --noconfirm --onefile --windowed --add-data "sing-box.exe;." main.py
+    pyinstaller --noconfirm --onefile --windowed --add-data "sing-box.exe;." --icon="assets/icon.ico" main.py
     ```
 
     Исполняемый файл будет создан в папке `dist`.

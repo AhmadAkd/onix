@@ -33,7 +33,7 @@ jobs:
 
     - name: Build with PyInstaller
       run: |
-        pyinstaller --noconfirm --onefile --windowed --add-data "sing-box.exe;." main.py
+        pyinstaller --noconfirm --onefile --windowed --add-data "sing-box.exe;." --icon="assets/icon.ico" main.py
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4

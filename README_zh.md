@@ -84,7 +84,7 @@ python main.py
 3. 运行以下命令：
 
     ```bash
-    pyinstaller --noconfirm --onefile --windowed --add-data "sing-box.exe;." main.py
+    pyinstaller --noconfirm --onefile --windowed --add-data "sing-box.exe;." --icon="assets/icon.ico" main.py
     ```
 
     可执行文件将在 `dist` 文件夹中创建。
