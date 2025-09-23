@@ -235,8 +235,7 @@ def generate_config_json(server_config, settings={}):
         dns_servers.append(
             {"server": "8.8.8.8", "type": "udp", "tag": "dns_direct"})
 
-
-    # --- Route & DNS Rules ---
+    # --- Route, DNS Rules, and Rule Sets ---
     bypass_domains_str = settings.get(
         "bypass_domains", "domain:geosite:ir,*.ir,*.local")
     bypass_domains_list = [d.strip()
@@ -247,29 +246,81 @@ def generate_config_json(server_config, settings={}):
     bypass_ips_list = [i.strip()
                        for i in bypass_ips_str.split(',') if i.strip()]
 
-    # Separate geoip rules from ip_cidr rules
-    geoip_rules = [i.replace("geoip:", "")
-                   for i in bypass_ips_list if i.startswith("geoip:")]
-    ip_cidr_rules = [i for i in bypass_ips_list if not i.startswith("geoip:")]
-
     route_rules = [{"protocol": ["dns"], "action": "hijack-dns"}]
-    if bypass_domains_list:
-        route_rules.append(
-            {"domain": bypass_domains_list, "outbound": "direct"})
-    if geoip_rules:
-        route_rules.append({"geoip": geoip_rules, "outbound": "direct"})
+    rule_sets = []
+
+    # New GeoIP/Rule-Set handling
+    geoip_codes = [i.replace("geoip:", "") for i in bypass_ips_list if i.startswith("geoip:")]
+    ip_cidr_rules = [i for i in bypass_ips_list if not i.startswith("geoip:")]
+    
+    if "private" in geoip_codes:
+        route_rules.append({"ip_is_private": True, "outbound": "direct"})
+        geoip_codes.remove("private")
+
+    if geoip_codes:
+        rule_set_tags = [f"geoip-{code}" for code in geoip_codes]
+        route_rules.append({"rule_set": rule_set_tags, "outbound": "direct"})
+        for code in geoip_codes:
+            url = ""
+            if code == 'ir':
+                url = "https://raw.githubusercontent.com/Chocolate4U/Iran-sing-box-rules/rule-set/geoip-ir.srs"
+            else:
+                url = f"https://raw.githubusercontent.com/soffchen/sing-geoip/rule-set/geoip-{code}.srs"
+            
+            rule_sets.append({
+                "tag": f"geoip-{code}",
+                "type": "remote",
+                "format": "binary",
+                "url": url,
+                "download_detour": "direct"
+            })
+
     if ip_cidr_rules:
         route_rules.append({"ip_cidr": ip_cidr_rules, "outbound": "direct"})
+
+    # Geosite handling
+    geosite_domains = [d.replace("domain:geosite:", "") for d in bypass_domains_list if d.startswith("domain:geosite:")]
+    other_domains = [d for d in bypass_domains_list if not d.startswith("domain:geosite:")]
+
+    if geosite_domains:
+        geosite_rule_set_tags = [f"geosite-{code}" for code in geosite_domains]
+        route_rules.append({"rule_set": geosite_rule_set_tags, "outbound": "direct"})
+        for code in geosite_domains:
+            url = ""
+            if code == 'ir' or code == 'tld-ir':
+                url = "https://raw.githubusercontent.com/Chocolate4U/Iran-sing-box-rules/rule-set/geosite-ir.srs"
+            else:
+                url = f"https://raw.githubusercontent.com/soffchen/sing-geosite/rule-set/{code}.srs"
+
+            rule_sets.append({
+                "tag": f"geosite-{code}",
+                "type": "remote",
+                "format": "binary",
+                "url": url,
+                "download_detour": "direct"
+            })
+
+    if other_domains:
+        route_rules.append({"domain": other_domains, "outbound": "direct"})
+
 
     route_rules.append({"protocol": ["quic"], "action": "reject"})
 
     dns_rules = []
-    if bypass_domains_list:
+    non_geosite_bypass_domains = [d for d in bypass_domains_list if not d.startswith("domain:geosite:")]
+    if non_geosite_bypass_domains:
         dns_rules.append(
-            {"domain": bypass_domains_list, "server": "dns_direct"})
+            {"domain": non_geosite_bypass_domains, "server": "dns_direct"})
 
     config_template = {
         "log": {"level": "info"},
+        "experimental": {
+            "cache_file": {
+                "enabled": True,
+                "path": "cache.db",
+                "store_fakeip": True
+            }
+        },
         "dns": {
             "servers": dns_servers,
             "rules": dns_rules,
@@ -287,6 +338,7 @@ def generate_config_json(server_config, settings={}):
         ],
         "route": {
             "rules": route_rules,
+            "rule_set": rule_sets,
             "final": "proxy-out",
             "default_domain_resolver": "dns_proxy"
         }
@@ -342,8 +394,83 @@ def generate_config_json(server_config, settings={}):
             "uuid": server_config["uuid"],
             "security": server_config.get("security", "auto"),
             "alter_id": server_config.get("alter_id", 0),
-            # Add network field
-            "network": server_config.get("transport", "tcp"),
+            "tls": tls_config
+        }
+
+        if server_config.get("transport") == "ws":
+            host_header = server_config.get(
+                "ws_host") or server_config.get("server")
+            outbound["transport"] = {
+                "type": "ws",
+                "path": server_config.get("ws_path", "/"),
+                "headers": {"Host": host_header}
+            }
+
+        config_template["outbounds"].append(outbound)
+
+    elif server_config["protocol"] == "shadowsocks":
+        outbound = {
+            "type": "shadowsocks",
+            "tag": "proxy-out",
+            "server": server_config["server"],
+            "server_port": server_config["port"],
+            "method": server_config["method"],
+            "password": server_config["password"]
+        }
+        config_template["outbounds"].append(outbound)
+
+    return config_template
+
+    if server_config["protocol"] == "vless":
+        outbound = {
+            "type": "vless",
+            "tag": "proxy-out",
+            "server": server_config["server"],
+            "server_port": server_config["port"],
+            "uuid": server_config["uuid"],
+        }
+
+        if server_config["tls_enabled"]:
+            tls_config = {
+                "enabled": True,
+                "server_name": sni_value,
+                "insecure": True,
+                "alpn": ["h2", "http/1.1"]
+            }
+            if fingerprint := server_config.get("fp"):
+                tls_config["utls"] = {
+                    "enabled": True, "fingerprint": fingerprint}
+            outbound["tls"] = tls_config
+
+        if server_config.get("flow") and server_config.get("transport") != "ws":
+            outbound["flow"] = server_config.get("flow")
+
+        if server_config.get("transport") == "ws":
+            host_header = server_config.get(
+                "sni") or server_config.get("server")
+            outbound["transport"] = {
+                "type": "ws",
+                "path": server_config.get("ws_path", "/"),
+                "headers": {"Host": host_header}
+            }
+
+        config_template["outbounds"].append(outbound)
+
+    elif server_config["protocol"] == "vmess":
+        tls_config = {
+            "enabled": server_config["tls_enabled"],
+            "server_name": server_config.get("sni") or server_config.get("server"),
+            "insecure": True
+        }
+
+        outbound = {
+            "type": "vmess",
+            "tag": "proxy-out",
+            "server": server_config["server"],
+            "server_port": server_config["port"],
+            "uuid": server_config["uuid"],
+            "security": server_config.get("security", "auto"),
+            "alter_id": server_config.get("alter_id", 0),
             "tls": tls_config
         }
 

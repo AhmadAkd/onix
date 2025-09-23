@@ -329,7 +329,7 @@ class SingboxApp(customtkinter.CTk):
         self.bypass_domains_entry.grid(
             row=2, column=1, padx=10, pady=5, sticky="ew")
         self.bypass_domains_entry.insert(0, self.settings.get(
-            "bypass_domains", "domain:geosite:ir,*.ir,*.local"))
+            "bypass_domains", "domain:geosite:tld-ir,*.ir,*.local"))
 
         # Bypass IPs
         customtkinter.CTkLabel(network_frame, text="Bypass IPs:", font=APP_FONT).grid(
