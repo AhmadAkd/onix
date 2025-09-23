@@ -84,11 +84,8 @@ def run_single_url_test(config, settings={}):
 
         command = [get_resource_path('sing-box.exe'),
                    'run', '-c', temp_config_file]
-        env = os.environ.copy()
-        env["ENABLE_DEPRECATED_SPECIAL_OUTBOUNDS"] = "true"
         temp_proc = subprocess.Popen(command, stdout=subprocess.DEVNULL,
-                                     stderr=subprocess.DEVNULL, creationflags=subprocess.CREATE_NO_WINDOW,
-                                     env=env)
+                                     stderr=subprocess.DEVNULL, creationflags=subprocess.CREATE_NO_WINDOW)
 
         if wait_for_proxy(PROXY_HOST, PROXY_PORT):
             return url_test(PROXY_SERVER_ADDRESS)
@@ -222,16 +219,22 @@ def generate_config_json(server_config, settings={}):
     user_dns_str = settings.get("dns_servers", "1.1.1.1,8.8.8.8")
     user_dns_list = [s.strip() for s in user_dns_str.split(',') if s.strip()]
 
-    # Define DNS outbounds with addresses (new format)
-    dns_outbounds = []
+    dns_servers = []
     if user_dns_list:
-        dns_outbounds.append(
-            {"type": "dns", "tag": "dns_proxy", "address": user_dns_list[0]})
+        dns_servers.append(
+            {"server": user_dns_list[0], "type": "udp", "tag": "dns_proxy"})
+        if len(user_dns_list) > 1:
+            dns_servers.append(
+                {"server": user_dns_list[1], "type": "udp", "tag": "dns_direct"})
+        else:
+            dns_servers.append(
+                {"server": "8.8.8.8", "type": "udp", "tag": "dns_direct"})
     else:
-        dns_outbounds.append(
-            {"type": "dns", "tag": "dns_proxy", "address": "1.1.1.1"})
-    dns_outbounds.append(
-        {"type": "dns", "tag": "dns_direct", "address": "8.8.8.8"})
+        dns_servers.append(
+            {"server": "1.1.1.1", "type": "udp", "tag": "dns_proxy"})
+        dns_servers.append(
+            {"server": "8.8.8.8", "type": "udp", "tag": "dns_direct"})
+
 
     # --- Route & DNS Rules ---
     bypass_domains_str = settings.get(
@@ -268,7 +271,8 @@ def generate_config_json(server_config, settings={}):
     config_template = {
         "log": {"level": "info"},
         "dns": {
-            "rules": dns_rules,  # The 'servers' key is removed
+            "servers": dns_servers,
+            "rules": dns_rules,
             "strategy": "prefer_ipv4",
             "final": "dns_proxy"
         },
@@ -280,10 +284,11 @@ def generate_config_json(server_config, settings={}):
         ],
         "outbounds": [
             {"type": "direct", "tag": "direct"}
-        ] + dns_outbounds,
+        ],
         "route": {
             "rules": route_rules,
-            "final": "proxy-out"
+            "final": "proxy-out",
+            "default_domain_resolver": "dns_proxy"
         }
     }
 

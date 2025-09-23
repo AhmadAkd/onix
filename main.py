@@ -708,8 +708,7 @@ class SingboxApp(customtkinter.CTk):
             command = [get_resource_path(
                 'sing-box.exe'), 'run', '-c', config_filename]
             self.singbox_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                                    text=True, encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW,
-                                                    env=env)
+                                                    text=True, encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW)
             self.singbox_pid = self.singbox_process.pid  # Store PID
 
             for line in iter(self.singbox_process.stdout.readline, ''):
