@@ -3,6 +3,7 @@ import sys
 import requests
 import zipfile
 import io
+from constants import GITHUB_SINGBOX_RELEASE_API, SINGBOX_WINDOWS_ASSET_KEYWORD
 
 
 def get_resource_path(relative_path):
@@ -23,8 +24,8 @@ def download_singbox_if_needed():
 
     print("INFO: sing-box.exe not found. Attempting to download from GitHub...")
 
-    api_url = "https://api.github.com/repos/SagerNet/sing-box/releases/latest"
-    asset_name_keyword = "windows-amd64"
+    api_url = GITHUB_SINGBOX_RELEASE_API
+    asset_name_keyword = SINGBOX_WINDOWS_ASSET_KEYWORD
 
     try:
         # Get latest release information

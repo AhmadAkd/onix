@@ -104,6 +104,11 @@ GEOSITE_RULE_SET_URL = (
 IRAN_GEOIP_RULE_SET_URL = "https://raw.githubusercontent.com/Chocolate4U/Iran-sing-box-rules/rule-set/geoip-ir.srs"
 IRAN_GEOSITE_RULE_SET_URL = "https://raw.githubusercontent.com/Chocolate4U/Iran-sing-box-rules/rule-set/geosite-ir.srs"
 
+# --- GitHub API Constants ---
+GITHUB_SINGBOX_RELEASE_API = "https://api.github.com/repos/SagerNet/sing-box/releases/latest"
+SINGBOX_WINDOWS_ASSET_KEYWORD = "windows-amd64"
+DEFAULT_USER_AGENT = "Mozilla/5.0"
+
 # --- Singbox Manager Constants ---
 CONNECTION_STOP_DELAY = 0.5
 CONNECTION_CHECK_DELAY = 2000
