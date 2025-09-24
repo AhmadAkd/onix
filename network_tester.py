@@ -5,9 +5,11 @@ import time
 import requests
 import subprocess
 import tempfile
+import sys  # Added
 
 import utils
 import config_generator
+import constants  # Changed from from constants import (...)
 from constants import (
     PROXY_HOST,
     PROXY_PORT,
@@ -76,55 +78,96 @@ def wait_for_proxy(host, port, timeout=WAIT_FOR_PROXY_TIMEOUT):
     return False
 
 
+class TemporarySingboxInstance:
+    def __init__(self, config_content, proxy_host, proxy_port):
+        self.config_content = config_content
+        self.proxy_host = proxy_host
+        self.proxy_port = proxy_port
+        self.temp_config_file = None
+        self.singbox_process = None
+
+    def __enter__(self):
+        try:
+            # Create temporary config file
+            with tempfile.NamedTemporaryFile(
+                mode="w", delete=False, suffix=".json", encoding="utf-8"
+            ) as f:
+                json.dump(self.config_content, f, indent=2)
+                self.temp_config_file = f.name
+
+            # Determine sing-box executable name based on OS
+            # sys.platform can be 'win32', 'linux', 'darwin'
+            os_key = (
+                sys.platform.split("win")[0].lower()
+                if sys.platform.startswith("win")
+                else sys.platform.lower()
+            )
+            singbox_executable = constants.SINGBOX_EXECUTABLE_NAMES.get(os_key)
+
+            if not singbox_executable:
+                raise RuntimeError(
+                    f"Unsupported OS for sing-box executable: {sys.platform}"
+                )
+
+            command = [
+                utils.get_resource_path(singbox_executable),
+                "run",
+                "-c",
+                self.temp_config_file,
+            ]
+
+            # Use appropriate subprocess flags for Windows
+            creationflags = 0
+            if sys.platform.startswith("win"):
+                creationflags = subprocess.CREATE_NO_WINDOW
+
+            self.singbox_process = subprocess.Popen(
+                command,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=creationflags,
+            )
+
+            if not wait_for_proxy(self.proxy_host, self.proxy_port):
+                raise RuntimeError("Temporary sing-box proxy did not start in time.")
+
+            return self
+        except FileNotFoundError:
+            error_msg = f"{singbox_executable} not found. Please ensure it's in the correct directory."
+            print(f"ERROR: {error_msg}")
+            show_error_message("Error", error_msg)
+            raise
+        except Exception as e:
+            print(f"Error starting temporary sing-box instance: {e}")
+            show_error_message("Error", f"Failed to start temporary sing-box: {e}")
+            raise
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.singbox_process:
+            self.singbox_process.kill()
+            self.singbox_process.wait()  # Ensure process is terminated
+        if self.temp_config_file and os.path.exists(self.temp_config_file):
+            try:
+                os.remove(self.temp_config_file)
+            except OSError as e:
+                print(
+                    f"WARNING: Could not remove temporary config file {self.temp_config_file}: {e}"
+                )
+
+
 def run_single_url_test(config, settings={}):
     """Runs a URL test for a single server configuration using a temporary config file."""
-    temp_proc = None
-    temp_config_file = None
     try:
         full_config = config_generator.generate_config_json(config, settings)
-        with tempfile.NamedTemporaryFile(
-            mode="w", delete=False, suffix=".json", encoding="utf-8"
-        ) as f:
-            json.dump(full_config, f, indent=2)
-            temp_config_file = f.name
-
-        command = [
-            utils.get_resource_path("sing-box.exe"),
-            "run",
-            "-c",
-            temp_config_file,
-        ]
-        temp_proc = subprocess.Popen(
-            command,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            creationflags=subprocess.CREATE_NO_WINDOW,
-        )
-
-        if wait_for_proxy(PROXY_HOST, PROXY_PORT):
+        with TemporarySingboxInstance(full_config, PROXY_HOST, PROXY_PORT):
             return url_test(PROXY_SERVER_ADDRESS)
-        else:
-            return -1
-    except FileNotFoundError:
-        error_msg = "sing-box.exe not found. Please ensure it's in the correct directory."
-        print(f"ERROR: {error_msg}")
-        show_error_message("Error", error_msg)
+    except RuntimeError as e:
+        print(f"ERROR: {e}")
+        show_error_message("Error", str(e))
         return -1
-    except OSError as e:
-        error_msg = f"OS error when running sing-box: {e}"
-        print(f"ERROR: {error_msg}")
-        show_error_message("Error", error_msg)
-        return -1
-    except Exception as e: # Catch any other unexpected errors
-        # Log the specific exception for debugging
+    except Exception as e:
         print(f"Error in run_single_url_test: {type(e).__name__}: {e}")
-        show_error_message("Error", f"An unexpected error occurred during URL test: {e}")
+        show_error_message(
+            "Error", f"An unexpected error occurred during URL test: {e}"
+        )
         return -1
-    finally:
-        if temp_proc:
-            temp_proc.kill()
-        if temp_config_file and os.path.exists(temp_config_file):
-            try:
-                os.remove(temp_config_file)
-            except OSError:
-                pass
