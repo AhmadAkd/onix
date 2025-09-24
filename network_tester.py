@@ -20,6 +20,7 @@ from constants import (
     URL_TEST_DEFAULT_URL,
     GET_EXTERNAL_IP_URL,
 )
+from message_utils import show_error_message
 
 
 def tcp_ping(host, port, timeout=TCP_PING_TIMEOUT):
@@ -104,9 +105,20 @@ def run_single_url_test(config, settings={}):
             return url_test(PROXY_SERVER_ADDRESS)
         else:
             return -1
-    except Exception as e:
+    except FileNotFoundError:
+        error_msg = "sing-box.exe not found. Please ensure it's in the correct directory."
+        print(f"ERROR: {error_msg}")
+        show_error_message("Error", error_msg)
+        return -1
+    except OSError as e:
+        error_msg = f"OS error when running sing-box: {e}"
+        print(f"ERROR: {error_msg}")
+        show_error_message("Error", error_msg)
+        return -1
+    except Exception as e: # Catch any other unexpected errors
         # Log the specific exception for debugging
         print(f"Error in run_single_url_test: {type(e).__name__}: {e}")
+        show_error_message("Error", f"An unexpected error occurred during URL test: {e}")
         return -1
     finally:
         if temp_proc:
