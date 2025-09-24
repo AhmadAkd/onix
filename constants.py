@@ -112,6 +112,20 @@ GITHUB_SINGBOX_RELEASE_API = (
 SINGBOX_WINDOWS_ASSET_KEYWORD = "windows-amd64"
 DEFAULT_USER_AGENT = "Mozilla/5.0"
 
+# --- Singbox Download Constants ---
+SINGBOX_ASSET_KEYWORDS = {
+    "windows_amd64": "windows-amd64",
+    "linux_amd64": "linux-amd64",
+    "linux_arm64": "linux-arm64",
+    "darwin_amd64": "darwin-amd64",
+    "darwin_arm64": "darwin-arm64",
+}
+SINGBOX_EXECUTABLE_NAMES = {
+    "windows": "sing-box.exe",
+    "linux": "sing-box",
+    "darwin": "sing-box",
+}
+
 # --- Singbox Manager Constants ---
 CONNECTION_STOP_DELAY = 0.5
 CONNECTION_CHECK_DELAY = 2000
