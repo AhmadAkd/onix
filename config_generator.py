@@ -97,22 +97,61 @@ def _build_route_config(settings):
     rule_sets = []
 
     # Add custom rules from settings
-    custom_rules = settings.get("custom_rules", [])
-    for rule in custom_rules:
+    custom_routing_rules = settings.get("custom_routing_rules", [])
+    for rule in custom_routing_rules:
         rule_type = rule.get("type")
         rule_value = rule.get("value")
-        rule_outbound = rule.get("outbound")
+        rule_action = rule.get("action")
 
-        if rule_type and rule_value and rule_outbound:
+        if rule_type and rule_value and rule_action:
+            outbound_tag = "proxy-out" if rule_action == "proxy" else rule_action
+
             if rule_type == "domain":
-                route_rules.append({"domain": rule_value, "outbound": rule_outbound})
-            elif rule_type == "ip_cidr":
-                route_rules.append({"ip_cidr": rule_value, "outbound": rule_outbound})
-            elif rule_type == "protocol":
-                route_rules.append({"protocol": [rule_value], "outbound": rule_outbound})
-            # Add more rule types as needed (e.g., rule_set, process, etc.)
+                route_rules.append({"domain": rule_value, "outbound": outbound_tag})
+            elif rule_type == "ip":
+                route_rules.append({"ip_cidr": rule_value, "outbound": outbound_tag})
+            elif rule_type == "process":
+                route_rules.append(
+                    {"process_name": rule_value, "outbound": outbound_tag}
+                )
+            elif rule_type == "geosite":
+                rule_set_tag = f"geosite-{rule_value}"
+                route_rules.append({"rule_set": rule_set_tag, "outbound": outbound_tag})
+                # Add rule_set definition if not already present
+                if not any(rs.get("tag") == rule_set_tag for rs in rule_sets):
+                    url = GEOSITE_RULE_SET_URL.format(code=rule_value)
+                    if rule_value == "ir" or rule_value == "tld-ir":
+                        url = IRAN_GEOSITE_RULE_SET_URL
+                    rule_sets.append(
+                        {
+                            "tag": rule_set_tag,
+                            "type": "remote",
+                            "format": "binary",
+                            "url": url,
+                            "download_detour": "direct",
+                        }
+                    )
+            elif rule_type == "geoip":
+                rule_set_tag = f"geoip-{rule_value}"
+                route_rules.append({"rule_set": rule_set_tag, "outbound": outbound_tag})
+                # Add rule_set definition if not already present
+                if not any(rs.get("tag") == rule_set_tag for rs in rule_sets):
+                    url = GEOIP_RULE_SET_URL.format(code=rule_value)
+                    if rule_value == "ir":
+                        url = IRAN_GEOIP_RULE_SET_URL
+                    rule_sets.append(
+                        {
+                            "tag": rule_set_tag,
+                            "type": "remote",
+                            "format": "binary",
+                            "url": url,
+                            "download_detour": "direct",
+                        }
+                    )
 
-    route_rules.append({"protocol": ["dns"], "outbound": "dns_proxy"}) # Add default DNS rule after custom rules
+    route_rules.append(
+        {"protocol": ["dns"], "outbound": "dns_proxy"}
+    )  # Add default DNS rule after custom rules
 
     # GeoIP handling
     geoip_codes = [
