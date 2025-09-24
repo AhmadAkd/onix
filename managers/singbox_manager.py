@@ -3,11 +3,13 @@ import os
 import time
 import json
 import threading
-import winreg
-import ctypes
 import tempfile
+
 import utils
-from constants import PROXY_SERVER_ADDRESS, PROXY_BYPASS, PROXY_HOST, PROXY_PORT, LogLevel, CONNECTION_STOP_DELAY, CONNECTION_CHECK_DELAY
+import network_tester
+import system_proxy
+import config_generator
+from constants import PROXY_SERVER_ADDRESS, PROXY_HOST, PROXY_PORT, LogLevel, CONNECTION_STOP_DELAY, CONNECTION_CHECK_DELAY
 
 class SingboxManager:
     def __init__(self, settings, callbacks):
@@ -33,7 +35,7 @@ class SingboxManager:
     def _run_and_log(self, config):
         config_filename = None
         try:
-            full_config = utils.generate_config_json(config, self.settings)
+            full_config = config_generator.generate_config_json(config, self.settings)
             with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json', encoding='utf-8') as f:
                 json.dump(full_config, f, indent=2)
                 config_filename = f.name
@@ -85,14 +87,14 @@ class SingboxManager:
             except Exception as e:
                 self.log(f"Failed to terminate sing-box process: {type(e).__name__}: {e}", LogLevel.ERROR)
 
-        utils.set_system_proxy(False, self.settings, self.log)
+        system_proxy.set_system_proxy(False, self.settings, self.log)
         self.callbacks.get('on_stop', lambda: None)()
 
     def check_connection(self):
-        result = utils.url_test(PROXY_SERVER_ADDRESS)
+        result = network_tester.url_test(PROXY_SERVER_ADDRESS)
         if result != -1:
             self.log(f"Connection successful! Latency: {result} ms.")
-            utils.set_system_proxy(True, self.settings, self.log)
+            system_proxy.set_system_proxy(True, self.settings, self.log)
             self.callbacks.get('on_connect', lambda r: None)(result)
             
             ip_thread = threading.Thread(target=self._fetch_ip_and_update, daemon=True)
@@ -103,10 +105,8 @@ class SingboxManager:
             self.stop()
 
     def _fetch_ip_and_update(self):
-        ip_address = utils.get_external_ip(PROXY_SERVER_ADDRESS)
+        ip_address = network_tester.get_external_ip(PROXY_SERVER_ADDRESS)
         self.callbacks.get('on_ip_update', lambda ip: None)(ip_address)
-
-    
 
     def log(self, message, level=LogLevel.INFO):
         self.callbacks.get('log', lambda msg, lvl: None)(message, level)

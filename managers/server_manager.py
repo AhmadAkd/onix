@@ -5,6 +5,7 @@ import requests
 from concurrent.futures import ThreadPoolExecutor
 
 import utils
+import network_tester
 from constants import LogLevel, NA
 
 class ServerManager:
@@ -156,9 +157,9 @@ class ServerManager:
 
     def _ping_task(self, config, is_url_test):
         if is_url_test:
-            ping_result = utils.run_single_url_test(config, self.settings)
+            ping_result = network_tester.run_single_url_test(config, self.settings)
         else:
-            ping_result = utils.tcp_ping(config["server"], config["port"])
+            ping_result = network_tester.tcp_ping(config["server"], config["port"])
         
         config["ping"] = ping_result
         self.callbacks.get('schedule', lambda t, c: None)(0, lambda: self.callbacks.get('on_ping_result')(config, ping_result, is_url_test))

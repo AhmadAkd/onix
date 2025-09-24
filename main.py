@@ -35,6 +35,9 @@ class SingboxApp(customtkinter.CTk):
     def __init__(self):
         super().__init__()
 
+        # --- Download sing-box if not exists ---
+        utils.download_singbox_if_needed()
+
         # --- Load Settings ---
         self.settings = settings_manager.load_settings()
 
@@ -744,7 +747,7 @@ class SingboxApp(customtkinter.CTk):
             self.quit_application()
 
     def _reset_proxy_and_then_hide(self):
-        utils.set_system_proxy(False, self.settings, self.log)
+        system_proxy.set_system_proxy(False, self.settings, self.log)
         # After resetting proxy, hide the window (which will then start the tray icon in its own thread)
         self.after(0, self.hide_window)
 
