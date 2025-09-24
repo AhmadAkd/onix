@@ -9,7 +9,8 @@ import constants
 import customtkinter
 import threading
 import base64
-from PIL import Image
+import PIL
+import numpy as np
 import io
 import pystray
 from pystray import MenuItem as item
@@ -336,7 +337,15 @@ class SingboxApp(customtkinter.CTk):
             command=self.add_manual_server,
             font=APP_FONT,
         )
-        self.manual_add_button.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
+        self.manual_add_button.grid(row=2, column=0, padx=10, pady=(10, 0), sticky="ew")
+
+        self.scan_qr_button = customtkinter.CTkButton(
+            manual_frame,
+            text="Scan QR Code from Screen",
+            command=self.scan_qr_from_screen,
+            font=APP_FONT,
+        )
+        self.scan_qr_button.grid(row=3, column=0, padx=10, pady=(0, 10), sticky="ew")
 
         # --- Log Textbox ---
         log_frame = customtkinter.CTkFrame(management_container, fg_color="transparent")
@@ -928,6 +937,51 @@ class SingboxApp(customtkinter.CTk):
         self.server_manager.add_manual_server(server_link)
         self.manual_add_entry.delete(0, "end")
 
+    def scan_qr_from_screen(self):
+        """Scans the screen for QR codes and adds any found server links."""
+        try:
+            import pyscreenshot as ImageGrab
+            import cv2
+            from pyzbar import pyzbar
+
+            self.log("Scanning screen for QR codes...", LogLevel.INFO)
+            # Grab the entire screen
+            screen = ImageGrab.grab()
+            screen_np = cv2.cvtColor(
+                np.array(screen),
+                cv2.COLOR_RGB2BGR,
+            )
+
+            decoded_objects = pyzbar.decode(screen_np)
+
+            found_qrs = 0
+            for obj in decoded_objects:
+                if obj.type == "QRCODE":
+                    qr_data = obj.data.decode("utf-8")
+                    self.log(f"Found QR Code: {qr_data}", LogLevel.INFO)
+                    self.server_manager.add_manual_server(qr_data)
+                    found_qrs += 1
+
+            if found_qrs == 0:
+                self.log("No QR codes found on screen.", LogLevel.WARNING)
+            else:
+                self.log(
+                    f"Successfully added {found_qrs} server(s) from QR codes.",
+                    LogLevel.SUCCESS,
+                )
+
+        except ImportError as e:
+            show_error_message(
+                "Missing Library",
+                f"Required library for QR scan not found: {e}. Please install 'pyscreenshot', 'opencv-python', and 'pyzbar' using pip.",
+            )
+            self.log(f"Missing library for QR scan: {e}", LogLevel.ERROR)
+        except Exception as e:
+            show_error_message(
+                "QR Scan Error", f"An unexpected error occurred during QR scan: {e}"
+            )
+            self.log(f"Error during QR scan: {e}", LogLevel.ERROR)
+
     # --- Core Functionality ---
     def update_subscription(self, event=None):
         sub_link = self.sub_link_entry.get()
@@ -1077,9 +1131,10 @@ class SingboxApp(customtkinter.CTk):
         threading.Thread(target=self._run_tray_icon, daemon=True).start()
 
     def _run_tray_icon(self):
-                    img = PIL.Image.open(io.BytesIO(image_data))
+        image_data = base64.b64decode(ICON_BASE64)
+        img = PIL.Image.open(io.BytesIO(image_data))
         menu = (item("Show", self.show_window), item("Quit", self.quit_application))
-        self.tray_icon = pystray.Icon("Sing-box Client", image, "Sing-box Client", menu)
+        self.tray_icon = pystray.Icon("Sing-box Client", img, "Sing-box Client", menu)
         self.tray_icon.run()
 
     def show_about_window(self):
@@ -1131,7 +1186,6 @@ class SingboxApp(customtkinter.CTk):
         try:
             import qrcode
             from PIL import ImageTk
-            import PIL
 
             server_link = self.server_manager.get_server_link(
                 config
