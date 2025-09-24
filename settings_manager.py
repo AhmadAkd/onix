@@ -16,6 +16,7 @@ DEFAULT_SETTINGS = {
     "bypass_domains": DEFAULT_BYPASS_DOMAINS,
     "bypass_ips": DEFAULT_BYPASS_IPS,
     "connection_mode": "Rule-Based",
+    "custom_rules": [],
 }
 
 
