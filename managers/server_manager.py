@@ -110,7 +110,7 @@ class ServerManager:
             skipped_count = 0
 
             for link in server_links:
-                config = utils.parse_server_link(link)
+                config = link_parser.parse_server_link(link)
                 if config:
                     server_id = f"{config.get('server')}:{config.get('port')}"
                     if server_id in existing_server_ids:

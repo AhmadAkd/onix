@@ -240,12 +240,15 @@ class SingboxApp(customtkinter.CTk):
         self.group_name_entry.grid(
             row=3, column=0, padx=10, pady=(0, 10), sticky="ew")
 
+        self.group_sub_checkbox = customtkinter.CTkCheckBox(sub_frame, text="Create a group for this subscription", font=APP_FONT)
+        self.group_sub_checkbox.grid(row=4, column=0, padx=10, pady=(0, 10), sticky="w")
+
         self.update_button = customtkinter.CTkButton(
             sub_frame, text="Update", command=self.update_subscription, font=APP_FONT)
-        self.update_button.grid(row=4, column=0, padx=10, pady=10, sticky="ew")
+        self.update_button.grid(row=5, column=0, padx=10, pady=10, sticky="ew")
 
         self.progress_bar = customtkinter.CTkProgressBar(sub_frame, orientation="horizontal")
-        self.progress_bar.grid(row=5, column=0, padx=10, pady=(0, 10), sticky="ew")
+        self.progress_bar.grid(row=6, column=0, padx=10, pady=(0, 10), sticky="ew")
         self.progress_bar.grid_remove()  # Hide it initially
 
         # --- Group Actions ---
@@ -668,7 +671,17 @@ class SingboxApp(customtkinter.CTk):
             self.log("Please enter a subscription link first.", LogLevel.WARNING)
             return
         
-        custom_group_name = self.group_name_entry.get().strip()
+        custom_group_name = None
+        if self.group_sub_checkbox.get():
+            custom_group_name = self.group_name_entry.get().strip()
+            if not custom_group_name:
+                # Try to generate a group name from the subscription link
+                try:
+                    # A simple way to get a name from the url
+                    custom_group_name = sub_link.split('/')[-1].split('.')[0]
+                except:
+                    custom_group_name = "Subscription"
+
         self.server_manager.update_subscription(sub_link, custom_group_name)
 
     def start_singbox(self):
