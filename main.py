@@ -16,7 +16,7 @@ from concurrent.futures import ThreadPoolExecutor
 import webbrowser
 from tkinter import messagebox, filedialog
 import json
-from message_utils import show_error_message
+from message_utils import show_error_message, show_warning_message
 
 
 # Local imports
@@ -885,7 +885,15 @@ class SingboxApp(customtkinter.CTk):
                 try:
                     # A simple way to get a name from the url
                     custom_group_name = sub_link.split("/")[-1].split(".")[0]
-                except Exception:
+                except IndexError:
+                    warning_msg = "Could not automatically determine group name from subscription link. Using 'Subscription' as default."
+                    self.log(warning_msg, LogLevel.WARNING)
+                    show_warning_message("Warning", warning_msg)
+                    custom_group_name = "Subscription"
+                except Exception as e:
+                    error_msg = f"An unexpected error occurred while generating group name: {e}. Using 'Subscription' as default."
+                    self.log(error_msg, LogLevel.ERROR)
+                    show_error_message("Error", error_msg)
                     custom_group_name = "Subscription"
 
         self.server_manager.update_subscription(sub_link, custom_group_name)
