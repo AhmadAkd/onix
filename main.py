@@ -1286,7 +1286,11 @@ class SingboxApp(customtkinter.CTk):
             edit_button.grid(row=i, column=1, padx=(0, 5), pady=5, sticky="e")
 
             delete_button = customtkinter.CTkButton(
-                self.routing_rules_frame, text="Delete", width=60, font=APP_FONT
+                self.routing_rules_frame,
+                text="Delete",
+                width=60,
+                font=APP_FONT,
+                command=lambda r=rule: self._delete_routing_rule(r),
             )
             delete_button.grid(row=i, column=2, padx=(0, 10), pady=5, sticky="e")
 
@@ -1299,6 +1303,15 @@ class SingboxApp(customtkinter.CTk):
         self.custom_routing_rules = self.settings.get("custom_routing_rules", [])
         self._display_routing_rules()
         self.log("Routing rules loaded.", LogLevel.INFO)
+
+    def _delete_routing_rule(self, rule_to_delete):
+        if messagebox.askyesno(
+            "Confirm Delete", "Are you sure you want to delete this rule?"
+        ):
+            self.custom_routing_rules.remove(rule_to_delete)
+            self._display_routing_rules()
+            self.save_all_settings()
+            self.log("Routing rule deleted.", LogLevel.INFO)
 
 
 if __name__ == "__main__":
