@@ -46,6 +46,7 @@ class SingboxApp(customtkinter.CTk):
         self.ip_label = None
         self.latency_label = None
         self.server_widgets = {}  # New: To store references to server widgets
+        self.custom_routing_rules = []  # New: To store custom routing rules
 
         # --- Setup Managers ---
         self.singbox_manager = self._setup_singbox_manager()
@@ -587,6 +588,7 @@ class SingboxApp(customtkinter.CTk):
             "dns_servers": self.dns_entry.get(),
             "bypass_domains": self.bypass_domains_entry.get(),
             "bypass_ips": self.bypass_ips_entry.get(),
+            "custom_routing_rules": self.custom_routing_rules,  # New: Save custom routing rules
         }
         settings_manager.save_settings(settings)
 
@@ -594,6 +596,10 @@ class SingboxApp(customtkinter.CTk):
         try:
             self.sub_link_entry.insert(0, self.settings.get("sub_link"))
             self.server_manager.load_servers()
+            self.custom_routing_rules = self.settings.get(
+                "custom_routing_rules", []
+            )  # New: Load custom routing rules
+            self._display_routing_rules()  # Call to display rules on load
         except (FileNotFoundError, json.JSONDecodeError) as e:
             error_msg = f"Error loading application data. Settings file might be missing or corrupted: {e}"
             self.log(error_msg, LogLevel.ERROR)
@@ -1245,15 +1251,120 @@ class SingboxApp(customtkinter.CTk):
             )
 
     def _add_routing_rule_ui(self):
-        self.log("Add Routing Rule UI (Not yet implemented)", LogLevel.INFO)
+        AddRoutingRuleDialog(self, self._on_rule_added)
+
+    def _on_rule_added(self, rule_data):
+        if rule_data and rule_data["value"]:
+            self.custom_routing_rules.append(rule_data)
+            self.log(f"Added routing rule: {rule_data}", LogLevel.INFO)
+            self._display_routing_rules()
+
+    def _display_routing_rules(self):
+        # Clear existing rules
+        for widget in self.routing_rules_frame.winfo_children():
+            widget.destroy()
+
+        if not self.custom_routing_rules:
+            customtkinter.CTkLabel(
+                self.routing_rules_frame,
+                text="No custom rules added yet.",
+                font=APP_FONT,
+            ).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+            return
+
+        for i, rule in enumerate(self.custom_routing_rules):
+            rule_text = f"{rule['type']}: {rule['value']} -> {rule['action']}"
+            rule_label = customtkinter.CTkLabel(
+                self.routing_rules_frame, text=rule_text, font=APP_FONT, anchor="w"
+            )
+            rule_label.grid(row=i, column=0, padx=10, pady=5, sticky="ew")
+
+            # Add Edit/Delete buttons (placeholder for now)
+            edit_button = customtkinter.CTkButton(
+                self.routing_rules_frame, text="Edit", width=60, font=APP_FONT
+            )
+            edit_button.grid(row=i, column=1, padx=(0, 5), pady=5, sticky="e")
+
+            delete_button = customtkinter.CTkButton(
+                self.routing_rules_frame, text="Delete", width=60, font=APP_FONT
+            )
+            delete_button.grid(row=i, column=2, padx=(0, 10), pady=5, sticky="e")
 
     def _save_routing_rules(self):
-        self.log("Save Routing Rules (Not yet implemented)", LogLevel.INFO)
+        self.save_all_settings()
+        self.log("Routing rules saved.", LogLevel.SUCCESS)
 
     def _load_routing_rules(self):
-        self.log("Load Routing Rules (Not yet implemented)", LogLevel.INFO)
+        self.settings = settings_manager.load_settings()
+        self.custom_routing_rules = self.settings.get("custom_routing_rules", [])
+        self._display_routing_rules()
+        self.log("Routing rules loaded.", LogLevel.INFO)
 
 
 if __name__ == "__main__":
     app = SingboxApp()
     app.mainloop()
+
+
+class AddRoutingRuleDialog(customtkinter.CTkToplevel):
+    def __init__(self, parent, callback):
+        super().__init__(parent)
+        self.parent = parent
+        self.callback = callback
+
+        self.title("Add Routing Rule")
+        self.geometry("400x300")
+        self.transient(parent)  # Make it appear on top of the main window
+        self.grab_set()  # Make it modal
+
+        self.grid_columnconfigure(1, weight=1)
+
+        # Rule Type
+        customtkinter.CTkLabel(self, text="Rule Type:", font=APP_FONT).grid(
+            row=0, column=0, padx=10, pady=10, sticky="w"
+        )
+        self.type_optionmenu = customtkinter.CTkOptionMenu(
+            self,
+            values=["domain", "ip", "process", "geosite", "geoip"],
+            font=APP_FONT,
+        )
+        self.type_optionmenu.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
+
+        # Rule Value
+        customtkinter.CTkLabel(self, text="Value:", font=APP_FONT).grid(
+            row=1, column=0, padx=10, pady=10, sticky="w"
+        )
+        self.value_entry = customtkinter.CTkEntry(self, font=APP_FONT)
+        self.value_entry.grid(row=1, column=1, padx=10, pady=10, sticky="ew")
+
+        # Action
+        customtkinter.CTkLabel(self, text="Action:", font=APP_FONT).grid(
+            row=2, column=0, padx=10, pady=10, sticky="w"
+        )
+        self.action_optionmenu = customtkinter.CTkOptionMenu(
+            self,
+            values=["direct", "proxy", "block"],
+            font=APP_FONT,
+        )
+        self.action_optionmenu.grid(row=2, column=1, padx=10, pady=10, sticky="ew")
+
+        # Buttons
+        add_button = customtkinter.CTkButton(
+            self, text="Add Rule", command=self._add_button_command, font=APP_FONT
+        )
+        add_button.grid(row=3, column=0, padx=10, pady=10, sticky="ew")
+
+        cancel_button = customtkinter.CTkButton(
+            self, text="Cancel", command=self.destroy, font=APP_FONT
+        )
+        cancel_button.grid(row=3, column=1, padx=10, pady=10, sticky="ew")
+
+    def _add_button_command(self):
+        rule_data = {
+            "type": self.type_optionmenu.get(),
+            "value": self.value_entry.get(),
+            "action": self.action_optionmenu.get(),
+        }
+        if self.callback:
+            self.callback(rule_data)
+        self.destroy()
