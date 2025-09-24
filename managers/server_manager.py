@@ -113,13 +113,18 @@ class ServerManager:
 
     def _update_subscription_task(self, sub_link, custom_group_name):
         try:
+            self.log("Downloading subscription content...", LogLevel.INFO)
             headers = {"User-Agent": constants.DEFAULT_USER_AGENT}
             response = requests.get(sub_link, headers=headers, timeout=10)
             response.raise_for_status()
+            self.log(
+                "Subscription content downloaded. Processing links...", LogLevel.INFO
+            )
 
             base64_text = response.text.strip()
             decoded_content = base64.b64decode(base64_text).decode("utf-8")
             server_links = decoded_content.splitlines()
+            self.log(f"Found {len(server_links)} links in subscription.", LogLevel.INFO)
 
             existing_server_ids = {
                 f"{s_config.get('server')}:{s_config.get('port')}"
@@ -151,7 +156,9 @@ class ServerManager:
 
             self.server_groups.update(temp_groups)
 
-            log_message = f"Successfully loaded {server_count} new servers."
+            log_message = (
+                f"Finished processing subscription. Added {server_count} new server(s)."
+            )
             if skipped_count > 0:
                 log_message += f" Skipped {skipped_count} duplicate(s)."
             self.log(log_message, LogLevel.SUCCESS)
