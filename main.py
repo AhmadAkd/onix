@@ -1279,9 +1279,10 @@ class SingboxApp(customtkinter.CTk):
             )
             rule_label.grid(row=i, column=0, padx=10, pady=5, sticky="ew")
 
-            # Add Edit/Delete buttons (placeholder for now)
+            # Add Edit/Delete buttons
             edit_button = customtkinter.CTkButton(
-                self.routing_rules_frame, text="Edit", width=60, font=APP_FONT
+                self.routing_rules_frame, text="Edit", width=60, font=APP_FONT,
+                command=lambda r=rule: self._edit_routing_rule_ui(r)
             )
             edit_button.grid(row=i, column=1, padx=(0, 5), pady=5, sticky="e")
 
@@ -1313,6 +1314,25 @@ class SingboxApp(customtkinter.CTk):
             self.save_all_settings()
             self.log("Routing rule deleted.", LogLevel.INFO)
 
+    def _edit_routing_rule_ui(self, rule_to_edit):
+        # Store the original rule to find and update it later
+        self._current_edit_rule = rule_to_edit
+        AddRoutingRuleDialog(self, self._on_rule_edited, initial_rule=rule_to_edit)
+
+    def _on_rule_edited(self, new_rule_data):
+        if new_rule_data and new_rule_data["value"]:
+            # Find the index of the original rule and update it
+            try:
+                index = self.custom_routing_rules.index(self._current_edit_rule)
+                self.custom_routing_rules[index] = new_rule_data
+                self.log(f"Edited routing rule: {new_rule_data}", LogLevel.INFO)
+                self._display_routing_rules()
+                self.save_all_settings()
+            except ValueError:
+                self.log("Error: Original rule not found for editing.", LogLevel.ERROR)
+        # Clear the stored rule after editing
+        self._current_edit_rule = None
+
 
 if __name__ == "__main__":
     app = SingboxApp()
@@ -1320,12 +1340,13 @@ if __name__ == "__main__":
 
 
 class AddRoutingRuleDialog(customtkinter.CTkToplevel):
-    def __init__(self, parent, callback):
+    def __init__(self, parent, callback, initial_rule=None):
         super().__init__(parent)
         self.parent = parent
         self.callback = callback
+        self.initial_rule = initial_rule
 
-        self.title("Add Routing Rule")
+        self.title("Add Routing Rule" if initial_rule is None else "Edit Routing Rule")
         self.geometry("400x300")
         self.transient(parent)  # Make it appear on top of the main window
         self.grab_set()  # Make it modal
@@ -1361,9 +1382,14 @@ class AddRoutingRuleDialog(customtkinter.CTkToplevel):
         )
         self.action_optionmenu.grid(row=2, column=1, padx=10, pady=10, sticky="ew")
 
+        if self.initial_rule:
+            self.type_optionmenu.set(self.initial_rule["type"])
+            self.value_entry.insert(0, self.initial_rule["value"])
+            self.action_optionmenu.set(self.initial_rule["action"])
+
         # Buttons
         add_button = customtkinter.CTkButton(
-            self, text="Add Rule", command=self._add_button_command, font=APP_FONT
+            self, text="Add Rule" if initial_rule is None else "Save Changes", command=self._add_button_command, font=APP_FONT
         )
         add_button.grid(row=3, column=0, padx=10, pady=10, sticky="ew")
 
