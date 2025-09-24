@@ -15,6 +15,8 @@ class ServerManager:
         self.callbacks = callbacks
         self.server_groups = {}
         self.ping_executor = ThreadPoolExecutor(max_workers=20)
+        self._cancel_event = threading.Event()
+        self.is_testing = False
 
     # --- Logging ---
     def log(self, message, level=LogLevel.INFO):
@@ -142,30 +144,82 @@ class ServerManager:
 
     # --- Ping & URL Tests ---
     def test_all_pings(self, servers_to_test):
+        if self.is_testing:
+            self.log("A test is already in progress.", LogLevel.WARNING)
+            return
+        self.is_testing = True
+        self._cancel_event.clear()
+        self.callbacks.get('on_testing_start', lambda: None)()
         self.log(f"Starting TCP ping for {len(servers_to_test)} servers...", LogLevel.INFO)
-        for config in servers_to_test:
-            self.ping_executor.submit(self._ping_task, config, is_url_test=False)
+
+        futures = [self.ping_executor.submit(self._ping_task, config, is_url_test=False) for config in servers_to_test]
+
+        def wait_for_pings():
+            try:
+                from concurrent.futures import as_completed
+                for future in as_completed(futures):
+                    if self._cancel_event.is_set():
+                        break
+                    try:
+                        future.result()
+                    except Exception:
+                        pass # Ignore exceptions from individual pings
+            finally:
+                self.is_testing = False
+                for f in futures: # Cancel any remaining
+                    f.cancel()
+                if not self._cancel_event.is_set():
+                    self.log("All ping tests finished.", LogLevel.INFO)
+                self.callbacks.get('schedule', lambda t, c: None)(0, self.callbacks.get('on_testing_finish'))
+
+        threading.Thread(target=wait_for_pings, daemon=True).start()
 
     def test_all_urls(self, servers_to_test):
+        if self.is_testing:
+            self.log("A test is already in progress.", LogLevel.WARNING)
+            return
+        self.is_testing = True
+        self._cancel_event.clear()
+        self.callbacks.get('on_testing_start', lambda: None)()
         self.log("Starting URL test. This may take some time.", LogLevel.INFO)
-        # Run URL tests sequentially to avoid overwhelming the system
         threading.Thread(target=self._sequential_url_test, args=(servers_to_test,), daemon=True).start()
 
     def _sequential_url_test(self, servers):
-        for config in servers:
-            self._ping_task(config, is_url_test=True)
-            # Small delay between tests
-            import time
-            time.sleep(0.2)
+        try:
+            for config in servers:
+                if self._cancel_event.is_set():
+                    self.log("URL test cancelled.", LogLevel.INFO)
+                    break
+                self._ping_task(config, is_url_test=True)
+                import time
+                time.sleep(0.2)
+        finally:
+            self.is_testing = False
+            if not self._cancel_event.is_set():
+                self.log("URL testing finished.", LogLevel.INFO)
+            self.callbacks.get('schedule', lambda t, c: None)(0, self.callbacks.get('on_testing_finish'))
 
     def _ping_task(self, config, is_url_test):
+        if self._cancel_event.is_set():
+            return
+
         if is_url_test:
             ping_result = network_tester.run_single_url_test(config, self.settings)
         else:
             ping_result = network_tester.tcp_ping(config["server"], config["port"])
+
+        if self._cancel_event.is_set():
+            return
         
         config["ping"] = ping_result
         self.callbacks.get('schedule', lambda t, c: None)(0, lambda: self.callbacks.get('on_ping_result')(config, ping_result, is_url_test))
+
+    def cancel_tests(self):
+        """Cancels any ongoing ping or URL tests."""
+        if not self.is_testing:
+            return
+        self.log("Cancelling tests...", LogLevel.INFO)
+        self._cancel_event.set()
 
     def sort_servers_by_ping(self, group_name):
         if group_name not in self.server_groups:

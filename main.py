@@ -104,6 +104,8 @@ class SingboxApp(customtkinter.CTk):
             'on_servers_updated': self.refresh_server_list_ui,
             'on_ping_result': self._on_ping_result,
             'on_error': self._on_error,
+            'on_testing_start': self._on_testing_start,
+            'on_testing_finish': self._on_testing_finish,
         }
         return ServerManager(self.settings, callbacks)
 
@@ -488,6 +490,20 @@ class SingboxApp(customtkinter.CTk):
                 else:
                     ping_label.configure(text="Failed" if is_url_test else "Timeout", text_color="red")
 
+    def _on_testing_start(self):
+        """Disables test buttons and enables the cancel button."""
+        self.ping_button.configure(state="disabled")
+        self.url_test_all_button.configure(state="disabled")
+        self.cancel_tests_button.configure(state="normal")
+        self.update_button.configure(state="disabled") # Also disable updates during test
+
+    def _on_testing_finish(self):
+        """Enables test buttons and disables the cancel button."""
+        self.ping_button.configure(state="normal")
+        self.url_test_all_button.configure(state="normal")
+        self.cancel_tests_button.configure(state="disabled")
+        self.update_button.configure(state="normal")
+
     def refresh_server_list_ui(self):
         current_group = self.group_dropdown.get()
         self.filter_servers_by_group(current_group)
@@ -720,6 +736,10 @@ class SingboxApp(customtkinter.CTk):
             return
         servers_to_test = self.server_manager.get_servers_by_group(current_group)
         self.server_manager.test_all_urls(servers_to_test)
+
+    def cancel_all_tests(self):
+        self.log("Cancelling all tests...", LogLevel.INFO)
+        self.server_manager.cancel_tests()
 
     def run_url_test(self):
         if not self.singbox_manager.is_running:
