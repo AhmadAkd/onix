@@ -33,7 +33,7 @@ def parse_vless_link(link):
             "group": group,
             "protocol": "vless",
             "server": parsed_url.hostname,
-            "port": parsed_url.port,
+            "port": int(parsed_url.port),
             "uuid": parsed_url.username,
             "tls_enabled": query_params.get("security", [""])[0] == "tls",
             "sni": query_params.get("sni", [""])[0],
@@ -104,7 +104,7 @@ def parse_shadowsocks_link(link):
             "group": group,
             "protocol": "shadowsocks",
             "server": parsed_url.hostname,
-            "port": parsed_url.port,
+            "port": int(parsed_url.port),
             "method": method,
             "password": password
         }
