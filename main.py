@@ -266,10 +266,14 @@ class SingboxApp(customtkinter.CTk):
         self.url_test_all_button.grid(
             row=0, column=1, padx=5, pady=10, sticky="ew")
 
+        self.cancel_tests_button = customtkinter.CTkButton(
+            actions_frame, text="Cancel", command=self.cancel_all_tests, font=APP_FONT, state="disabled")
+        self.cancel_tests_button.grid(
+            row=0, column=2, padx=(5, 10), pady=10, sticky="ew")
+
         self.sort_button = customtkinter.CTkButton(
             actions_frame, text="Sort by Ping", command=self.sort_servers, font=APP_FONT)
-        self.sort_button.grid(row=0, column=2, padx=(
-            5, 10), pady=10, sticky="ew")
+        self.sort_button.grid(row=1, column=0, columnspan=3, padx=10, pady=(0, 10), sticky="ew")
 
         self.url_test_button = customtkinter.CTkButton(
             actions_frame, text="URL Test (Active)", command=self.run_url_test, font=APP_FONT, state="disabled")
