@@ -16,6 +16,7 @@ from concurrent.futures import ThreadPoolExecutor
 import webbrowser
 from tkinter import messagebox, filedialog
 import json
+from message_utils import show_error_message
 
 
 # Local imports
@@ -526,8 +527,14 @@ class SingboxApp(customtkinter.CTk):
         try:
             self.sub_link_entry.insert(0, self.settings.get("sub_link"))
             self.server_manager.load_servers()
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            error_msg = f"Error loading application data. Settings file might be missing or corrupted: {e}"
+            self.log(error_msg, LogLevel.ERROR)
+            show_error_message("Error", error_msg)
         except Exception as e:
-            self.log(f"Error loading data: {e}", LogLevel.ERROR)
+            error_msg = f"An unexpected error occurred while loading data: {e}"
+            self.log(error_msg, LogLevel.ERROR)
+            show_error_message("Error", error_msg)
 
     def import_profile(self):
         """Imports settings from a JSON file and overwrites the current settings."""
