@@ -14,7 +14,8 @@ import pystray
 from pystray import MenuItem as item
 from concurrent.futures import ThreadPoolExecutor
 import webbrowser
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
+import json
 
 
 # Local imports
@@ -381,7 +382,7 @@ class SingboxApp(customtkinter.CTk):
     def _create_settings_tab_widgets(self, parent_tab):
         parent_tab.grid_columnconfigure(0, weight=1)
         # Allow extra space to expand
-        parent_tab.grid_rowconfigure(4, weight=1)
+        parent_tab.grid_rowconfigure(6, weight=1)
 
         # --- Appearance Settings ---
         customtkinter.CTkLabel(
@@ -453,11 +454,31 @@ class SingboxApp(customtkinter.CTk):
         self.bypass_ips_entry.grid(row=3, column=1, padx=10, pady=5, sticky="ew")
         self.bypass_ips_entry.insert(0, self.settings.get("bypass_ips"))
 
+        # --- Profile Management ---
+        customtkinter.CTkLabel(
+            parent_tab, text="Profile Management", font=(APP_FONT[0], 16)
+        ).grid(row=4, column=0, padx=20, pady=(20, 10), sticky="w")
+
+        profile_frame = customtkinter.CTkFrame(parent_tab)
+        profile_frame.grid(row=5, column=0, padx=20, pady=10, sticky="ew")
+        profile_frame.grid_columnconfigure((0, 1), weight=1)
+
+        import_button = customtkinter.CTkButton(
+            profile_frame, text="Import Profile", command=self.import_profile, font=APP_FONT
+        )
+        import_button.grid(row=0, column=0, padx=(10, 5), pady=10, sticky="ew")
+
+        export_button = customtkinter.CTkButton(
+            profile_frame, text="Export Profile", command=self.export_profile, font=APP_FONT
+        )
+        export_button.grid(row=0, column=1, padx=(5, 10), pady=10, sticky="ew")
+
+
         # --- About Button ---
         about_button = customtkinter.CTkButton(
             parent_tab, text="About Onix", command=self.show_about_window
         )
-        about_button.grid(row=5, column=0, padx=20, pady=20, sticky="s")
+        about_button.grid(row=7, column=0, padx=20, pady=20, sticky="s")
 
     def bind_shortcuts(self):
         right_click_menu = RightClickMenu(self)
@@ -507,6 +528,66 @@ class SingboxApp(customtkinter.CTk):
             self.server_manager.load_servers()
         except Exception as e:
             self.log(f"Error loading data: {e}", LogLevel.ERROR)
+
+    def import_profile(self):
+        """Imports settings from a JSON file and overwrites the current settings."""
+        file_path = filedialog.askopenfilename(
+            title="Import Profile",
+            filetypes=[("JSON files", "*.json"), ("All files", "*.* ")],
+            defaultextension=".json",
+        )
+        if not file_path:
+            return
+
+        if not messagebox.askyesno(
+            "Confirm Import",
+            "This will overwrite all your current settings and servers. Are you sure you want to continue?",
+        ):
+            return
+
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                new_settings = json.load(f)
+            
+            # Basic validation
+            if "sub_link" not in new_settings or "servers" not in new_settings:
+                raise ValueError("Invalid profile file.")
+
+            settings_manager.save_settings(new_settings)
+            messagebox.showinfo(
+                "Import Successful",
+                "Profile imported successfully. Please restart the application for the changes to take full effect.",
+            )
+            self.quit_application() # Force restart
+        except (IOError, json.JSONDecodeError, ValueError) as e:
+            messagebox.showerror("Import Failed", f"Failed to import profile: {e}")
+
+    def export_profile(self):
+        """Exports all current settings to a JSON file."""
+        file_path = filedialog.asksaveasfilename(
+            title="Export Profile",
+            filetypes=[("JSON files", "*.json"), ("All files", "*.* ")],
+            defaultextension=".json",
+            initialfile="onix_profile.json",
+        )
+        if not file_path:
+            return
+
+        try:
+            # Ensure current settings are saved before exporting
+            self.save_all_settings()
+            
+            # Read the saved settings and write to the new file
+            current_settings = settings_manager.load_settings()
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(current_settings, f, indent=4)
+
+            messagebox.showinfo(
+                "Export Successful", f"Profile successfully exported to:\n{file_path}"
+            )
+        except (IOError, json.JSONDecodeError) as e:
+            messagebox.showerror("Export Failed", f"Failed to export profile: {e}")
+
 
     # --- Server Manager Callbacks ---
     def _on_update_start(self):
