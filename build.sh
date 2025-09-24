@@ -22,13 +22,11 @@ echo "dev" > version.txt
 echo "version.txt created successfully."
 echo ""
 
-# Step 3: Check for the sing-box binary.
-# Note: For a cross-platform build, you would need to download the appropriate
-# sing-box binary for Linux/macOS here.
-if [ ! -f "sing-box" ]; then
-    echo "Error: 'sing-box' binary not found. Please download it for your OS and place it in the root directory."
-    exit 1
-fi
+# Step 3: Ensure sing-box binary is available (downloads if needed).
+echo "Ensuring sing-box binary is available..."
+python download_singbox.py
+echo "sing-box binary check complete."
+echo ""
 
 # Step 4: Download GeoIP database if it doesn't exist.
 if [ ! -f "geoip.db" ]; then

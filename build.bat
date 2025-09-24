@@ -7,10 +7,17 @@ echo      Starting Onix Build
 echo =================================
 echo.
 
-REM --- Step 1: Check Prerequisites ---
+REM --- Step 1: Check Prerequisites (including sing-box download) ---
 echo [1/5] Checking prerequisites...
 if not exist "main.py" echo ERROR: 'main.py' not found. & goto :fail
-if not exist "sing-box.exe" echo ERROR: 'sing-box.exe' not found. & goto :fail
+
+echo [1/5] Ensuring sing-box binary is available...
+python download_singbox.py
+if %errorlevel% neq 0 (
+    echo ERROR: Failed to ensure sing-box binary.
+    goto :fail
+)
+echo sing-box binary check complete.
 
 where pyinstaller >nul 2>nul
 if %errorlevel% neq 0 (
@@ -21,6 +28,7 @@ if %errorlevel% neq 0 (
 )
 echo Prerequisites check passed.
 echo.
+
 
 REM --- Step 2: Create version.txt ---
 echo [2/5] Creating version.txt...
