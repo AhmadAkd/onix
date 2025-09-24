@@ -93,8 +93,26 @@ def _build_route_config(settings):
     bypass_ips_str = settings.get("bypass_ips")
     bypass_ips_list = [i.strip() for i in bypass_ips_str.split(",") if i.strip()]
 
-    route_rules = [{"protocol": ["dns"], "outbound": "dns_proxy"}]
+    route_rules = []
     rule_sets = []
+
+    # Add custom rules from settings
+    custom_rules = settings.get("custom_rules", [])
+    for rule in custom_rules:
+        rule_type = rule.get("type")
+        rule_value = rule.get("value")
+        rule_outbound = rule.get("outbound")
+
+        if rule_type and rule_value and rule_outbound:
+            if rule_type == "domain":
+                route_rules.append({"domain": rule_value, "outbound": rule_outbound})
+            elif rule_type == "ip_cidr":
+                route_rules.append({"ip_cidr": rule_value, "outbound": rule_outbound})
+            elif rule_type == "protocol":
+                route_rules.append({"protocol": [rule_value], "outbound": rule_outbound})
+            # Add more rule types as needed (e.g., rule_set, process, etc.)
+
+    route_rules.append({"protocol": ["dns"], "outbound": "dns_proxy"}) # Add default DNS rule after custom rules
 
     # GeoIP handling
     geoip_codes = [
