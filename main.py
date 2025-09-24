@@ -1,14 +1,13 @@
 from ui_components import RightClickMenu, ServerContextMenu, handle_text_shortcut
+from managers.singbox_manager import SingboxManager
+from managers.server_manager import ServerManager
 import settings_manager
 import utils
-from constants import *
+from constants import LogLevel, APP_FONT, ICON_BASE64, PROXY_SERVER_ADDRESS
 import customtkinter
 import subprocess
 import threading
 import os
-import sys  # Added for PyInstaller path handling
-import winreg
-import ctypes
 import requests
 import base64
 import json
@@ -23,22 +22,10 @@ import webbrowser
 from tkinter import messagebox
 
 
-def get_resource_path(relative_path):
-    """Get absolute path to resource, works for dev and for PyInstaller."""
-    if hasattr(sys, '_MEIPASS'):
-        return os.path.join(sys._MEIPASS, relative_path)
-    return os.path.join(os.getcwd(), relative_path)
 
 
-def get_app_version():
-    """Reads the version from the version.txt file."""
-    try:
-        version_file_path = get_resource_path('version.txt')
-        with open(version_file_path, 'r', encoding='utf-8') as f:
-            version = f.read().strip()
-            return version
-    except FileNotFoundError:
-        return "dev"  # Default version for local development
+
+    
 
 
 # Local imports
@@ -52,25 +39,27 @@ class SingboxApp(customtkinter.CTk):
         self.settings = settings_manager.load_settings()
 
         # --- Initialize State Variables ---
-        self.singbox_process = None
-        self.singbox_pid = None
         self.selected_config = None
-        self.server_groups = {}
+        # self.server_groups = {} # This will be managed by ServerManager
         self.selected_server_button = None
         self.selected_group = None
         self.selected_group_button = None
         self.tray_icon = None
         self.ping_executor = ThreadPoolExecutor(max_workers=20)
-        self.current_config_file = None
         self.conn_status_label = None
         self.ip_label = None
         self.latency_label = None
+        self.server_widgets = {} # New: To store references to server widgets
+
+        # --- Setup Managers ---
+        self.singbox_manager = self._setup_singbox_manager()
+        self.server_manager = self._setup_server_manager()
 
         self.setup_appearance()
 
         # --- Configure Window ---
         self.geometry("1024x600")
-        self.app_version = get_app_version()
+        self.app_version = self._get_app_version()
         self.title(f"Onix - {self.app_version}")
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
@@ -78,17 +67,76 @@ class SingboxApp(customtkinter.CTk):
         self.create_widgets()
         self.bind_shortcuts()
 
-        # --- Cleanup ---
-        self._cleanup_temp_files()
-
         # --- Load Data ---
         self.load_data()
 
+    def _get_app_version(self):
+        """Reads the version from the version.txt file."""
+        try:
+            version_file_path = utils.get_resource_path('version.txt')
+            with open(version_file_path, 'r', encoding='utf-8') as f:
+                version = f.read().strip()
+                return version
+        except FileNotFoundError:
+            return "dev"  # Default version for local development
+
+    def _setup_singbox_manager(self):
+        callbacks = {
+            'log': self.log,
+            'schedule': self.after,
+            'on_status_change': self._on_status_change,
+            'on_connect': self._on_connect,
+            'on_stop': self._on_stop,
+            'on_ip_update': self._on_ip_update,
+        }
+        return SingboxManager(self.settings, callbacks)
+
+    def _setup_server_manager(self):
+        callbacks = {
+            'log': self.log,
+            'schedule': self.after,
+            'on_update_start': self._on_update_start,
+            'on_update_finish': self._on_update_finish,
+            'on_servers_loaded': self.populate_group_dropdown,
+            'on_servers_updated': self.refresh_server_list_ui,
+            'on_ping_result': self._on_ping_result,
+        }
+        return ServerManager(self.settings, callbacks)
+
+    # --- Singbox Manager Callbacks ---
+    def _on_status_change(self, status, color):
+        self.status_label.configure(text=status, text_color=color)
+
+    def _on_connect(self, latency):
+        self.status_label.configure(
+            text=f"Running: {self.selected_config['name']}", text_color="lightgreen")
+        self.conn_status_label.configure(
+            text="Connected", text_color="lightgreen")
+        self.latency_label.configure(text=f"{latency} ms")
+        self.start_button.configure(state="disabled")
+        self.stop_button.configure(state="normal")
+        self.url_test_button.configure(state="normal")
+
+    def _on_stop(self):
+        status_text = f"Selected: {self.selected_config['name'] if self.selected_config else 'None'}"
+        self.status_label.configure(text=status_text, text_color="orange")
+        self.conn_status_label.configure(
+            text="Disconnected", text_color="orange")
+        self.ip_label.configure(text="N/A")
+        self.latency_label.configure(text="N/A")
+        self.start_button.configure(state="normal")
+        self.stop_button.configure(state="disabled")
+        self.url_test_button.configure(state="disabled")
+
+    def _on_ip_update(self, ip_address):
+        self.ip_label.configure(text=ip_address)
+
+
     def setup_appearance(self):
         customtkinter.set_appearance_mode(
-            self.settings.get("appearance_mode", "System"))
+            self.settings.get("appearance_mode"))
         customtkinter.set_default_color_theme(
-            self.settings.get("color_theme", "green"))
+            self.settings.get("color_theme"))
 
     def create_widgets(self):
         # --- Main Layout ---
@@ -188,10 +236,9 @@ class SingboxApp(customtkinter.CTk):
             sub_frame, text="Update", command=self.update_subscription, font=APP_FONT)
         self.update_button.grid(row=4, column=0, padx=10, pady=10, sticky="ew")
 
-        self.progress_bar = customtkinter.CTkProgressBar(
-            sub_frame, mode="indeterminate")
-        self.progress_bar.grid(row=5, column=0, padx=10, pady=5, sticky="ew")
-        self.progress_bar.grid_remove()
+        self.progress_bar = customtkinter.CTkProgressBar(sub_frame, orientation="horizontal")
+        self.progress_bar.grid(row=5, column=0, padx=10, pady=(0, 10), sticky="ew")
+        self.progress_bar.grid_remove()  # Hide it initially
 
         # --- Group Actions ---
         actions_frame = customtkinter.CTkFrame(management_container)
@@ -292,8 +339,8 @@ class SingboxApp(customtkinter.CTk):
         self.color_theme_menu.pack(side="right", padx=10, pady=10)
 
         self.appearance_mode_menu.set(
-            self.settings.get("appearance_mode", "System"))
-        self.color_theme_menu.set(self.settings.get("color_theme", "green"))
+            self.settings.get("appearance_mode"))
+        self.color_theme_menu.set(self.settings.get("color_theme"))
 
         # --- Network Settings ---
         customtkinter.CTkLabel(parent_tab, text="Network Settings", font=(
@@ -311,7 +358,7 @@ class SingboxApp(customtkinter.CTk):
         self.connection_mode_menu.grid(
             row=0, column=1, padx=10, pady=5, sticky="ew")
         self.connection_mode_menu.set(
-            self.settings.get("connection_mode", "Rule-Based"))
+            self.settings.get("connection_mode"))
 
         # DNS Servers
         customtkinter.CTkLabel(network_frame, text="DNS Servers:", font=APP_FONT).grid(
@@ -319,7 +366,7 @@ class SingboxApp(customtkinter.CTk):
         self.dns_entry = customtkinter.CTkEntry(network_frame, font=APP_FONT)
         self.dns_entry.grid(row=1, column=1, padx=10, pady=5, sticky="ew")
         self.dns_entry.insert(0, self.settings.get(
-            "dns_servers", "1.1.1.1,8.8.8.8"))
+            "dns_servers"))
 
         # Bypass Domains
         customtkinter.CTkLabel(network_frame, text="Bypass Domains:", font=APP_FONT).grid(
@@ -329,7 +376,7 @@ class SingboxApp(customtkinter.CTk):
         self.bypass_domains_entry.grid(
             row=2, column=1, padx=10, pady=5, sticky="ew")
         self.bypass_domains_entry.insert(0, self.settings.get(
-            "bypass_domains", "domain:geosite:tld-ir,*.ir,*.local"))
+            "bypass_domains"))
 
         # Bypass IPs
         customtkinter.CTkLabel(network_frame, text="Bypass IPs:", font=APP_FONT).grid(
@@ -339,7 +386,7 @@ class SingboxApp(customtkinter.CTk):
         self.bypass_ips_entry.grid(
             row=3, column=1, padx=10, pady=5, sticky="ew")
         self.bypass_ips_entry.insert(0, self.settings.get(
-            "bypass_ips", "geoip:ir,192.168.0.0/16,127.0.0.1,10.0.0.0/8"))
+            "bypass_ips"))
 
         # --- About Button ---
         about_button = customtkinter.CTkButton(
@@ -373,33 +420,11 @@ class SingboxApp(customtkinter.CTk):
         self.bind_all("<Control-u>", self.update_subscription)
         self.bind_all("<Control-q>", self.quit_application)
 
-    def _cleanup_temp_files(self):
-        """Removes leftover temporary config files from previous sessions."""
-        try:
-            # Use glob to find all temp config files
-            temp_files = glob.glob("temp_config_*.json")
-            temp_files.extend(glob.glob("temp_url_test_config.json"))
-
-            if not temp_files:
-                return
-
-            count = 0
-            for f in temp_files:
-                try:
-                    os.remove(f)
-                    count += 1
-                except OSError as e:
-                    self.log(f"Error removing temp file {f}: {e}")
-            if count > 0:
-                self.log(f"Removed {count} old temporary file(s).")
-        except Exception as e:
-            self.log(f"An error occurred during temp file cleanup: {e}")
-
     # --- Data & Settings Management ---
     def save_all_settings(self):
         settings = {
             "sub_link": self.sub_link_entry.get(),
-            "servers": self.server_groups,
+            "servers": self.server_manager.get_all_server_groups(), # Get servers from the manager
             "appearance_mode": customtkinter.get_appearance_mode(),
             "color_theme": self.color_theme_menu.get(),
             "dns_servers": self.dns_entry.get(),
@@ -410,65 +435,184 @@ class SingboxApp(customtkinter.CTk):
 
     def load_data(self):
         try:
-            self.sub_link_entry.insert(0, self.settings.get("sub_link", ""))
-            self.server_groups = self.settings.get("servers", {})
-            if self.server_groups:
-                self.populate_group_dropdown()
-                self.log("Saved servers loaded successfully.")
+            self.sub_link_entry.insert(0, self.settings.get("sub_link"))
+            self.server_manager.load_servers()
         except Exception as e:
-            self.log(f"Error loading data: {e}")
+            self.log(f"Error loading data: {e}", LogLevel.ERROR)
+
+    # --- Server Manager Callbacks ---
+    def _on_update_start(self):
+        self.log_textbox.delete("1.0", "end")
+        self.log("Updating from subscription link...", LogLevel.INFO)
+        self.progress_bar.grid()
+        self.progress_bar.start()
+        self.update_button.configure(state="disabled")
+
+    def _on_update_finish(self, error=False):
+        self.progress_bar.stop()
+        self.progress_bar.grid_remove()
+        self.update_button.configure(state="normal")
+        if not error:
+            self.save_all_settings()
+            self.populate_group_dropdown()
+        else:
+            self.log("Subscription update failed.", LogLevel.ERROR)
+
+    def _on_ping_result(self, config, result, is_url_test):
+        config_id = f"{config.get('server')}:{config.get('port')}"
+        if config_id in self.server_widgets:
+            widget_info = self.server_widgets[config_id]
+            ping_label = widget_info['ping_label']
+            if ping_label.winfo_exists():
+                if result != -1:
+                    if is_url_test:
+                        color = "lightgreen" if result < 1000 else "orange" if result < 3000 else "red"
+                    else:
+                        color = "lightgreen" if result < 200 else "orange" if result < 500 else "red"
+                    ping_label.configure(text=f"{result} ms", text_color=color)
+                else:
+                    ping_label.configure(text="Failed" if is_url_test else "Timeout", text_color="red")
+
+    def refresh_server_list_ui(self):
+        current_group = self.group_dropdown.get()
+        self.filter_servers_by_group(current_group)
 
     # --- UI Update & Logging ---
-    def log(self, message):
-        self.log_textbox.insert("end", message + "\n")
+    def log(self, message, level=LogLevel.INFO):
+        log_colors = {
+            LogLevel.INFO: "white",
+            LogLevel.WARNING: "orange",
+            LogLevel.ERROR: "red",
+            LogLevel.SUCCESS: "lightgreen",
+            LogLevel.DEBUG: "gray"
+        }
+        color = log_colors.get(level, "white")
+        
+        self.log_textbox.configure(state="normal") # Enable editing
+        self.log_textbox.insert("end", message + "\n", (level.value,))
+        self.log_textbox.tag_config(level.value, foreground=color)
         self.log_textbox.see("end")
+        self.log_textbox.configure(state="disabled") # Disable editing
 
     def populate_group_dropdown(self):
-        groups = list(self.server_groups.keys())
-        self.group_dropdown.configure(
-            values=groups if groups else ["No Groups"])
-        if groups:
+        groups = self.server_manager.get_groups()
+        current_selection = self.group_dropdown.get()
+        
+        if not groups:
+            self.group_dropdown.configure(values=["No Groups"])
+            self.group_dropdown.set("No Groups")
+            self.filter_servers_by_group("No Groups")
+            return
+
+        self.group_dropdown.configure(values=groups)
+        if current_selection in groups:
+            self.group_dropdown.set(current_selection)
+        else:
             self.group_dropdown.set(groups[0])
-            self.filter_servers_by_group(groups[0])
+        self.filter_servers_by_group(self.group_dropdown.get())
 
     def filter_servers_by_group(self, selected_group, sorted_configs=None):
         self.selected_server_button = None
-        for widget in self.server_list_frame.winfo_children():
+        
+        self.selected_group = selected_group
+        configs = sorted_configs if sorted_configs is not None else self.server_manager.get_servers_by_group(
+            selected_group)
+        
+        # Create a set of unique identifiers for the new configs
+        new_config_ids = {f"{c.get('server')}:{c.get('port')}" for c in configs}
+        
+        # Identify widgets to remove
+        widgets_to_destroy = []
+        for config_id, widget_info in self.server_widgets.items():
+            if config_id not in new_config_ids:
+                widgets_to_destroy.append(widget_info['frame'])
+        
+        # Destroy old widgets
+        for widget in widgets_to_destroy:
             widget.destroy()
+        
+        # Clear removed widgets from our tracking dictionary
+        self.server_widgets = {
+            config_id: widget_info for config_id, widget_info in self.server_widgets.items()
+            if config_id in new_config_ids
+        }
 
-        configs = sorted_configs if sorted_configs is not None else self.server_groups.get(
-            selected_group, [])
+        # Update or create widgets
         for i, config in enumerate(configs):
-            server_frame = customtkinter.CTkFrame(
-                self.server_list_frame, fg_color="transparent")
-            server_frame.server_config = config
-            server_frame.grid(row=i, column=0, sticky="ew", pady=1)
-            server_frame.grid_columnconfigure(0, weight=1)
+            config_id = f"{config.get('server')}:{config.get('port')}"
+            
+            if config_id in self.server_widgets:
+                # Update existing widget
+                server_frame = self.server_widgets[config_id]['frame']
+                name_label = self.server_widgets[config_id]['name_label']
+                ping_label = self.server_widgets[config_id]['ping_label']
 
-            name_label = customtkinter.CTkLabel(
-                server_frame, text=config["name"], font=APP_FONT, anchor="w")
-            name_label.grid(row=0, column=0, sticky="w", padx=5)
+                # Update text and color if changed
+                if name_label.cget("text") != config["name"]:
+                    name_label.configure(text=config["name"])
+                
+                ping_val = config.get("ping", "-")
+                ping_text = f"{ping_val} ms" if isinstance(ping_val, int) and ping_val != -1 else ("Timeout" if ping_val == -1 else "- ms")
+                if ping_label.cget("text") != ping_text:
+                    ping_label.configure(text=ping_text)
+                
+                # Re-grid to ensure correct order
+                server_frame.grid(row=i, column=0, sticky="ew", pady=1)
 
-            ping_val = config.get("ping", "-")
-            ping_text = f"{ping_val} ms" if isinstance(
-                ping_val, int) and ping_val != -1 else ("Timeout" if ping_val == -1 else "- ms")
-            ping_label = customtkinter.CTkLabel(
-                server_frame, text=ping_text, font=APP_FONT, anchor="e", width=80)
-            ping_label.grid(row=0, column=1, sticky="e", padx=5)
+            else:
+                # Create new widget
+                server_frame = customtkinter.CTkFrame(
+                    self.server_list_frame, fg_color="transparent")
+                server_frame.server_config = config # Still attach for context menu and selection
+                server_frame.grid(row=i, column=0, sticky="ew", pady=1)
+                server_frame.grid_columnconfigure(0, weight=1)
 
-            context_menu = ServerContextMenu(
-                self, config, ping_label, self._ping_thread_task, self._url_test_thread_task, self.delete_server, self.edit_server)
+                name_label = customtkinter.CTkLabel(
+                    server_frame, text=config["name"], font=APP_FONT, anchor="w")
+                name_label.grid(row=0, column=0, sticky="w", padx=5)
 
-            server_frame.bind("<Button-3>", context_menu.popup)
-            name_label.bind("<Button-3>", context_menu.popup)
-            ping_label.bind("<Button-3>", context_menu.popup)
+                ping_val = config.get("ping", "-")
+                ping_text = f"{ping_val} ms" if isinstance(
+                    ping_val, int) and ping_val != -1 else ("Timeout" if ping_val == -1 else "- ms")
+                ping_label = customtkinter.CTkLabel(
+                    server_frame, text=ping_text, font=APP_FONT, anchor="e", width=80)
+                ping_label.grid(row=0, column=1, sticky="e", padx=5)
 
-            server_frame.bind("<Button-1>", lambda e, c=config,
-                              f=server_frame: self.select_server(c, f))
-            name_label.bind("<Button-1>", lambda e, c=config,
-                            f=server_frame: self.select_server(c, f))
-            ping_label.bind("<Button-1>", lambda e, c=config,
-                            f=server_frame: self.select_server(c, f))
+                context_menu = ServerContextMenu(
+                    self, config, ping_label, 
+                    lambda cfg, lbl: self.server_manager.test_all_pings([cfg]),
+                    lambda cfg, lbl: self.server_manager.test_all_urls([cfg]),
+                    self.delete_server, self.edit_server)
+
+                server_frame.bind("<Button-3>", context_menu.popup)
+                name_label.bind("<Button-3>", context_menu.popup)
+                ping_label.bind("<Button-3>", context_menu.popup)
+
+                server_frame.bind("<Button-1>", lambda e, c=config,
+                                  f=server_frame: self.select_server(c, f))
+                name_label.bind("<Button-1>", lambda e, c=config,
+                                f=server_frame: self.select_server(c, f))
+                ping_label.bind("<Button-1>", lambda e, c=config,
+                                f=server_frame: self.select_server(c, f))
+                
+                # Store new widget references
+                self.server_widgets[config_id] = {
+                    'frame': server_frame,
+                    'name_label': name_label,
+                    'ping_label': ping_label,
+                    'config': config # Store config for easy access
+                }
+        
+        # Handle selection after updates
+        if self.selected_config:
+            selected_config_id = f"{self.selected_config.get('server')}:{self.selected_config.get('port')}"
+            if selected_config_id in self.server_widgets:
+                selected_frame = self.server_widgets[selected_config_id]['frame']
+                selected_frame.configure(fg_color=("gray85", "gray25"))
+                self.selected_server_button = selected_frame
+            else:
+                self.selected_config = None # Selected server no longer exists
+                self.status_label.configure(text="No Server Selected", text_color="orange")
 
     def select_server(self, config, frame_widget):
         if self.selected_server_button is not None:
@@ -477,7 +621,7 @@ class SingboxApp(customtkinter.CTk):
         frame_widget.configure(fg_color=("gray85", "gray25"))
         self.selected_server_button = frame_widget
         self.selected_config = config
-        self.log(f"Server selected: {config['name']}")
+        self.log(f"Server selected: {config['name']}", LogLevel.INFO)
         self.status_label.configure(
             text=f"Selected: {config['name']}", text_color="orange")
 
@@ -486,47 +630,7 @@ class SingboxApp(customtkinter.CTk):
         if not messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete server '{config_to_delete.get('name')}'?"):
             return
 
-        group_name = config_to_delete.get("group")
-        if not group_name or group_name not in self.server_groups:
-            self.log(
-                f"Error: Could not find group for server {config_to_delete.get('name')}.")
-            return
-
-        # Find and remove the server
-        initial_len = len(self.server_groups[group_name])
-        self.server_groups[group_name] = [
-            s for s in self.server_groups[group_name] if s != config_to_delete
-        ]
-        final_len = len(self.server_groups[group_name])
-
-        if final_len < initial_len:
-            self.log(f"Deleted server: {config_to_delete.get('name')}")
-
-            # If the group is now empty, remove it
-            if not self.server_groups[group_name]:
-                del self.server_groups[group_name]
-                self.log(f"Removed empty group: {group_name}")
-                # Refresh dropdown if a group was removed
-                self.populate_group_dropdown()
-
-            # Refresh the currently displayed list
-            current_group = self.group_dropdown.get()
-            if current_group == group_name:
-                self.filter_servers_by_group(current_group)
-            elif not self.server_groups:  # If all groups are gone
-                self.filter_servers_by_group("No Groups")
-
-            # If the deleted server was the selected one, clear selection
-            if self.selected_config == config_to_delete:
-                self.selected_config = None
-                self.selected_server_button = None
-                self.status_label.configure(
-                    text="No Server Selected", text_color="orange")
-
-            self.save_all_settings()
-        else:
-            self.log(
-                f"Error: Could not find server {config_to_delete.get('name')} to delete.")
+        self.server_manager.delete_server(config_to_delete)
 
     def edit_server(self, config_to_edit):
         """Opens a dialog to edit the server's name."""
@@ -534,340 +638,69 @@ class SingboxApp(customtkinter.CTk):
             text="Enter new server name:",
             title="Edit Server Name"
         )
-        # To make the dialog appear on top of the main window
         dialog.after(10, dialog.lift)
         new_name = dialog.get_input()
 
         if new_name and new_name.strip():
-            old_name = config_to_edit['name']
-            config_to_edit['name'] = new_name.strip()
-            self.log(f"Renamed server '{old_name}' to '{new_name.strip()}'.")
-
-            # Refresh the UI
-            current_group = self.group_dropdown.get()
-            self.filter_servers_by_group(current_group)
-
-            # Save changes
-            self.save_all_settings()
+            self.server_manager.edit_server(config_to_edit, new_name.strip())
 
     def add_manual_server(self):
         server_link = self.manual_add_entry.get()
         if not server_link:
-            self.log("Please paste a server link to add.")
+            self.log("Please paste a server link to add.", LogLevel.WARNING)
             return
 
-        config = utils.parse_server_link(server_link)
-        if not config:
-            self.log(f"Failed to parse server link: {server_link}")
-            return
-
-        # --- Duplicate Check ---
-        server_id = f"{config.get('server')}:{config.get('port')}"
-        for group in self.server_groups.values():
-            for s_config in group:
-                if f"{s_config.get('server')}:{s_config.get('port')}" == server_id:
-                    self.log(
-                        f"Server {config.get('name')} already exists. Skipping.")
-                    return
-        # --- End Duplicate Check ---
-
-        group_name = config.get("group", "Manual Servers")
-        if group_name not in self.server_groups:
-            self.server_groups[group_name] = []
-
-        self.server_groups[group_name].append(config)
-        self.log(
-            f"Added server '{config.get('name')}' to group '{group_name}'.")
-
-        # Refresh UI and save
-        self.populate_group_dropdown()
-        self.filter_servers_by_group(self.group_dropdown.get())  # Refresh list
-        self.save_all_settings()
-        self.manual_add_entry.delete(0, "end")  # Clear entry
+        self.server_manager.add_manual_server(server_link)
+        self.manual_add_entry.delete(0, "end")
 
     # --- Core Functionality ---
     def update_subscription(self, event=None):
         sub_link = self.sub_link_entry.get()
         if not sub_link:
-            self.log("Please enter a subscription link first.")
+            self.log("Please enter a subscription link first.", LogLevel.WARNING)
             return
-
-        self.log_textbox.delete("1.0", "end")
-        self.log("Updating from subscription link...")
-        self.progress_bar.grid()
-        self.progress_bar.start()
-
-        threading.Thread(target=self._update_subscription_task,
-                         daemon=True).start()
-
-    def _update_subscription_task(self):
-        sub_link = self.sub_link_entry.get()
+        
         custom_group_name = self.group_name_entry.get().strip()
-        try:
-            headers = {'User-Agent': 'Mozilla/5.0'}
-            response = requests.get(sub_link, headers=headers, timeout=10)
-            response.raise_for_status()
-
-            base64_text = response.text.strip()
-            decoded_content = base64.b64decode(base64_text).decode('utf-8')
-            server_links = decoded_content.splitlines()
-
-            # --- Duplicate Check Setup ---
-            existing_server_ids = set()
-            for group in self.server_groups.values():
-                for s_config in group:
-                    s_id = f"{s_config.get('server')}:{s_config.get('port')}"
-                    existing_server_ids.add(s_id)
-            # --- End Duplicate Check Setup ---
-
-            temp_groups = {}
-            server_count = 0
-            skipped_count = 0
-
-            for link in server_links:
-                config = utils.parse_server_link(link)
-                if config:
-                    # --- Duplicate Check ---
-                    server_id = f"{config.get('server')}:{config.get('port')}"
-                    if server_id in existing_server_ids:
-                        skipped_count += 1
-                        continue
-                    # --- End Duplicate Check ---
-
-                    # Add to set to check against others in the same subscription
-                    existing_server_ids.add(server_id)
-                    server_count += 1
-                    group_name = custom_group_name if custom_group_name else config["group"]
-                    if group_name not in temp_groups:
-                        temp_groups[group_name] = []
-                    config["group"] = group_name
-                    temp_groups[group_name].append(config)
-
-            self.server_groups.update(temp_groups)
-            self.after(0, self.populate_group_dropdown)
-
-            log_message = f"Successfully loaded {server_count} new servers."
-            if skipped_count > 0:
-                log_message += f" Skipped {skipped_count} duplicate(s)."
-            self.after(0, self.log, log_message)
-
-            self.save_all_settings()
-
-        except Exception as e:
-            self.after(0, self.log, f"Failed to update subscription: {e}")
-        finally:
-            self.after(0, self.progress_bar.stop)
-            self.after(0, self.progress_bar.grid_remove)
+        self.server_manager.update_subscription(sub_link, custom_group_name)
 
     def start_singbox(self):
         if not self.selected_config:
-            self.log("Please select a server first!")
+            self.log("Please select a server first!", LogLevel.WARNING)
             return
-
-        if self.singbox_process and self.singbox_process.poll() is None:
-            self.log("Switching servers... Stopping previous connection first.")
-            self.stop_singbox()
-            time.sleep(0.5)
-
-        self.current_config_file = f"temp_config_{int(time.time()*1000)}.json"
-
         self.log_textbox.delete("1.0", "end")
-        self.log("Starting connection...")
-        self.status_label.configure(text="Connecting...", text_color="yellow")
-
-        threading.Thread(target=self._run_singbox_and_log_output, args=(
-            self.selected_config, self.current_config_file), daemon=True).start()
-        self.after(2000, self.check_connection_status)
-
-    def _run_singbox_and_log_output(self, config_to_run, config_filename):
-        try:
-            # 1. Generate config
-            full_config = utils.generate_config_json(
-                config_to_run, self.settings)
-            with open(config_filename, 'w', encoding='utf-8') as f:
-                json.dump(full_config, f, indent=2)
-
-            # 2. Validate config
-            self.after(0, self.log, "Validating configuration...")
-            check_command = [get_resource_path(
-                'sing-box.exe'), 'check', '-c', config_filename]
-            result = subprocess.run(check_command, capture_output=True, text=True,
-                                    encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW)
-
-            if result.returncode != 0:
-                error_message = result.stdout.strip() or result.stderr.strip()
-                self.after(0, self.log, "Configuration check failed!")
-                self.after(0, self.log, f"Error: {error_message}")
-                self.after(0, self.stop_singbox)  # Clean up
-                return
-
-            self.after(
-                0, self.log, "Configuration is valid. Starting process...")
-
-            # 3. Run process
-            command = [get_resource_path(
-                'sing-box.exe'), 'run', '-c', config_filename]
-            self.singbox_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                                    text=True, encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW)
-            self.singbox_pid = self.singbox_process.pid  # Store PID
-
-            for line in iter(self.singbox_process.stdout.readline, ''):
-                self.after(0, self.log, line.strip())
-
-        except FileNotFoundError:
-            singbox_path = get_resource_path(
-                'sing-box.exe')  # Get path again for logging
-            self.after(
-                0, self.log, f"Error: sing-box.exe not found at '{singbox_path}'!")
-        except Exception as e:
-            self.after(
-                0, self.log, f"An unexpected error occurred: {type(e).__name__}: {e}")
+        self.singbox_manager.start(self.selected_config)
 
     def stop_singbox(self):
-        pid_to_kill = self.singbox_pid
-        process_to_kill = self.singbox_process
-
-        # Reset state immediately
-        self.singbox_process = None
-        self.singbox_pid = None
-
-        if process_to_kill and process_to_kill.poll() is None:
-            try:
-                process_to_kill.kill()
-                self.log("Sing-box process terminated.")
-            except Exception as e:
-                self.log(
-                    f"Failed to terminate process object: {e}. Falling back to PID kill.")
-                if pid_to_kill:
-                    try:
-                        subprocess.run(["taskkill", "/F", "/PID", str(pid_to_kill)], check=False,
-                                       capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
-                        self.log(
-                            f"Killed process with PID {pid_to_kill} as a fallback.")
-                    except Exception as kill_e:
-                        self.log(f"Fallback PID kill failed: {kill_e}")
-        elif pid_to_kill:
-            self.log(
-                f"Process object not active, attempting to clean up PID {pid_to_kill}.")
-            try:
-                # Use timeout to prevent hanging, capture output to hide it
-                result = subprocess.run(["taskkill", "/F", "/PID", str(pid_to_kill)], check=False,
-                                        capture_output=True, timeout=5, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
-                # taskkill exit code is 0 on success, 128 if process not found.
-                if result.returncode == 0:
-                    self.log(
-                        f"Cleaned up lingering process with PID {pid_to_kill}.")
-            except Exception as e:
-                self.log(f"Error during lingering process cleanup: {e}")
-
-        try:
-            if self.current_config_file and os.path.exists(self.current_config_file):
-                os.remove(self.current_config_file)
-        except OSError as e:
-            self.log(f"Error removing config file: {e}")
-
-        self.set_system_proxy(False)
-        status_text = f"Selected: {self.selected_config['name'] if self.selected_config else 'None'}"
-        self.status_label.configure(text=status_text, text_color="orange")
-        self.start_button.configure(state="normal")
-        self.stop_button.configure(state="disabled")
-        self.url_test_button.configure(state="disabled")
-        self.conn_status_label.configure(
-            text="Disconnected", text_color="orange")
-        self.ip_label.configure(text="N/A")
-        self.latency_label.configure(text="N/A")
-
-    def _fetch_ip_and_update_statusbar(self):
-        ip_address = utils.get_external_ip(PROXY_SERVER_ADDRESS)
-
-        def update_ui():
-            self.ip_label.configure(text=ip_address)
-        self.after(0, update_ui)
-
-    def check_connection_status(self):
-        result = utils.url_test(PROXY_SERVER_ADDRESS)
-        if result != -1:
-            self.status_label.configure(
-                text=f"Running: {self.selected_config['name']}", text_color="lightgreen")
-            self.log(f"Connection successful! Latency: {result} ms.")
-            self.set_system_proxy(True)
-            self.start_button.configure(state="disabled")
-            self.stop_button.configure(state="normal")
-            self.url_test_button.configure(state="normal")
-            self.conn_status_label.configure(
-                text="Connected", text_color="lightgreen")
-            self.latency_label.configure(text=f"{result} ms")
-            threading.Thread(
-                target=self._fetch_ip_and_update_statusbar, daemon=True).start()
-        else:
-            self.status_label.configure(
-                text="Connection Failed", text_color="red")
-            self.log("Error: Connection test failed. Check server config.")
-            self.stop_singbox()
+        self.singbox_manager.stop()
 
     def start_stop_toggle(self, event=None):
-        if (self.singbox_process is None) or (self.singbox_process.poll() is not None):
+        if not self.singbox_manager.is_running:
             self.start_singbox()
         else:
             self.stop_singbox()
 
     # --- Ping & URL Tests ---
-    def _ping_thread_task(self, config, ping_label):
-        ping_label.configure(text="...", text_color="gray")
-        ping_result = utils.tcp_ping(config["server"], config["port"])
-        config["ping"] = ping_result
-
-        def update_ui():
-            if ping_label.winfo_exists():
-                if ping_result != -1:
-                    color = "lightgreen" if ping_result < 200 else "orange" if ping_result < 500 else "red"
-                    ping_label.configure(
-                        text=f"{ping_result} ms", text_color=color)
-                else:
-                    ping_label.configure(text="Timeout", text_color="red")
-        self.after(0, update_ui)
-
-    def _url_test_thread_task(self, config, ping_label):
-        ping_label.configure(text="...", text_color="gray")
-        result = utils.run_single_url_test(config, self.settings)
-        config["ping"] = result
-
-        def update_ui():
-            if ping_label.winfo_exists():
-                if result != -1:
-                    color = "lightgreen" if result < 1000 else "orange" if result < 3000 else "red"
-                    ping_label.configure(text=f"{result} ms", text_color=color)
-                else:
-                    ping_label.configure(text="Failed", text_color="red")
-        self.after(0, update_ui)
-
     def test_all_pings(self):
-        self.log("Starting TCP ping for all visible servers...")
-        for server_frame in self.server_list_frame.winfo_children():
-            config = server_frame.server_config
-            ping_label = server_frame.grid_slaves(row=0, column=1)[0]
-            self.ping_executor.submit(
-                self._ping_thread_task, config, ping_label)
+        current_group = self.group_dropdown.get()
+        if not current_group or current_group == "No Groups":
+            self.log("No servers to test.", LogLevel.INFO)
+            return
+        servers_to_test = self.server_manager.get_servers_by_group(current_group)
+        self.server_manager.test_all_pings(servers_to_test)
 
     def test_all_urls(self):
-        self.log(
-            "Starting URL test. This process is SLOW and may take several minutes.")
-        all_frames = list(self.server_list_frame.winfo_children())
-
-        def sequential_test_task():
-            for server_frame in all_frames:
-                if server_frame.winfo_exists():
-                    config = server_frame.server_config
-                    ping_label = server_frame.grid_slaves(row=0, column=1)[0]
-                    self._url_test_thread_task(config, ping_label)
-                    time.sleep(0.5)  # Avoid overwhelming the system
-        threading.Thread(target=sequential_test_task, daemon=True).start()
+        current_group = self.group_dropdown.get()
+        if not current_group or current_group == "No Groups":
+            self.log("No servers to test.")
+            return
+        servers_to_test = self.server_manager.get_servers_by_group(current_group)
+        self.server_manager.test_all_urls(servers_to_test)
 
     def run_url_test(self):
-        if self.singbox_process is None or self.singbox_process.poll() is not None:
-            self.log("URL Test failed: Not connected.")
+        if not self.singbox_manager.is_running:
+            self.log("URL Test failed: Not connected.", LogLevel.WARNING)
             return
-        self.log("Running URL test on current connection...")
+        self.log("Running URL test on current connection...", LogLevel.INFO)
         self.url_test_button.configure(state="disabled", text="Testing...")
 
         def task():
@@ -875,14 +708,11 @@ class SingboxApp(customtkinter.CTk):
 
             def update_ui():
                 if result != -1:
-                    self.log(
-                        f"URL Test successful! Response time: {result} ms")
+                    self.log(f"URL Test successful! Response time: {result} ms", LogLevel.SUCCESS)
                 else:
-                    self.log(
-                        "URL Test failed: Could not reach test URL via proxy.")
-                if self.singbox_process is not None and self.singbox_process.poll() is None:
-                    self.url_test_button.configure(
-                        state="normal", text="URL Test")
+                    self.log("URL Test failed: Could not reach test URL via proxy.", LogLevel.ERROR)
+                if self.singbox_manager.is_running:
+                    self.url_test_button.configure(state="normal", text="URL Test (Active)")
             self.after(0, update_ui)
         threading.Thread(target=task, daemon=True).start()
 
@@ -891,64 +721,32 @@ class SingboxApp(customtkinter.CTk):
         if not current_group or current_group == "No Groups":
             self.log("No servers to sort.")
             return
-
-        configs = self.server_groups.get(current_group, [])
-        configs.sort(key=lambda c: c.get("ping", 9999)
-                     if c.get("ping", 9999) != -1 else 99999)
-
-        self.filter_servers_by_group(current_group, sorted_configs=configs)
-        self.log("Servers sorted by ping (fastest first).")
+        self.server_manager.sort_servers_by_ping(current_group)
 
     # --- System & Window Management ---
-    def set_system_proxy(self, enable):
-        try:
-            key_path = r"Software\Microsoft\Windows\CurrentVersion\Internet Settings"
-            internet_settings = winreg.OpenKey(
-                winreg.HKEY_CURRENT_USER, key_path, 0, winreg.KEY_WRITE)
-            if enable:
-                # Combine default bypass with user-defined domains for the system setting
-                user_domains = self.settings.get("bypass_domains", "")
-                bypass_list = PROXY_BYPASS
-                if user_domains:
-                    # System proxy bypass list is semicolon-separated
-                    user_domains_semicolon = ";".join(
-                        d.strip() for d in user_domains.split(','))
-                    bypass_list = f"{PROXY_BYPASS};{user_domains_semicolon}"
-
-                winreg.SetValueEx(internet_settings,
-                                  "ProxyEnable", 0, winreg.REG_DWORD, 1)
-                winreg.SetValueEx(internet_settings, "ProxyServer",
-                                  0, winreg.REG_SZ, PROXY_SERVER_ADDRESS)
-                winreg.SetValueEx(
-                    internet_settings,
-                    "ProxyOverride", 0, winreg.REG_SZ, bypass_list)
-            else:
-                winreg.SetValueEx(internet_settings,
-                                  "ProxyEnable", 0, winreg.REG_DWORD, 0)
-            winreg.CloseKey(internet_settings)
-
-            ctypes.windll.Wininet.InternetSetOptionW(
-                0, 39, 0, 0)  # INTERNET_OPTION_SETTINGS_CHANGED
-            ctypes.windll.Wininet.InternetSetOptionW(
-                0, 37, 0, 0)  # INTERNET_OPTION_REFRESH
-        except Exception as e:
-            self.log(f"Failed to set system proxy: {e}")
+    
 
     def change_appearance_mode(self, new_mode):
         customtkinter.set_appearance_mode(new_mode)
         self.save_all_settings()
 
     def change_color_theme(self, new_theme):
-        self.log("Color theme changed. Please restart the app to see full effect.")
+        self.log("Color theme changed. Please restart the app to see full effect.", LogLevel.INFO)
         self.color_theme_menu.set(new_theme)
         self.save_all_settings()
 
     def on_closing(self):
         self.save_all_settings()
-        if self.singbox_process is not None and self.singbox_process.poll() is None:
-            threading.Thread(target=self.hide_window, daemon=True).start()
+        if self.singbox_manager.is_running:
+            # Reset proxy in a separate thread to avoid blocking UI
+            threading.Thread(target=self._reset_proxy_and_then_hide, daemon=True).start()
         else:
             self.quit_application()
+
+    def _reset_proxy_and_then_hide(self):
+        utils.set_system_proxy(False, self.settings, self.log)
+        # After resetting proxy, hide the window (which will then start the tray icon in its own thread)
+        self.after(0, self.hide_window)
 
     def quit_application(self, event=None):
         self.ping_executor.shutdown(wait=False, cancel_futures=True)
@@ -963,7 +761,11 @@ class SingboxApp(customtkinter.CTk):
         self.after(0, self.deiconify)
 
     def hide_window(self):
-        self.withdraw()
+        self.withdraw() # UI operation, must be on main thread
+        # Start the tray icon in a new thread, as it's blocking
+        threading.Thread(target=self._run_tray_icon, daemon=True).start()
+
+    def _run_tray_icon(self):
         image_data = base64.b64decode(ICON_BASE64)
         image = Image.open(io.BytesIO(image_data))
         menu = (item('Show', self.show_window),

@@ -5,158 +5,108 @@ import json
 import threading
 import winreg
 import ctypes
-import sys
+import tempfile
 import utils
-from constants import PROXY_SERVER_ADDRESS, PROXY_BYPASS
-
-def get_resource_path(relative_path):
-    """Get absolute path to resource, works for dev and for PyInstaller."""
-    if hasattr(sys, '_MEIPASS'):
-        return os.path.join(sys._MEIPASS, relative_path)
-    return os.path.join(os.getcwd(), relative_path)
+from constants import PROXY_SERVER_ADDRESS, PROXY_BYPASS, PROXY_HOST, PROXY_PORT, LogLevel, CONNECTION_STOP_DELAY, CONNECTION_CHECK_DELAY
 
 class SingboxManager:
     def __init__(self, settings, callbacks):
         self.settings = settings
         self.callbacks = callbacks
         self.singbox_process = None
-        self.singbox_pid = None
-        self.current_config_file = None
         self.is_running = False
 
     def start(self, config):
-        if self.is_running:
-            self.log("Switching servers... Stopping previous connection first.")
+        if self.is_running and self.singbox_process and self.singbox_process.poll() is None:
+            self.log("Switching servers... Stopping previous connection first.", LogLevel.INFO)
             self.stop()
-            time.sleep(0.5)
-
-        self.current_config_file = f"temp_config_{int(time.time()*1000)}.json"
+            time.sleep(CONNECTION_STOP_DELAY)
         
-        self.log("Starting connection...")
-        self.callbacks['on_status_change']("Connecting...", "yellow")
+        self.log("Starting connection...", LogLevel.INFO)
+        self.callbacks.get('on_status_change', lambda s, c: None)("Connecting...", "yellow")
 
-        thread = threading.Thread(target=self._run_and_log, args=(config, self.current_config_file), daemon=True)
+        thread = threading.Thread(target=self._run_and_log, args=(config,), daemon=True)
         thread.start()
         
-        # Schedule connection check
-        threading.Timer(2.0, self.check_connection).start()
+        self.callbacks.get('schedule', lambda t, c: None)(CONNECTION_CHECK_DELAY, self.check_connection)
 
-    def _run_and_log(self, config, config_filename):
+    def _run_and_log(self, config):
+        config_filename = None
         try:
-            # 1. Generate config
             full_config = utils.generate_config_json(config, self.settings)
-            with open(config_filename, 'w', encoding='utf-8') as f:
+            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json', encoding='utf-8') as f:
                 json.dump(full_config, f, indent=2)
+                config_filename = f.name
 
-            # 2. Validate config
-            self.log("Validating configuration...")
-            check_command = [get_resource_path('sing-box.exe'), 'check', '-c', config_filename]
-            result = subprocess.run(check_command, capture_output=True, text=True,
-                                    encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW)
+            self.log("Validating configuration...", LogLevel.INFO)
+            check_command = [utils.get_resource_path('sing-box.exe'), 'check', '-c', config_filename]
+            result = subprocess.run(check_command, capture_output=True, text=True, encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW)
 
             if result.returncode != 0:
                 error_message = result.stdout.strip() or result.stderr.strip()
-                self.log("Configuration check failed!")
-                self.log(f"Error: {error_message}")
-                self.stop()
+                self.log(f"Configuration check failed! Error: {error_message}", LogLevel.ERROR)
+                self.callbacks.get('schedule', lambda t, c: None)(0, self.stop)
                 return
 
-            self.log("Configuration is valid. Starting process...")
-
-            # 3. Run process
-            command = [get_resource_path('sing-box.exe'), 'run', '-c', config_filename]
-            self.singbox_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                                    text=True, encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW)
-            self.singbox_pid = self.singbox_process.pid
+            self.log("Configuration is valid. Starting process...", LogLevel.INFO)
+            command = [utils.get_resource_path('sing-box.exe'), 'run', '-c', config_filename]
+            self.singbox_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW)
             self.is_running = True
 
             for line in iter(self.singbox_process.stdout.readline, ''):
-                self.log(line.strip())
+                self.log(line.strip(), LogLevel.DEBUG)
 
         except FileNotFoundError:
-            self.log(f"Error: sing-box.exe not found at '{get_resource_path('sing-box.exe')}'!")
-            self.is_running = False
+            self.log(f"Error: sing-box.exe not found at '{utils.get_resource_path('sing-box.exe')}'!", LogLevel.ERROR)
         except Exception as e:
-            self.log(f"An unexpected error occurred: {type(e).__name__}: {e}")
-            self.is_running = False
+            self.log(f"An unexpected error occurred during sing-box execution: {type(e).__name__}: {e}", LogLevel.ERROR)
         finally:
-            # When process finishes or fails, update state
-            self.is_running = False
-            self.callbacks['on_stop']()
-
+            if self.is_running:
+                self.is_running = False
+                self.callbacks.get('on_stop', lambda: None)()
+            if config_filename and os.path.exists(config_filename):
+                try:
+                    os.remove(config_filename)
+                except OSError:
+                    pass
 
     def stop(self):
-        pid_to_kill = self.singbox_pid
+        if not self.is_running and not self.singbox_process:
+            return
+            
         process_to_kill = self.singbox_process
-
-        self.singbox_process = None
-        self.singbox_pid = None
         self.is_running = False
+        self.singbox_process = None
 
         if process_to_kill and process_to_kill.poll() is None:
             try:
                 process_to_kill.kill()
                 self.log("Sing-box process terminated.")
             except Exception as e:
-                self.log(f"Failed to terminate process object: {e}. Falling back to PID kill.")
-                if pid_to_kill:
-                    self._kill_pid(pid_to_kill)
-        elif pid_to_kill:
-            self.log(f"Process object not active, attempting to clean up PID {pid_to_kill}.")
-            self._kill_pid(pid_to_kill)
+                self.log(f"Failed to terminate sing-box process: {type(e).__name__}: {e}", LogLevel.ERROR)
 
-        try:
-            if self.current_config_file and os.path.exists(self.current_config_file):
-                os.remove(self.current_config_file)
-        except OSError as e:
-            self.log(f"Error removing config file: {e}")
-
-        self.set_system_proxy(False)
-        self.callbacks['on_stop']()
-
-    def _kill_pid(self, pid):
-        try:
-            subprocess.run(["taskkill", "/F", "/PID", str(pid)], check=False,
-                           capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
-            self.log(f"Killed process with PID {pid} as a fallback.")
-        except Exception as e:
-            self.log(f"Fallback PID kill failed: {e}")
+        utils.set_system_proxy(False, self.settings, self.log)
+        self.callbacks.get('on_stop', lambda: None)()
 
     def check_connection(self):
         result = utils.url_test(PROXY_SERVER_ADDRESS)
         if result != -1:
             self.log(f"Connection successful! Latency: {result} ms.")
-            self.set_system_proxy(True)
-            self.callbacks['on_connect'](result)
+            utils.set_system_proxy(True, self.settings, self.log)
+            self.callbacks.get('on_connect', lambda r: None)(result)
+            
+            ip_thread = threading.Thread(target=self._fetch_ip_and_update, daemon=True)
+            ip_thread.start()
         else:
             self.log("Error: Connection test failed. Check server config.")
-            self.callbacks['on_status_change']("Connection Failed", "red")
+            self.callbacks.get('on_status_change', lambda s, c: None)("Connection Failed", "red")
             self.stop()
 
-    def set_system_proxy(self, enable):
-        try:
-            key_path = r"Software\Microsoft\Windows\CurrentVersion\Internet Settings"
-            internet_settings = winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_path, 0, winreg.KEY_WRITE)
-            
-            if enable:
-                user_domains = self.settings.get("bypass_domains", "")
-                bypass_list = PROXY_BYPASS
-                if user_domains:
-                    user_domains_semicolon = ";".join(d.strip() for d in user_domains.split(','))
-                    bypass_list = f"{PROXY_BYPASS};{user_domains_semicolon}"
+    def _fetch_ip_and_update(self):
+        ip_address = utils.get_external_ip(PROXY_SERVER_ADDRESS)
+        self.callbacks.get('on_ip_update', lambda ip: None)(ip_address)
 
-                winreg.SetValueEx(internet_settings, "ProxyEnable", 0, winreg.REG_DWORD, 1)
-                winreg.SetValueEx(internet_settings, "ProxyServer", 0, winreg.REG_SZ, PROXY_SERVER_ADDRESS)
-                winreg.SetValueEx(internet_settings, "ProxyOverride", 0, winreg.REG_SZ, bypass_list)
-            else:
-                winreg.SetValueEx(internet_settings, "ProxyEnable", 0, winreg.REG_DWORD, 0)
-            
-            winreg.CloseKey(internet_settings)
+    
 
-            ctypes.windll.Wininet.InternetSetOptionW(0, 39, 0, 0)  # INTERNET_OPTION_SETTINGS_CHANGED
-            ctypes.windll.Wininet.InternetSetOptionW(0, 37, 0, 0)  # INTERNET_OPTION_REFRESH
-        except Exception as e:
-            self.log(f"Failed to set system proxy: {e}")
-
-    def log(self, message):
-        self.callbacks['log'](message)
+    def log(self, message, level=LogLevel.INFO):
+        self.callbacks.get('log', lambda msg, lvl: None)(message, level)
