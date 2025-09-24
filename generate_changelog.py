@@ -22,11 +22,9 @@ def get_previous_tag(current_tag):
     try:
         # Get all tags sorted by version descending
         tags_str = subprocess.check_output(
-            ["git", "tag", "--sort=-v:refname"],
-            text=True,
-            stderr=subprocess.PIPE
+            ["git", "tag", "--sort=-v:refname"], text=True, stderr=subprocess.PIPE
         ).strip()
-        tags = tags_str.split('\n')
+        tags = tags_str.split("\n")
 
         # Find the index of the current tag
         try:
@@ -49,11 +47,11 @@ def get_commits_since_tag(tag):
     # Using a simple format: just the subject line
     command = ["git", "log", f"{tag}..HEAD", "--pretty=format:%s"]
     try:
-        commits = subprocess.check_output(
-            command,
-            text=True,
-            encoding='utf-8'
-        ).strip().split('\n')
+        commits = (
+            subprocess.check_output(command, text=True, encoding="utf-8")
+            .strip()
+            .split("\n")
+        )
         # Filter out empty lines that might result from the split
         return [commit for commit in commits if commit]
     except subprocess.CalledProcessError:
@@ -65,7 +63,8 @@ def parse_commits(commits):
     categorized_commits = {}
     # Regex to capture type, scope (optional), and subject
     commit_pattern = re.compile(
-        r"^(?P<type>\w+)(?:\((?P<scope>.*)\))?!?: (?P<subject>.+)$")
+        r"^(?P<type>\w+)(?:\((?P<scope>.*)\))?!?: (?P<subject>.+)$"
+    )
 
     for commit_msg in commits:
         match = commit_pattern.match(commit_msg)
@@ -110,7 +109,7 @@ def update_main_changelog(new_content, changelog_file="CHANGELOG.md"):
     existing_content = ""
     header = "# Changelog\n\nAll notable changes to this project will be documented in this file."
     try:
-        with open(changelog_file, 'r', encoding='utf-8') as f:
+        with open(changelog_file, "r", encoding="utf-8") as f:
             existing_content = f.read()
     except FileNotFoundError:
         print(f"'{changelog_file}' not found. A new file will be created.")
@@ -120,7 +119,7 @@ def update_main_changelog(new_content, changelog_file="CHANGELOG.md"):
         # Find the first real entry (starts with '## v')
         first_entry_match = re.search(r"## v\d", existing_content)
         if first_entry_match:
-            old_entries = existing_content[first_entry_match.start():]
+            old_entries = existing_content[first_entry_match.start() :]
         else:
             old_entries = ""  # No previous versions found
     else:
@@ -128,7 +127,7 @@ def update_main_changelog(new_content, changelog_file="CHANGELOG.md"):
 
     full_content = f"{header}\n\n{new_content}\n\n{old_entries.strip()}"
 
-    with open(changelog_file, 'w', encoding='utf-8') as f:
+    with open(changelog_file, "w", encoding="utf-8") as f:
         f.write(full_content)
     print(f"'{changelog_file}' has been updated.")
 
@@ -136,7 +135,8 @@ def update_main_changelog(new_content, changelog_file="CHANGELOG.md"):
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print(
-            "Usage: python generate_changelog.py <new_version_tag> [--update-file <filename>]")
+            "Usage: python generate_changelog.py <new_version_tag> [--update-file <filename>]"
+        )
         sys.exit(1)
 
     new_version_tag = sys.argv[1]
@@ -149,11 +149,10 @@ if __name__ == "__main__":
         changelog_content = "No notable changes for this version."
     else:
         categorized = parse_commits(commits)
-        changelog_content = generate_changelog_text(
-            categorized, new_version_tag)
+        changelog_content = generate_changelog_text(categorized, new_version_tag)
 
     # Write to the body file for the release
-    with open(body_output_file, 'w', encoding='utf-8') as f:
+    with open(body_output_file, "w", encoding="utf-8") as f:
         f.write(changelog_content)
     print(f"Changelog body generated and saved to {body_output_file}")
 

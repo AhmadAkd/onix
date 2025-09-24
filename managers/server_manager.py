@@ -1,13 +1,13 @@
 import base64
 import binascii
-import json
 import threading
 import requests
 from concurrent.futures import ThreadPoolExecutor
 
 import link_parser
 import network_tester
-from constants import LogLevel, NA
+from constants import LogLevel
+
 
 class ServerManager:
     def __init__(self, settings, callbacks):
@@ -20,14 +20,14 @@ class ServerManager:
 
     # --- Logging ---
     def log(self, message, level=LogLevel.INFO):
-        self.callbacks.get('log', lambda msg, lvl: None)(message, level)
+        self.callbacks.get("log", lambda msg, lvl: None)(message, level)
 
     # --- Server Data Management ---
     def load_servers(self):
         self.server_groups = self.settings.get("servers", {})
         if self.server_groups:
             self.log("Saved servers loaded successfully.", LogLevel.SUCCESS)
-        self.callbacks.get('on_servers_loaded', lambda: None)()
+        self.callbacks.get("on_servers_loaded", lambda: None)()
 
     def get_all_server_groups(self):
         return self.server_groups
@@ -49,7 +49,10 @@ class ServerManager:
         for group in self.server_groups.values():
             for s_config in group:
                 if f"{s_config.get('server')}:{s_config.get('port')}" == server_id:
-                    self.log(f"Server {config.get('name')} already exists. Skipping.", LogLevel.WARNING)
+                    self.log(
+                        f"Server {config.get('name')} already exists. Skipping.",
+                        LogLevel.WARNING,
+                    )
                     return
 
         group_name = config.get("group", "Manual Servers")
@@ -57,18 +60,26 @@ class ServerManager:
             self.server_groups[group_name] = []
 
         self.server_groups[group_name].append(config)
-        self.log(f"Added server '{config.get('name')}' to group '{group_name}'.", LogLevel.SUCCESS)
-        
-        self.callbacks.get('on_servers_updated', lambda: None)()
+        self.log(
+            f"Added server '{config.get('name')}' to group '{group_name}'.",
+            LogLevel.SUCCESS,
+        )
+
+        self.callbacks.get("on_servers_updated", lambda: None)()
 
     def delete_server(self, config_to_delete):
         group_name = config_to_delete.get("group")
         if not group_name or group_name not in self.server_groups:
-            self.log(f"Error: Could not find group for server {config_to_delete.get('name')}.", LogLevel.ERROR)
+            self.log(
+                f"Error: Could not find group for server {config_to_delete.get('name')}.",
+                LogLevel.ERROR,
+            )
             return
 
         initial_len = len(self.server_groups[group_name])
-        self.server_groups[group_name] = [s for s in self.server_groups[group_name] if s != config_to_delete]
+        self.server_groups[group_name] = [
+            s for s in self.server_groups[group_name] if s != config_to_delete
+        ]
         final_len = len(self.server_groups[group_name])
 
         if final_len < initial_len:
@@ -76,35 +87,43 @@ class ServerManager:
             if not self.server_groups[group_name]:
                 del self.server_groups[group_name]
                 self.log(f"Removed empty group: {group_name}", LogLevel.INFO)
-            
-            self.callbacks.get('on_servers_updated', lambda: None)()
+
+            self.callbacks.get("on_servers_updated", lambda: None)()
         else:
-            self.log(f"Error: Could not find server {config_to_delete.get('name')} to delete.", LogLevel.ERROR)
+            self.log(
+                f"Error: Could not find server {config_to_delete.get('name')} to delete.",
+                LogLevel.ERROR,
+            )
 
     def edit_server(self, config_to_edit, new_name):
-        old_name = config_to_edit['name']
-        config_to_edit['name'] = new_name
+        old_name = config_to_edit["name"]
+        config_to_edit["name"] = new_name
         self.log(f"Renamed server '{old_name}' to '{new_name}'.", LogLevel.INFO)
-        self.callbacks.get('on_servers_updated', lambda: None)()
+        self.callbacks.get("on_servers_updated", lambda: None)()
 
     # --- Subscription Update ---
     def update_subscription(self, sub_link, custom_group_name):
-        self.callbacks.get('on_update_start', lambda: None)()
-        threading.Thread(target=self._update_subscription_task, args=(sub_link, custom_group_name), daemon=True).start()
+        self.callbacks.get("on_update_start", lambda: None)()
+        threading.Thread(
+            target=self._update_subscription_task,
+            args=(sub_link, custom_group_name),
+            daemon=True,
+        ).start()
 
     def _update_subscription_task(self, sub_link, custom_group_name):
         try:
-            headers = {'User-Agent': 'Mozilla/5.0'}
+            headers = {"User-Agent": "Mozilla/5.0"}
             response = requests.get(sub_link, headers=headers, timeout=10)
             response.raise_for_status()
 
             base64_text = response.text.strip()
-            decoded_content = base64.b64decode(base64_text).decode('utf-8')
+            decoded_content = base64.b64decode(base64_text).decode("utf-8")
             server_links = decoded_content.splitlines()
 
             existing_server_ids = {
                 f"{s_config.get('server')}:{s_config.get('port')}"
-                for group in self.server_groups.values() for s_config in group
+                for group in self.server_groups.values()
+                for s_config in group
             }
 
             temp_groups = {}
@@ -118,29 +137,73 @@ class ServerManager:
                     if server_id in existing_server_ids:
                         skipped_count += 1
                         continue
-                    
+
                     existing_server_ids.add(server_id)
                     server_count += 1
-                    group_name = custom_group_name if custom_group_name else config["group"]
+                    group_name = (
+                        custom_group_name if custom_group_name else config["group"]
+                    )
                     if group_name not in temp_groups:
                         temp_groups[group_name] = []
                     config["group"] = group_name
                     temp_groups[group_name].append(config)
 
             self.server_groups.update(temp_groups)
-            
+
             log_message = f"Successfully loaded {server_count} new servers."
             if skipped_count > 0:
                 log_message += f" Skipped {skipped_count} duplicate(s)."
             self.log(log_message, LogLevel.SUCCESS)
-            
-            self.callbacks.get('schedule', lambda t, c: None)(0, self.callbacks.get('on_update_finish'))
 
-        except (requests.exceptions.RequestException, binascii.Error, UnicodeDecodeError) as e:
-            error_message = f"Failed to update subscription: {type(e).__name__}: {e}"
+            self.callbacks.get("schedule", lambda t, c: None)(
+                0, self.callbacks.get("on_update_finish")
+            )
+
+        except requests.exceptions.Timeout:
+            error_message = "Failed to update subscription: The request timed out. Check your internet connection."
             self.log(error_message, LogLevel.ERROR)
-            self.callbacks.get('on_error', lambda title, msg: None)("Subscription Error", error_message)
-            self.callbacks.get('schedule', lambda t, c: None)(0, lambda: self.callbacks.get('on_update_finish')(error=True))
+            self.callbacks.get("on_error", lambda title, msg: None)(
+                "Subscription Error", error_message
+            )
+            self.callbacks.get("schedule", lambda t, c: None)(
+                0, lambda: self.callbacks.get("on_update_finish")(error=True)
+            )
+        except requests.exceptions.HTTPError as e:
+            error_message = f"Failed to update subscription: Invalid response from server ({e.response.status_code}). Please check the link."
+            self.log(error_message, LogLevel.ERROR)
+            self.callbacks.get("on_error", lambda title, msg: None)(
+                "Subscription Error", error_message
+            )
+            self.callbacks.get("schedule", lambda t, c: None)(
+                0, lambda: self.callbacks.get("on_update_finish")(error=True)
+            )
+        except requests.exceptions.RequestException:
+            error_message = "Failed to update subscription: A network error occurred. Please check your connection and the link."
+            self.log(error_message, LogLevel.ERROR)
+            self.callbacks.get("on_error", lambda title, msg: None)(
+                "Subscription Error", error_message
+            )
+            self.callbacks.get("schedule", lambda t, c: None)(
+                0, lambda: self.callbacks.get("on_update_finish")(error=True)
+            )
+        except (binascii.Error, UnicodeDecodeError):
+            error_message = "Failed to decode subscription content. The link may not be a valid subscription or the content is corrupted."
+            self.log(error_message, LogLevel.ERROR)
+            self.callbacks.get("on_error", lambda title, msg: None)(
+                "Subscription Error", error_message
+            )
+            self.callbacks.get("schedule", lambda t, c: None)(
+                0, lambda: self.callbacks.get("on_update_finish")(error=True)
+            )
+        except Exception as e:
+            error_message = f"An unexpected error occurred: {e}"
+            self.log(error_message, LogLevel.ERROR)
+            self.callbacks.get("on_error", lambda title, msg: None)(
+                "Subscription Error", error_message
+            )
+            self.callbacks.get("schedule", lambda t, c: None)(
+                0, lambda: self.callbacks.get("on_update_finish")(error=True)
+            )
 
     # --- Ping & URL Tests ---
     def test_all_pings(self, servers_to_test):
@@ -149,28 +212,36 @@ class ServerManager:
             return
         self.is_testing = True
         self._cancel_event.clear()
-        self.callbacks.get('on_testing_start', lambda: None)()
-        self.log(f"Starting TCP ping for {len(servers_to_test)} servers...", LogLevel.INFO)
+        self.callbacks.get("on_testing_start", lambda: None)()
+        self.log(
+            f"Starting TCP ping for {len(servers_to_test)} servers...", LogLevel.INFO
+        )
 
-        futures = [self.ping_executor.submit(self._ping_task, config, is_url_test=False) for config in servers_to_test]
+        futures = [
+            self.ping_executor.submit(self._ping_task, config, is_url_test=False)
+            for config in servers_to_test
+        ]
 
         def wait_for_pings():
             try:
                 from concurrent.futures import as_completed
+
                 for future in as_completed(futures):
                     if self._cancel_event.is_set():
                         break
                     try:
                         future.result()
                     except Exception:
-                        pass # Ignore exceptions from individual pings
+                        pass  # Ignore exceptions from individual pings
             finally:
                 self.is_testing = False
-                for f in futures: # Cancel any remaining
+                for f in futures:  # Cancel any remaining
                     f.cancel()
                 if not self._cancel_event.is_set():
                     self.log("All ping tests finished.", LogLevel.INFO)
-                self.callbacks.get('schedule', lambda t, c: None)(0, self.callbacks.get('on_testing_finish'))
+                self.callbacks.get("schedule", lambda t, c: None)(
+                    0, self.callbacks.get("on_testing_finish")
+                )
 
         threading.Thread(target=wait_for_pings, daemon=True).start()
 
@@ -180,9 +251,11 @@ class ServerManager:
             return
         self.is_testing = True
         self._cancel_event.clear()
-        self.callbacks.get('on_testing_start', lambda: None)()
+        self.callbacks.get("on_testing_start", lambda: None)()
         self.log("Starting URL test. This may take some time.", LogLevel.INFO)
-        threading.Thread(target=self._sequential_url_test, args=(servers_to_test,), daemon=True).start()
+        threading.Thread(
+            target=self._sequential_url_test, args=(servers_to_test,), daemon=True
+        ).start()
 
     def _sequential_url_test(self, servers):
         try:
@@ -192,12 +265,15 @@ class ServerManager:
                     break
                 self._ping_task(config, is_url_test=True)
                 import time
+
                 time.sleep(0.2)
         finally:
             self.is_testing = False
             if not self._cancel_event.is_set():
                 self.log("URL testing finished.", LogLevel.INFO)
-            self.callbacks.get('schedule', lambda t, c: None)(0, self.callbacks.get('on_testing_finish'))
+            self.callbacks.get("schedule", lambda t, c: None)(
+                0, self.callbacks.get("on_testing_finish")
+            )
 
     def _ping_task(self, config, is_url_test):
         if self._cancel_event.is_set():
@@ -210,9 +286,14 @@ class ServerManager:
 
         if self._cancel_event.is_set():
             return
-        
+
         config["ping"] = ping_result
-        self.callbacks.get('schedule', lambda t, c: None)(0, lambda: self.callbacks.get('on_ping_result')(config, ping_result, is_url_test))
+        self.callbacks.get("schedule", lambda t, c: None)(
+            0,
+            lambda: self.callbacks.get("on_ping_result")(
+                config, ping_result, is_url_test
+            ),
+        )
 
     def cancel_tests(self):
         """Cancels any ongoing ping or URL tests."""
@@ -224,9 +305,11 @@ class ServerManager:
     def sort_servers_by_ping(self, group_name):
         if group_name not in self.server_groups:
             return
-        
+
         configs = self.server_groups.get(group_name, [])
-        configs.sort(key=lambda c: c.get("ping", 9999) if c.get("ping", 9999) != -1 else 99999)
-        
+        configs.sort(
+            key=lambda c: c.get("ping", 9999) if c.get("ping", 9999) != -1 else 99999
+        )
+
         self.log("Servers sorted by ping (fastest first).", LogLevel.INFO)
-        self.callbacks.get('on_servers_updated', lambda: None)()
+        self.callbacks.get("on_servers_updated", lambda: None)()

@@ -20,9 +20,9 @@ def parse_vless_link(link):
     try:
         parsed_url = urlparse(link)
         remarks = unquote(parsed_url.fragment) if parsed_url.fragment else "Unnamed"
-        remarks = re.sub(r'[\U0001F1E6-\U0001F1FF]', '', remarks).strip()
+        remarks = re.sub(r"[\U0001F1E6-\U0001F1FF]", "", remarks).strip()
         group = "Default"
-        delimiters = ['|', '-', '_', ' ']
+        delimiters = ["|", "-", "_", " "]
         for d in delimiters:
             if d in remarks:
                 group = remarks.split(d)[0].strip()
@@ -40,7 +40,7 @@ def parse_vless_link(link):
             "flow": query_params.get("flow", [""])[0],
             "fp": query_params.get("fp", [""])[0],
             "transport": query_params.get("type", ["tcp"])[0],
-            "ws_path": query_params.get("path", [""])[0]
+            "ws_path": query_params.get("path", [""])[0],
         }
     except Exception as e:
         print(f"Error parsing VLESS link: {type(e).__name__}: {e}")
@@ -50,13 +50,13 @@ def parse_vless_link(link):
 def parse_vmess_link(link):
     try:
         base64_str = link.replace("vmess://", "")
-        base64_str += '=' * (-len(base64_str) % 4)
-        decoded_str = base64.b64decode(base64_str).decode('utf-8')
+        base64_str += "=" * (-len(base64_str) % 4)
+        decoded_str = base64.b64decode(base64_str).decode("utf-8")
         vmess_config = json.loads(decoded_str)
 
         remarks = vmess_config.get("ps", "Unnamed")
         group = "Default"
-        delimiters = ['|', '-', '_', ' ']
+        delimiters = ["|", "-", "_", " "]
         for d in delimiters:
             if d in remarks:
                 group = remarks.split(d)[0].strip()
@@ -75,7 +75,7 @@ def parse_vmess_link(link):
             "sni": vmess_config.get("sni", ""),
             "transport": vmess_config.get("net", "tcp"),
             "ws_path": vmess_config.get("path", "/"),
-            "ws_host": vmess_config.get("host", "")
+            "ws_host": vmess_config.get("host", ""),
         }
     except (json.JSONDecodeError, binascii.Error, ValueError):
         return None
@@ -87,17 +87,17 @@ def parse_shadowsocks_link(link):
         remarks = unquote(parsed_url.fragment) if parsed_url.fragment else "Unnamed"
 
         group = "Default"
-        delimiters = ['|', '-', '_', ' ']
+        delimiters = ["|", "-", "_", " "]
         for d in delimiters:
             if d in remarks:
                 group = remarks.split(d)[0].strip()
                 break
 
         user_info_b64 = parsed_url.username
-        user_info_b64 += '=' * (-len(user_info_b64) % 4)
-        decoded_user_info = base64.b64decode(user_info_b64).decode('utf-8')
+        user_info_b64 += "=" * (-len(user_info_b64) % 4)
+        decoded_user_info = base64.b64decode(user_info_b64).decode("utf-8")
 
-        method, password = decoded_user_info.split(':', 1)
+        method, password = decoded_user_info.split(":", 1)
 
         return {
             "name": remarks,
@@ -106,7 +106,7 @@ def parse_shadowsocks_link(link):
             "server": parsed_url.hostname,
             "port": int(parsed_url.port),
             "method": method,
-            "password": password
+            "password": password,
         }
     except (binascii.Error, ValueError):
         return None
