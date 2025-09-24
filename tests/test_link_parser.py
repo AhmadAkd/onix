@@ -1,5 +1,6 @@
 import sys
 import os
+import base64
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -28,7 +29,7 @@ class TestLinkParser(unittest.TestCase):
 
     def test_parse_vmess_link(self):
         vmess_json = '{"v": "2", "ps": "remarks", "add": "server", "port": 443, "id": "uuid", "aid": 0, "net": "ws", "type": "none", "host": "host.com", "path": "/path", "tls": "tls", "sni": "sni.com"}'
-        encoded_vmess = "vmess://" + __import__("base64").b64encode(
+        encoded_vmess = "vmess://" + base64.b64encode(
             vmess_json.encode("utf-8")
         ).decode("utf-8")
         expected = {
@@ -60,6 +61,29 @@ class TestLinkParser(unittest.TestCase):
             "password": "password",
         }
         self.assertEqual(parse_shadowsocks_link(link), expected)
+
+    # --- Invalid VLESS Links ---
+    def test_parse_vless_link_invalid_format(self):
+        self.assertIsNone(parse_vless_link("invalid-vless-link"))
+        self.assertIsNone(parse_vless_link("vless://uuid@server"))  # Incomplete (missing port)
+        self.assertIsNone(parse_vless_link("vless://uuid@server:invalid_port"))  # Invalid port
+        self.assertIsNone(parse_vless_link("vless://@server:443"))  # Missing UUID
+        self.assertIsNone(parse_vless_link("vless://uuid@:443"))  # Missing server
+
+    # --- Invalid VMESS Links ---
+    def test_parse_vmess_link_invalid_format(self):
+        self.assertIsNone(parse_vmess_link("invalid-vmess-link"))
+        self.assertIsNone(parse_vmess_link("vmess://invalid_base64"))  # Malformed base64
+        # Malformed JSON in base64
+        malformed_json = base64.b64encode(b'{ "v": "2", "ps": "remarks", "add": "server" }').decode("utf-8")
+        self.assertIsNone(parse_vmess_link(f"vmess://{malformed_json}")) # Missing port and id
+
+    # --- Invalid Shadowsocks Links ---
+    def test_parse_shadowsocks_link_invalid_format(self):
+        self.assertIsNone(parse_shadowsocks_link("invalid-ss-link"))
+        self.assertIsNone(parse_shadowsocks_link("ss://server:port"))  # Missing method/password
+        self.assertIsNone(parse_shadowsocks_link("ss://invalid_base64@server:8443"))  # Malformed base64
+        self.assertIsNone(parse_shadowsocks_link("ss://bWV0aG9kOnBhc3N3b3Jk@server:invalid_port"))  # Invalid port
 
 
 if __name__ == "__main__":
