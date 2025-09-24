@@ -136,7 +136,7 @@ class SingboxApp(customtkinter.CTk):
 
     def create_widgets(self):
         # --- Main Layout ---
-        connection_tab, settings_tab = self._create_main_layout()
+        connection_tab, settings_tab, routing_tab = self._create_main_layout()
 
         # --- Connection Tab Layout ---
         connection_tab.grid_columnconfigure(
@@ -153,13 +153,15 @@ class SingboxApp(customtkinter.CTk):
         self._create_management_ui(connection_tab)
         self._create_status_bar(connection_tab)
         self._create_settings_tab_widgets(settings_tab)
+        self._create_routing_tab_widgets(routing_tab)
 
     def _create_main_layout(self):
         tab_view = customtkinter.CTkTabview(self, anchor="w")
         tab_view.pack(expand=True, fill="both", padx=10, pady=10)
         connection_tab = tab_view.add("Connection")
         settings_tab = tab_view.add("Settings")
-        return connection_tab, settings_tab
+        routing_tab = tab_view.add("Routing")
+        return connection_tab, settings_tab, routing_tab
 
     def _create_server_list_ui(self, parent_tab):
         """Creates the UI for the left column (server list)."""
@@ -465,21 +467,36 @@ class SingboxApp(customtkinter.CTk):
         profile_frame.grid_columnconfigure((0, 1), weight=1)
 
         import_button = customtkinter.CTkButton(
-            profile_frame, text="Import Profile", command=self.import_profile, font=APP_FONT
+            profile_frame,
+            text="Import Profile",
+            command=self.import_profile,
+            font=APP_FONT,
         )
         import_button.grid(row=0, column=0, padx=(10, 5), pady=10, sticky="ew")
 
         export_button = customtkinter.CTkButton(
-            profile_frame, text="Export Profile", command=self.export_profile, font=APP_FONT
+            profile_frame,
+            text="Export Profile",
+            command=self.export_profile,
+            font=APP_FONT,
         )
         export_button.grid(row=0, column=1, padx=(5, 10), pady=10, sticky="ew")
-
 
         # --- About Button ---
         about_button = customtkinter.CTkButton(
             parent_tab, text="About Onix", command=self.show_about_window
         )
         about_button.grid(row=7, column=0, padx=20, pady=20, sticky="s")
+
+    def _create_routing_tab_widgets(self, parent_tab):
+        parent_tab.grid_columnconfigure(0, weight=1)
+        parent_tab.grid_rowconfigure(0, weight=1)
+
+        customtkinter.CTkLabel(
+            parent_tab,
+            text="Routing Rules Management (Coming Soon)",
+            font=(APP_FONT[0], 16),
+        ).grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
 
     def bind_shortcuts(self):
         right_click_menu = RightClickMenu(self)
@@ -555,7 +572,7 @@ class SingboxApp(customtkinter.CTk):
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 new_settings = json.load(f)
-            
+
             # Basic validation
             if "sub_link" not in new_settings or "servers" not in new_settings:
                 raise ValueError("Invalid profile file.")
@@ -565,7 +582,7 @@ class SingboxApp(customtkinter.CTk):
                 "Import Successful",
                 "Profile imported successfully. Please restart the application for the changes to take full effect.",
             )
-            self.quit_application() # Force restart
+            self.quit_application()  # Force restart
         except (IOError, json.JSONDecodeError, ValueError) as e:
             messagebox.showerror("Import Failed", f"Failed to import profile: {e}")
 
@@ -583,7 +600,7 @@ class SingboxApp(customtkinter.CTk):
         try:
             # Ensure current settings are saved before exporting
             self.save_all_settings()
-            
+
             # Read the saved settings and write to the new file
             current_settings = settings_manager.load_settings()
             with open(file_path, "w", encoding="utf-8") as f:
@@ -594,7 +611,6 @@ class SingboxApp(customtkinter.CTk):
             )
         except (IOError, json.JSONDecodeError) as e:
             messagebox.showerror("Export Failed", f"Failed to export profile: {e}")
-
 
     # --- Server Manager Callbacks ---
     def _on_update_start(self):
