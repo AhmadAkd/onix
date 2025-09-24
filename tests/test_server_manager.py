@@ -1,0 +1,75 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import unittest
+from unittest.mock import Mock, patch
+from managers.server_manager import ServerManager
+
+class TestServerManager(unittest.TestCase):
+
+    def setUp(self):
+        self.settings = {
+            "servers": {
+                "group1": [
+                    {'name': 'server1', 'ping': 100, 'group': 'group1'},
+                    {'name': 'server2', 'ping': 200, 'group': 'group1'}
+                ]
+            }
+        }
+        self.callbacks = {
+            'on_servers_loaded': Mock(),
+            'on_servers_updated': Mock(),
+            'log': Mock()
+        }
+        self.server_manager = ServerManager(self.settings, self.callbacks)
+
+    def test_load_servers(self):
+        self.server_manager.load_servers()
+        self.assertEqual(self.server_manager.get_groups(), ['group1'])
+        self.assertEqual(len(self.server_manager.get_servers_by_group('group1')), 2)
+        self.callbacks['on_servers_loaded'].assert_called_once()
+
+    @patch('managers.server_manager.link_parser.parse_server_link')
+    def test_add_manual_server(self, mock_parse_server_link):
+        new_server = {'name': 'server3', 'server': 'server3.com', 'port': 443, 'group': 'group2'}
+        mock_parse_server_link.return_value = new_server
+
+        self.server_manager.add_manual_server('vless://...')
+
+        self.assertIn('group2', self.server_manager.get_groups())
+        self.assertEqual(len(self.server_manager.get_servers_by_group('group2')), 1)
+        self.callbacks['on_servers_updated'].assert_called_once()
+
+    def test_delete_server(self):
+        server_to_delete = self.settings['servers']['group1'][0]
+        self.server_manager.load_servers()
+
+        self.server_manager.delete_server(server_to_delete)
+
+        self.assertEqual(len(self.server_manager.get_servers_by_group('group1')), 1)
+        self.callbacks['on_servers_updated'].assert_called_once()
+
+    def test_edit_server(self):
+        server_to_edit = self.settings['servers']['group1'][0]
+        self.server_manager.load_servers()
+
+        self.server_manager.edit_server(server_to_edit, 'new_name')
+
+        self.assertEqual(self.server_manager.get_servers_by_group('group1')[0]['name'], 'new_name')
+        self.callbacks['on_servers_updated'].assert_called_once()
+
+    def test_sort_servers_by_ping(self):
+        self.server_manager.load_servers()
+        self.server_manager.server_groups['group1'].append({'name': 'server3', 'ping': 50, 'group': 'group1'})
+
+        self.server_manager.sort_servers_by_ping('group1')
+
+        sorted_servers = self.server_manager.get_servers_by_group('group1')
+        self.assertEqual(sorted_servers[0]['name'], 'server3')
+        self.assertEqual(sorted_servers[1]['name'], 'server1')
+        self.assertEqual(sorted_servers[2]['name'], 'server2')
+        self.callbacks['on_servers_updated'].assert_called_once()
+
+if __name__ == '__main__':
+    unittest.main()

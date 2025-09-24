@@ -4,7 +4,7 @@ import threading
 import requests
 from concurrent.futures import ThreadPoolExecutor
 
-import utils
+import link_parser
 import network_tester
 from constants import LogLevel, NA
 
@@ -37,7 +37,7 @@ class ServerManager:
 
     # --- Server Actions ---
     def add_manual_server(self, server_link):
-        config = utils.parse_server_link(server_link)
+        config = link_parser.parse_server_link(server_link)
         if not config:
             self.log(f"Failed to parse server link: {server_link}", LogLevel.ERROR)
             return
