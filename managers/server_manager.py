@@ -1,4 +1,5 @@
 import base64
+import binascii
 import json
 import threading
 import requests
@@ -133,8 +134,10 @@ class ServerManager:
             
             self.callbacks.get('schedule', lambda t, c: None)(0, self.callbacks.get('on_update_finish'))
 
-        except Exception as e:
-            self.log(f"Failed to update subscription: {e}", LogLevel.ERROR)
+        except (requests.exceptions.RequestException, binascii.Error, UnicodeDecodeError) as e:
+            error_message = f"Failed to update subscription: {type(e).__name__}: {e}"
+            self.log(error_message, LogLevel.ERROR)
+            self.callbacks.get('on_error', lambda title, msg: None)("Subscription Error", error_message)
             self.callbacks.get('schedule', lambda t, c: None)(0, lambda: self.callbacks.get('on_update_finish')(error=True))
 
     # --- Ping & URL Tests ---

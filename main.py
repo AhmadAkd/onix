@@ -103,6 +103,7 @@ class SingboxApp(customtkinter.CTk):
             'on_servers_loaded': self.populate_group_dropdown,
             'on_servers_updated': self.refresh_server_list_ui,
             'on_ping_result': self._on_ping_result,
+            'on_error': self._on_error,
         }
         return ServerManager(self.settings, callbacks)
 
@@ -133,6 +134,10 @@ class SingboxApp(customtkinter.CTk):
 
     def _on_ip_update(self, ip_address):
         self.ip_label.configure(text=ip_address)
+
+
+    def _on_error(self, title, message):
+        messagebox.showerror(title, message)
 
 
     def setup_appearance(self):

@@ -5,6 +5,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import unittest
 from unittest.mock import Mock, patch
 from managers.server_manager import ServerManager
+import requests
 
 class TestServerManager(unittest.TestCase):
 
@@ -20,7 +21,10 @@ class TestServerManager(unittest.TestCase):
         self.callbacks = {
             'on_servers_loaded': Mock(),
             'on_servers_updated': Mock(),
-            'log': Mock()
+            'log': Mock(),
+            'on_error': Mock(),
+            'schedule': Mock(),
+            'on_update_finish': Mock(),
         }
         self.server_manager = ServerManager(self.settings, self.callbacks)
 
@@ -70,6 +74,14 @@ class TestServerManager(unittest.TestCase):
         self.assertEqual(sorted_servers[1]['name'], 'server1')
         self.assertEqual(sorted_servers[2]['name'], 'server2')
         self.callbacks['on_servers_updated'].assert_called_once()
+
+    @patch('requests.get')
+    def test_update_subscription_error(self, mock_requests_get):
+        mock_requests_get.side_effect = requests.exceptions.RequestException("Test Error")
+
+        self.server_manager._update_subscription_task("http://example.com", None)
+
+        self.callbacks['on_error'].assert_called_once()
 
 if __name__ == '__main__':
     unittest.main()
