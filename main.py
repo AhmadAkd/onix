@@ -490,13 +490,40 @@ class SingboxApp(customtkinter.CTk):
 
     def _create_routing_tab_widgets(self, parent_tab):
         parent_tab.grid_columnconfigure(0, weight=1)
-        parent_tab.grid_rowconfigure(0, weight=1)
+        parent_tab.grid_rowconfigure(1, weight=1) # Make row for rules scrollable
 
         customtkinter.CTkLabel(
-            parent_tab,
-            text="Routing Rules Management (Coming Soon)",
-            font=(APP_FONT[0], 16),
-        ).grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
+            parent_tab, text="Custom Routing Rules:", font=(APP_FONT[0], 16)
+        ).grid(row=0, column=0, padx=20, pady=(20, 10), sticky="w")
+
+        self.routing_rules_frame = customtkinter.CTkScrollableFrame(parent_tab, fg_color="transparent")
+        self.routing_rules_frame.grid(row=1, column=0, sticky="nsew", padx=20, pady=(0, 10))
+        self.routing_rules_frame.grid_columnconfigure(0, weight=1)
+
+        # Placeholder for rule entries
+        customtkinter.CTkLabel(
+            self.routing_rules_frame, text="No custom rules added yet.", font=APP_FONT
+        ).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+
+        # Buttons for managing rules
+        button_frame = customtkinter.CTkFrame(parent_tab, fg_color="transparent")
+        button_frame.grid(row=2, column=0, sticky="ew", padx=20, pady=(0, 20))
+        button_frame.grid_columnconfigure((0, 1, 2), weight=1)
+
+        add_rule_button = customtkinter.CTkButton(
+            button_frame, text="Add Rule", command=self._add_routing_rule_ui, font=APP_FONT
+        )
+        add_rule_button.grid(row=0, column=0, padx=(0, 5), pady=10, sticky="ew")
+
+        save_rules_button = customtkinter.CTkButton(
+            button_frame, text="Save Rules", command=self._save_routing_rules, font=APP_FONT
+        )
+        save_rules_button.grid(row=0, column=1, padx=5, pady=10, sticky="ew")
+
+        load_rules_button = customtkinter.CTkButton(
+            button_frame, text="Load Rules", command=self._load_routing_rules, font=APP_FONT
+        )
+        load_rules_button.grid(row=0, column=2, padx=(5, 0), pady=10, sticky="ew")
 
     def bind_shortcuts(self):
         right_click_menu = RightClickMenu(self)
@@ -1085,6 +1112,16 @@ class SingboxApp(customtkinter.CTk):
             self.about_win, text="OK", command=self.about_win.destroy, width=100
         )
         ok_button.grid(row=3, column=0, padx=20, pady=20)
+
+
+    def _add_routing_rule_ui(self):
+        self.log("Add Routing Rule UI (Not yet implemented)", LogLevel.INFO)
+
+    def _save_routing_rules(self):
+        self.log("Save Routing Rules (Not yet implemented)", LogLevel.INFO)
+
+    def _load_routing_rules(self):
+        self.log("Load Routing Rules (Not yet implemented)", LogLevel.INFO)
 
 
 if __name__ == "__main__":
