@@ -584,7 +584,7 @@ class SingboxApp(customtkinter.CTk):
         """Imports settings from a JSON file and overwrites the current settings."""
         file_path = filedialog.askopenfilename(
             title="Import Profile",
-            filetypes=[("JSON files", "*.json"), ("All files", "*.* ")],
+            filetypes=[("JSON files", "*.json"), ("All files", "*.*")],
             defaultextension=".json",
         )
         if not file_path:
@@ -617,7 +617,7 @@ class SingboxApp(customtkinter.CTk):
         """Exports all current settings to a JSON file."""
         file_path = filedialog.asksaveasfilename(
             title="Export Profile",
-            filetypes=[("JSON files", "*.json"), ("All files", "*.* ")],
+            filetypes=[("JSON files", "*.json"), ("All files", "*.*")],
             defaultextension=".json",
             initialfile="onix_profile.json",
         )
@@ -831,6 +831,7 @@ class SingboxApp(customtkinter.CTk):
                     lambda cfg, lbl: self.server_manager.test_all_urls([cfg]),
                     self.delete_server,
                     self.edit_server,
+                    self._show_qr_code_for_server,
                 )
 
                 server_frame.bind("<Button-3>", context_menu.popup)
@@ -1112,6 +1113,52 @@ class SingboxApp(customtkinter.CTk):
             self.about_win, text="OK", command=self.about_win.destroy, width=100
         )
         ok_button.grid(row=3, column=0, padx=20, pady=20)
+
+
+    def _show_qr_code_for_server(self, config):
+        try:
+            import qrcode
+            from PIL import ImageTk, Image
+
+            server_link = self.server_manager.get_server_link(config) # Assuming ServerManager has a method to get the full link
+            if not server_link:
+                show_error_message("QR Code Error", "Could not generate QR code: Server link is empty.")
+                return
+
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=4,
+            )
+            qr.add_data(server_link)
+            qr.make(fit=True)
+
+            img = qr.make_image(fill_color="black", back_color="white")
+
+            # Create a new Toplevel window to display the QR code
+            qr_window = customtkinter.CTkToplevel(self)
+            qr_window.title(f"QR Code for {config.get('name', 'Server')}")
+            qr_window.transient(self) # Make it appear on top of the main window
+            qr_window.grab_set() # Make it modal
+
+            # Convert PIL Image to PhotoImage for Tkinter
+            img_tk = ImageTk.PhotoImage(img)
+
+            qr_label = customtkinter.CTkLabel(qr_window, image=img_tk, text="")
+            qr_label.image = img_tk # Keep a reference!
+            qr_label.pack(padx=20, pady=20)
+
+            # Center the new window
+            qr_window.update_idletasks()
+            x = self.winfo_x() + (self.winfo_width() // 2) - (qr_window.winfo_width() // 2)
+            y = self.winfo_y() + (self.winfo_height() // 2) - (qr_window.winfo_height() // 2)
+            qr_window.geometry(f" +{x}+{y}")
+
+        except ImportError:
+            show_error_message("Missing Library", "The 'qrcode' or 'Pillow' library is not installed. Please install it using 'pip install qrcode Pillow'.")
+        except Exception as e:
+            show_error_message("QR Code Error", f"An error occurred while generating QR code: {e}")
 
 
     def _add_routing_rule_ui(self):

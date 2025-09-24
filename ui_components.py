@@ -109,6 +109,7 @@ class ServerContextMenu(tkinter.Menu):
         url_test_handler,
         delete_handler,
         edit_handler,
+        show_qr_handler,
         **kwargs,
     ):
         super().__init__(parent, tearoff=0, **kwargs)
@@ -118,12 +119,17 @@ class ServerContextMenu(tkinter.Menu):
         self.url_test_handler = url_test_handler
         self.delete_handler = delete_handler
         self.edit_handler = edit_handler
+        self.show_qr_handler = show_qr_handler
 
         self.add_command(label="Test Ping (TCP)", command=self.test_ping_single)
         self.add_command(label="Test Latency (URL)", command=self.test_url_single)
+        self.add_command(label="Show QR Code", command=self.show_qr_code)
         self.add_separator()
         self.add_command(label="Edit Server Name", command=self.edit_server)
         self.add_command(label="Delete Server", command=self.delete_server)
+
+    def show_qr_code(self):
+        self.show_qr_handler(self.config)
 
     def test_ping_single(self):
         threading.Thread(
