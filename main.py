@@ -5,6 +5,7 @@ import settings_manager
 import system_proxy
 import utils
 from constants import LogLevel, APP_FONT, ICON_BASE64, PROXY_SERVER_ADDRESS
+import constants
 import customtkinter
 import threading
 import base64
@@ -490,14 +491,18 @@ class SingboxApp(customtkinter.CTk):
 
     def _create_routing_tab_widgets(self, parent_tab):
         parent_tab.grid_columnconfigure(0, weight=1)
-        parent_tab.grid_rowconfigure(1, weight=1) # Make row for rules scrollable
+        parent_tab.grid_rowconfigure(1, weight=1)  # Make row for rules scrollable
 
         customtkinter.CTkLabel(
             parent_tab, text="Custom Routing Rules:", font=(APP_FONT[0], 16)
         ).grid(row=0, column=0, padx=20, pady=(20, 10), sticky="w")
 
-        self.routing_rules_frame = customtkinter.CTkScrollableFrame(parent_tab, fg_color="transparent")
-        self.routing_rules_frame.grid(row=1, column=0, sticky="nsew", padx=20, pady=(0, 10))
+        self.routing_rules_frame = customtkinter.CTkScrollableFrame(
+            parent_tab, fg_color="transparent"
+        )
+        self.routing_rules_frame.grid(
+            row=1, column=0, sticky="nsew", padx=20, pady=(0, 10)
+        )
         self.routing_rules_frame.grid_columnconfigure(0, weight=1)
 
         # Placeholder for rule entries
@@ -511,17 +516,26 @@ class SingboxApp(customtkinter.CTk):
         button_frame.grid_columnconfigure((0, 1, 2), weight=1)
 
         add_rule_button = customtkinter.CTkButton(
-            button_frame, text="Add Rule", command=self._add_routing_rule_ui, font=APP_FONT
+            button_frame,
+            text="Add Rule",
+            command=self._add_routing_rule_ui,
+            font=APP_FONT,
         )
         add_rule_button.grid(row=0, column=0, padx=(0, 5), pady=10, sticky="ew")
 
         save_rules_button = customtkinter.CTkButton(
-            button_frame, text="Save Rules", command=self._save_routing_rules, font=APP_FONT
+            button_frame,
+            text="Save Rules",
+            command=self._save_routing_rules,
+            font=APP_FONT,
         )
         save_rules_button.grid(row=0, column=1, padx=5, pady=10, sticky="ew")
 
         load_rules_button = customtkinter.CTkButton(
-            button_frame, text="Load Rules", command=self._load_routing_rules, font=APP_FONT
+            button_frame,
+            text="Load Rules",
+            command=self._load_routing_rules,
+            font=APP_FONT,
         )
         load_rules_button.grid(row=0, column=2, padx=(5, 0), pady=10, sticky="ew")
 
@@ -1063,8 +1077,7 @@ class SingboxApp(customtkinter.CTk):
         threading.Thread(target=self._run_tray_icon, daemon=True).start()
 
     def _run_tray_icon(self):
-        image_data = base64.b64decode(ICON_BASE64)
-        image = Image.open(io.BytesIO(image_data))
+                    img = PIL.Image.open(io.BytesIO(image_data))
         menu = (item("Show", self.show_window), item("Quit", self.quit_application))
         self.tray_icon = pystray.Icon("Sing-box Client", image, "Sing-box Client", menu)
         self.tray_icon.run()
@@ -1097,7 +1110,7 @@ class SingboxApp(customtkinter.CTk):
         version_label.grid(row=1, column=0, padx=20, pady=0)
 
         def open_releases_page(e):
-            webbrowser.open_new("https://github.com/AhmadAkd/onix/releases")
+            webbrowser.open_new(constants.GITHUB_RELEASES_URL)
 
         link_label = customtkinter.CTkLabel(
             self.about_win,
@@ -1114,15 +1127,19 @@ class SingboxApp(customtkinter.CTk):
         )
         ok_button.grid(row=3, column=0, padx=20, pady=20)
 
-
     def _show_qr_code_for_server(self, config):
         try:
             import qrcode
-            from PIL import ImageTk, Image
+            from PIL import ImageTk
+            import PIL
 
-            server_link = self.server_manager.get_server_link(config) # Assuming ServerManager has a method to get the full link
+            server_link = self.server_manager.get_server_link(
+                config
+            )  # Assuming ServerManager has a method to get the full link
             if not server_link:
-                show_error_message("QR Code Error", "Could not generate QR code: Server link is empty.")
+                show_error_message(
+                    "QR Code Error", "Could not generate QR code: Server link is empty."
+                )
                 return
 
             qr = qrcode.QRCode(
@@ -1139,27 +1156,39 @@ class SingboxApp(customtkinter.CTk):
             # Create a new Toplevel window to display the QR code
             qr_window = customtkinter.CTkToplevel(self)
             qr_window.title(f"QR Code for {config.get('name', 'Server')}")
-            qr_window.transient(self) # Make it appear on top of the main window
-            qr_window.grab_set() # Make it modal
+            qr_window.transient(self)  # Make it appear on top of the main window
+            qr_window.grab_set()  # Make it modal
 
             # Convert PIL Image to PhotoImage for Tkinter
             img_tk = ImageTk.PhotoImage(img)
 
             qr_label = customtkinter.CTkLabel(qr_window, image=img_tk, text="")
-            qr_label.image = img_tk # Keep a reference!
+            qr_label.image = img_tk  # Keep a reference!
             qr_label.pack(padx=20, pady=20)
 
             # Center the new window
             qr_window.update_idletasks()
-            x = self.winfo_x() + (self.winfo_width() // 2) - (qr_window.winfo_width() // 2)
-            y = self.winfo_y() + (self.winfo_height() // 2) - (qr_window.winfo_height() // 2)
+            x = (
+                self.winfo_x()
+                + (self.winfo_width() // 2)
+                - (qr_window.winfo_width() // 2)
+            )
+            y = (
+                self.winfo_y()
+                + (self.winfo_height() // 2)
+                - (qr_window.winfo_height() // 2)
+            )
             qr_window.geometry(f" +{x}+{y}")
 
         except ImportError:
-            show_error_message("Missing Library", "The 'qrcode' or 'Pillow' library is not installed. Please install it using 'pip install qrcode Pillow'.")
+            show_error_message(
+                "Missing Library",
+                "The 'qrcode' or 'Pillow' library is not installed. Please install it using 'pip install qrcode Pillow'.",
+            )
         except Exception as e:
-            show_error_message("QR Code Error", f"An error occurred while generating QR code: {e}")
-
+            show_error_message(
+                "QR Code Error", f"An error occurred while generating QR code: {e}"
+            )
 
     def _add_routing_rule_ui(self):
         self.log("Add Routing Rule UI (Not yet implemented)", LogLevel.INFO)

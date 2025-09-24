@@ -3,3 +3,6 @@ requests
 pystray
 Pillow
 pyinstaller
+qrcode
+pyzbar
+opencv-python

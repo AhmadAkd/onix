@@ -95,6 +95,7 @@ WAIT_FOR_PROXY_INTERVAL = 0.1
 # --- URLs ---
 URL_TEST_DEFAULT_URL = "http://www.gstatic.com/generate_204"
 GET_EXTERNAL_IP_URL = "https://api.ipify.org"
+GITHUB_RELEASES_URL = "https://github.com/AhmadAkd/onix/releases"
 GEOIP_RULE_SET_URL = (
     "https://raw.githubusercontent.com/soffchen/sing-geoip/rule-set/geoip-{code}.srs"
 )
@@ -105,7 +106,9 @@ IRAN_GEOIP_RULE_SET_URL = "https://raw.githubusercontent.com/Chocolate4U/Iran-si
 IRAN_GEOSITE_RULE_SET_URL = "https://raw.githubusercontent.com/Chocolate4U/Iran-sing-box-rules/rule-set/geosite-ir.srs"
 
 # --- GitHub API Constants ---
-GITHUB_SINGBOX_RELEASE_API = "https://api.github.com/repos/SagerNet/sing-box/releases/latest"
+GITHUB_SINGBOX_RELEASE_API = (
+    "https://api.github.com/repos/SagerNet/sing-box/releases/latest"
+)
 SINGBOX_WINDOWS_ASSET_KEYWORD = "windows-amd64"
 DEFAULT_USER_AGENT = "Mozilla/5.0"
 

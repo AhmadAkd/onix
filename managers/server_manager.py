@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 import link_parser
 import network_tester
 from constants import LogLevel
+import constants
 
 
 class ServerManager:
@@ -112,7 +113,7 @@ class ServerManager:
 
     def _update_subscription_task(self, sub_link, custom_group_name):
         try:
-            headers = {"User-Agent": "Mozilla/5.0"}
+            headers = {"User-Agent": constants.DEFAULT_USER_AGENT}
             response = requests.get(sub_link, headers=headers, timeout=10)
             response.raise_for_status()
 
