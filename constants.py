@@ -96,6 +96,9 @@ WAIT_FOR_PROXY_INTERVAL = 0.1
 URL_TEST_DEFAULT_URL = "http://www.gstatic.com/generate_204"
 GET_EXTERNAL_IP_URL = "https://api.ipify.org"
 GITHUB_RELEASES_URL = "https://github.com/AhmadAkd/onix/releases"
+GEOIP_DB_DOWNLOAD_URL = (
+    "https://github.com/SagerNet/sing-geoip/releases/latest/download/geoip.db"
+)
 GEOIP_RULE_SET_URL = (
     "https://raw.githubusercontent.com/soffchen/sing-geoip/rule-set/geoip-{code}.srs"
 )
