@@ -42,7 +42,7 @@ def parse_vless_link(link):
             "transport": query_params.get("type", ["tcp"])[0],
             "ws_path": query_params.get("path", [""])[0],
         }
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         print(f"Error parsing VLESS link: {type(e).__name__}: {e}")
         return None
 
