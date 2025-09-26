@@ -405,7 +405,9 @@ def _build_outbound_config(server_config, settings):
             ]
         })
 
-    return outbounddef _apply_mux_config(outbound, settings):
+    return outbound
+
+def _apply_mux_config(outbound, settings):
     if settings.get("mux_enabled"):
         try:
             max_streams = int(settings.get("mux_max_streams", 0))
