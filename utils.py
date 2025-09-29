@@ -68,9 +68,18 @@ def get_local_core_version(core_path, core_name):
         # sing-box: "sing-box version 1.9.0-alpha.4"
         # xray: "Xray 1.8.10 (Xray, Penetrates Everything.) ..."
         version_line = result.stdout.strip()
+        
+        # Clean up the version line - remove extra text
+        if "Environment:" in version_line:
+            version_line = version_line.split("Environment:")[0].strip()
+        
         parts = version_line.split(" ")
         if core_name == "sing-box":
-            return parts[2]
+            # Extract version from "sing-box version 1.9.0-alpha.4"
+            for part in parts:
+                if part.count('.') >= 2:  # Version format like 1.9.0-alpha.4
+                    return part
+            return parts[2] if len(parts) > 2 else "unknown"
         elif core_name == "xray":
             return parts[1]
     except (subprocess.CalledProcessError, FileNotFoundError, IndexError) as e:
@@ -238,7 +247,7 @@ def download_core_if_needed(core_name="sing-box", force_update=False, callbacks=
     if not force_update and local_version:
         latest_version = get_latest_core_version(details["api_url"])
         if not latest_version:
-            show_info(
+            print(
                 f"WARNING: Could not fetch the latest {core_name} version. Skipping update check."
             )
             return
@@ -249,19 +258,14 @@ def download_core_if_needed(core_name="sing-box", force_update=False, callbacks=
 
         try:
             if version.parse(local_version) >= version.parse(latest_version):
-                show_info("Up to Date",
-                          f"Your {core_name} core is up to date.")
+                print(f"INFO: Your {core_name} core is up to date.")
                 return
         except version.InvalidVersion:
-            show_warning(
-                "Version Warning", f"Could not parse local version '{local_version}'. Proceeding with update check."
-            )
+            print(
+                f"WARNING: Could not parse local version '{local_version}'. Proceeding with update check.")
 
-        if not ask_yes_no(
-            "Update Available",
-            f"A new version of {core_name} is available ({latest_version}). Your current version is {local_version}.\n\nDo you want to download and update it now?",
-        ):
-            return
+        # For build script, always proceed with download
+        print(f"INFO: Proceeding with {core_name} download/update...")
 
     print(f"INFO: Proceeding with {core_name} download/update...")
     asset_keyword = details["asset_keywords"].get(

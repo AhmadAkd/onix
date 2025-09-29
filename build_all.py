@@ -80,17 +80,21 @@ def download_cores():
     
     # Download sing-box
     if not run_command([sys.executable, "download_singbox.py"]):
-        print("Warning: Failed to download sing-box")
+        print("Warning: Failed to download sing-box, continuing...")
     
     # Download xray if needed
     if not run_command([sys.executable, "-c", "import utils; utils.download_core_if_needed('xray')"]):
-        print("Warning: Failed to download xray")
+        print("Warning: Failed to download xray, continuing...")
+    
+    return True  # Continue even if cores fail to download
 
 def compile_translations():
     """Compile translation files"""
     print("Compiling translations...")
     if not run_command([sys.executable, "update_translations.py"]):
-        print("Warning: Failed to compile translations")
+        print("Warning: Failed to compile translations, continuing...")
+    
+    return True  # Continue even if translations fail
 
 def download_geoip():
     """Download GeoIP database"""
