@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
     QTextEdit,
     QMenu,
     QLabel,
+    QProgressBar,
 )
 from PySide6.QtGui import QIcon, QAction, QMovie
 from PySide6.QtCore import QSize
@@ -53,6 +54,29 @@ def create_connection_view(main_window):
         main_window.tr("Start/Stop periodic URL health checking with exponential backoff"))
     main_window.health_check_tcp_button.setCheckable(True)
     main_window.health_check_url_button.setCheckable(True)
+    
+    # Export button
+    main_window.export_button = QPushButton(
+        QIcon(":/icons/file-text.svg"), main_window.tr("Export"))
+    main_window.export_button.setToolTip(main_window.tr("Export server data and health statistics"))
+    
+    # Health Check Progress Bar
+    main_window.health_check_progress = QProgressBar()
+    main_window.health_check_progress.setVisible(False)
+    main_window.health_check_progress.setMaximum(100)
+    main_window.health_check_progress.setValue(0)
+    main_window.health_check_progress.setStyleSheet("""
+        QProgressBar {
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            text-align: center;
+            background-color: #f0f0f0;
+        }
+        QProgressBar::chunk {
+            background-color: #4CAF50;
+            border-radius: 2px;
+        }
+    """)
 
     # Loading animation for sorting
     main_window.sorting_spinner_label = QLabel()
@@ -111,6 +135,8 @@ def create_connection_view(main_window):
     top_bar_layout.addWidget(main_window.sort_combo)
     top_bar_layout.addWidget(main_window.health_check_tcp_button)
     top_bar_layout.addWidget(main_window.health_check_url_button)
+    top_bar_layout.addWidget(main_window.export_button)
+    top_bar_layout.addWidget(main_window.health_check_progress)
     top_bar_layout.addWidget(main_window.sorting_spinner_label)
     top_bar_layout.addSpacing(10)
     top_bar_layout.addWidget(main_window.manage_chains_button)
@@ -155,6 +181,8 @@ def create_connection_view(main_window):
         main_window.toggle_health_check_tcp)
     main_window.health_check_url_button.clicked.connect(
         main_window.toggle_health_check_url)
+    main_window.export_button.clicked.connect(
+        main_window.show_export_dialog)
     main_window.manage_subs_button.clicked.connect(
         main_window.show_subscription_manager)
     main_window.manage_chains_button.clicked.connect(

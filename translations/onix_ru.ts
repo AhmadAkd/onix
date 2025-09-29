@@ -424,12 +424,12 @@
 <context>
     <name>AboutDialog</name>
     <message>
-        <location filename="../ui_pyside.py" line="499"/>
+        <location filename="../ui/dialogs/about.py" line="15"/>
         <source>About Onix</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="510"/>
+        <location filename="../ui/dialogs/about.py" line="26"/>
         <source>Version: {}</source>
         <translation type="unfinished"></translation>
     </message>
@@ -437,438 +437,123 @@
 <context>
     <name>PySideUI</name>
     <message>
-        <location filename="../ui_pyside.py" line="844"/>
-        <location filename="../ui_pyside.py" line="2366"/>
+        <location filename="../ui/main_window.py" line="148"/>
+        <location filename="../ui/main_window.py" line="1169"/>
         <source>Disconnected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="854"/>
-        <location filename="../ui_pyside.py" line="2368"/>
+        <location filename="../ui/main_window.py" line="158"/>
+        <location filename="../ui/main_window.py" line="1171"/>
         <source>IP: N/A</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="855"/>
-        <location filename="../ui_pyside.py" line="2367"/>
+        <location filename="../ui/main_window.py" line="159"/>
+        <location filename="../ui/main_window.py" line="1170"/>
         <source>Latency: N/A</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="859"/>
-        <location filename="../ui_pyside.py" line="2371"/>
+        <location filename="../ui/main_window.py" line="163"/>
+        <location filename="../ui/main_window.py" line="1174"/>
         <source>Start</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="887"/>
+        <location filename="../ui/main_window.py" line="191"/>
         <source>Connection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="887"/>
+        <location filename="../ui/main_window.py" line="191"/>
         <source>Routing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="888"/>
+        <location filename="../ui/main_window.py" line="192"/>
         <source>Logs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="888"/>
+        <location filename="../ui/main_window.py" line="192"/>
         <source>Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="918"/>
-        <source>Sort by: Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="918"/>
-        <location filename="../ui_pyside.py" line="2203"/>
+        <location filename="../ui/main_window.py" line="1029"/>
         <source>Name (A-Z)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="918"/>
-        <location filename="../ui_pyside.py" line="2205"/>
+        <location filename="../ui/main_window.py" line="1031"/>
         <source>Name (Z-A)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="918"/>
-        <location filename="../ui_pyside.py" line="2208"/>
+        <location filename="../ui/main_window.py" line="1034"/>
         <source>Ping (Low to High)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="923"/>
-        <source>Search...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="925"/>
-        <source>Subscriptions</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="927"/>
-        <source>Manage Chains</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="929"/>
-        <source>Update Subs</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="931"/>
-        <source>TCP Ping All</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="933"/>
-        <source>URL Test All</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="935"/>
-        <source>Cancel</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="937"/>
-        <source>Run a fast TCP handshake test on all servers.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="939"/>
-        <source>Run a real-world latency test (HTTP GET) on all servers.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="964"/>
-        <source>Import from Clipboard</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="969"/>
-        <source>Scan QR from Screen</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="974"/>
-        <source>Import WireGuard from File</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="981"/>
-        <source>Copy Group Links</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="986"/>
-        <source>Delete Current Group</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1055"/>
-        <source>Filter by level:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1056"/>
-        <source>Info</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1059"/>
-        <source>Warning</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1062"/>
-        <location filename="../ui_pyside.py" line="2046"/>
+        <location filename="../ui/main_window.py" line="872"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1065"/>
-        <source>Debug</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1076"/>
-        <source>Clear</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1085"/>
-        <source>Search logs...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1116"/>
-        <source>Custom Routing Rules</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1119"/>
-        <source>Add Rule</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1127"/>
-        <source>Type</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1127"/>
-        <source>Value</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1127"/>
-        <source>Action</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1127"/>
-        <source>Actions</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1198"/>
-        <source>General</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1200"/>
-        <source>Network</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1202"/>
-        <source>Protocols</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1235"/>
-        <source>Appearance</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1240"/>
-        <location filename="../ui_pyside.py" line="1532"/>
+        <location filename="../ui/main_window.py" line="351"/>
         <source>System</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1240"/>
-        <location filename="../ui_pyside.py" line="1532"/>
-        <location filename="../ui_pyside.py" line="1612"/>
+        <location filename="../ui/main_window.py" line="351"/>
+        <location filename="../ui/main_window.py" line="402"/>
         <source>Light</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1240"/>
-        <location filename="../ui_pyside.py" line="1532"/>
-        <location filename="../ui_pyside.py" line="1610"/>
+        <location filename="../ui/main_window.py" line="351"/>
+        <location filename="../ui/main_window.py" line="400"/>
         <source>Dark</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1256"/>
-        <source>Appearance Mode:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1268"/>
-        <source>Apply &amp;amp; Restart</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1272"/>
-        <source>Language:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1278"/>
-        <source>Profile Management</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1281"/>
-        <location filename="../ui_pyside.py" line="1636"/>
+        <location filename="../ui/main_window.py" line="426"/>
         <source>Import Profile</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1285"/>
-        <location filename="../ui_pyside.py" line="1655"/>
+        <location filename="../ui/main_window.py" line="445"/>
         <source>Export Profile</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1292"/>
-        <source>Log File Management</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1297"/>
-        <source>Clear Core Log File</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1306"/>
-        <source>Core Management</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1317"/>
-        <source>Active Core:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1320"/>
-        <location filename="../ui_pyside.py" line="1676"/>
+        <location filename="../ui/main_window.py" line="466"/>
         <source>Check for Core Updates</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1329"/>
-        <source>About Onix</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1340"/>
-        <source>Connection &amp; DNS</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1345"/>
-        <source>Rule-Based</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1345"/>
-        <source>Global</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1348"/>
-        <source>Connection Mode:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1353"/>
-        <source>e.g., 1.1.1.1,8.8.8.8</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1354"/>
-        <source>DNS Servers:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1357"/>
-        <source>Enable TUN Mode (System-wide Proxy)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1364"/>
-        <source>Bypass Rules</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1371"/>
-        <source>Comma-separated domains</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1372"/>
-        <source>Bypass Domains:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1384"/>
-        <source>Muxing Settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1386"/>
-        <source>Enable Muxing</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1395"/>
-        <source>Protocol:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1399"/>
-        <source>Max Streams:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1403"/>
-        <source>Advanced TLS Settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1405"/>
-        <source>Enable TLS Fragment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1413"/>
-        <source>Fragment Size:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1418"/>
-        <source>Fragment Sleep:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1423"/>
-        <source>Hysteria2 Settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1429"/>
-        <source>Default Upload (Mbps):</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1434"/>
-        <source>Default Download (Mbps):</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1473"/>
+        <location filename="../ui/main_window.py" line="217"/>
         <source>Log File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1474"/>
+        <location filename="../ui/main_window.py" line="218"/>
         <source>Core log file does not exist. Nothing to clear.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1476"/>
+        <location filename="../ui/main_window.py" line="220"/>
         <source>Core log file not found, nothing to clear.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1481"/>
+        <location filename="../ui/main_window.py" line="225"/>
         <source>Confirm Clear</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1482"/>
+        <location filename="../ui/main_window.py" line="228"/>
         <source>Are you sure you want to delete the core log file?
 ({})
 
@@ -876,516 +561,448 @@ This action cannot be undone.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1491"/>
-        <source>Successfully deleted {}.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1494"/>
+        <location filename="../ui/main_window.py" line="239"/>
         <source>Failed to delete log file: {}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1517"/>
+        <location filename="../ui/main_window.py" line="262"/>
         <source>Invalid Input</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1519"/>
-        <source>The value for &apos;{}&apos; is invalid.
-Please enter a valid {}.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="1519"/>
+        <location filename="../ui/main_window.py" line="264"/>
         <source>number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1519"/>
+        <location filename="../ui/main_window.py" line="264"/>
         <source>range (e.g., 10-100)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1566"/>
+        <location filename="../ui/main_window.py" line="385"/>
         <source>Settings saved.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1601"/>
+        <location filename="../ui/main_window.py" line="302"/>
+        <location filename="../ui/main_window.py" line="339"/>
         <source>Restarting to apply changes...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1623"/>
+        <location filename="../ui/main_window.py" line="236"/>
+        <source>Successfully deleted {}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/main_window.py" line="264"/>
+        <source>The value for &apos;{}&apos; is invalid.
+Please enter a valid {}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/main_window.py" line="413"/>
         <source>Checking for core updates...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1625"/>
+        <location filename="../ui/main_window.py" line="415"/>
         <source>Checking...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1636"/>
-        <location filename="../ui_pyside.py" line="1655"/>
+        <location filename="../ui/main_window.py" line="426"/>
+        <location filename="../ui/main_window.py" line="445"/>
         <source>JSON Files (*.json)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1643"/>
+        <location filename="../ui/main_window.py" line="433"/>
         <source>Import Successful</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1646"/>
+        <location filename="../ui/main_window.py" line="436"/>
         <source>Profile imported successfully. Please restart the application for the changes to take full effect.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1651"/>
+        <location filename="../ui/main_window.py" line="441"/>
         <source>Import Failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1651"/>
+        <location filename="../ui/main_window.py" line="441"/>
         <source>The selected file is not a valid Onix profile or is corrupted.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1661"/>
+        <location filename="../ui/main_window.py" line="451"/>
         <source>Export Successful</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1661"/>
+        <location filename="../ui/main_window.py" line="451"/>
         <source>Profile successfully exported to:
 {}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1688"/>
+        <location filename="../ui/main_window.py" line="478"/>
         <source>Subscription list updated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1690"/>
+        <location filename="../ui/main_window.py" line="480"/>
         <source>Update Subscriptions</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1692"/>
+        <location filename="../ui/main_window.py" line="482"/>
         <source>Subscription list has changed. Do you want to update all enabled subscriptions now?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1703"/>
+        <location filename="../ui/main_window.py" line="493"/>
         <source>Clipboard is empty.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1712"/>
+        <location filename="../ui/main_window.py" line="502"/>
         <source>Imported {} server(s) from clipboard.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1717"/>
+        <location filename="../ui/main_window.py" line="507"/>
         <source>Import WireGuard Config</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1717"/>
+        <location filename="../ui/main_window.py" line="507"/>
         <source>Config Files (*.conf)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1727"/>
+        <location filename="../ui/main_window.py" line="517"/>
         <source>Failed to read or parse WireGuard file: {}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1729"/>
+        <location filename="../ui/main_window.py" line="519"/>
         <source>Import Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1729"/>
+        <location filename="../ui/main_window.py" line="519"/>
         <source>Could not import the WireGuard file:
 {}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1734"/>
+        <location filename="../ui/main_window.py" line="524"/>
         <source>Scanning screen for QR code...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1760"/>
+        <location filename="../ui/main_window.py" line="550"/>
         <source>No QR code found on the screen.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1775"/>
+        <location filename="../ui/main_window.py" line="565"/>
         <source>No visible servers to copy.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1776"/>
+        <location filename="../ui/main_window.py" line="566"/>
         <source>Copy Links</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1777"/>
+        <location filename="../ui/main_window.py" line="567"/>
         <source>There are no servers in the list to copy.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1789"/>
+        <location filename="../ui/main_window.py" line="579"/>
         <source>Could not retrieve server data from the list.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1799"/>
+        <location filename="../ui/main_window.py" line="589"/>
         <source>Copy Successful</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1799"/>
+        <location filename="../ui/main_window.py" line="589"/>
         <source>Copied {} server link(s) to clipboard.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1802"/>
+        <location filename="../ui/main_window.py" line="592"/>
         <source>Copy Failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1802"/>
+        <location filename="../ui/main_window.py" line="592"/>
         <source>Could not generate links for the visible servers.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1808"/>
+        <location filename="../ui/main_window.py" line="598"/>
         <source>No group selected to delete.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1811"/>
+        <location filename="../ui/main_window.py" line="601"/>
         <source>Confirm Group Deletion</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1812"/>
+        <location filename="../ui/main_window.py" line="602"/>
         <source>Are you sure you want to delete the entire group &apos;{}&apos; and all its servers?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1849"/>
+        <location filename="../ui/main_window.py" line="639"/>
         <source>No enabled subscriptions to update.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1932"/>
+        <location filename="../ui/main_window.py" line="734"/>
         <source>Input Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1933"/>
+        <location filename="../ui/main_window.py" line="735"/>
         <source>The &apos;Value&apos; field cannot be empty.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1940"/>
+        <location filename="../ui/main_window.py" line="742"/>
         <source>Rule updated: {}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1945"/>
+        <location filename="../ui/main_window.py" line="747"/>
         <source>Rule added: {}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1956"/>
-        <location filename="../ui_pyside.py" line="2015"/>
+        <location filename="../ui/main_window.py" line="758"/>
+        <location filename="../ui/main_window.py" line="841"/>
         <source>Confirm Deletion</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1957"/>
+        <location filename="../ui/main_window.py" line="759"/>
         <source>Are you sure you want to delete the rule for &apos;{}&apos;?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="1960"/>
+        <location filename="../ui/main_window.py" line="762"/>
         <source>Rule deleted: {}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="2000"/>
+        <location filename="../ui/main_window.py" line="780"/>
+        <source>Stop TCP Health Check</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/main_window.py" line="788"/>
+        <source>Health Check TCP</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/main_window.py" line="805"/>
+        <source>Stop URL Health Check</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/main_window.py" line="813"/>
+        <source>Health Check URL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/main_window.py" line="826"/>
         <source>No server selected!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="2005"/>
-        <location filename="../ui_pyside.py" line="2010"/>
+        <location filename="../ui/main_window.py" line="831"/>
+        <location filename="../ui/main_window.py" line="836"/>
         <source>Latency testing server: {}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="2016"/>
+        <location filename="../ui/main_window.py" line="842"/>
         <source>Are you sure you want to delete server
 &apos;{}&apos;?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="2034"/>
+        <location filename="../ui/main_window.py" line="860"/>
         <source>Copied link for &apos;{}&apos; to clipboard.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="2038"/>
+        <location filename="../ui/main_window.py" line="864"/>
         <source>Could not generate a link for &apos;{}&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="2047"/>
+        <location filename="../ui/main_window.py" line="873"/>
         <source>Could not generate a link for this server.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="2081"/>
+        <location filename="../ui/main_window.py" line="907"/>
         <source>Copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="2087"/>
+        <location filename="../ui/main_window.py" line="913"/>
         <source>Copy Line</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="2105"/>
+        <location filename="../ui/main_window.py" line="931"/>
         <source>Logs cleared.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="2233"/>
+        <location filename="../ui/main_window.py" line="1059"/>
         <source>Selected server: {}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="2261"/>
-        <source>Ping result for &apos;{}&apos; (ID: {}): {} ms. Emitting signal.</source>
+        <location filename="../ui/main_window.py" line="1087"/>
+        <source>Ping result for &apos;{}&apos; (ID: {}, Type: {}): {} ms. Emitting signal.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="2267"/>
+        <location filename="../ui/main_window.py" line="1100"/>
+        <source>Found card for server ID {}. Updating {} ping value.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/main_window.py" line="1104"/>
+        <source>Could not find card widget for server ID {}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/main_window.py" line="1093"/>
         <source>Server ID is missing in ping result. Cannot update UI.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="2272"/>
-        <source>Found card for server ID {}. Updating ping value.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="2276"/>
-        <source>Could not find card widget for server ID {}.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="2325"/>
+        <location filename="../ui/main_window.py" line="1127"/>
         <source>Subscription update finished.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="2342"/>
+        <location filename="../ui/main_window.py" line="1144"/>
         <source>Outbound chains updated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="2351"/>
+        <location filename="../ui/main_window.py" line="1154"/>
         <source>Connecting...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="2360"/>
+        <location filename="../ui/main_window.py" line="1163"/>
         <source>Connected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="2361"/>
+        <location filename="../ui/main_window.py" line="1164"/>
         <source>Latency: {} ms</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="2362"/>
+        <location filename="../ui/main_window.py" line="1165"/>
         <source>Disconnect</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="2375"/>
+        <location filename="../ui/main_window.py" line="1178"/>
         <source>IP: {}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="2510"/>
+        <location filename="../ui/main_window.py" line="1316"/>
         <source>The application is still running in the background.</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>QRCodeDialog</name>
-    <message>
-        <location filename="../ui_pyside.py" line="378"/>
-        <source>QR Code for {}</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="393"/>
-        <source>Could not generate QR code: {}</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>RoutingRuleDialog</name>
-    <message>
-        <location filename="../ui_pyside.py" line="530"/>
-        <source>Edit Rule</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="530"/>
-        <source>Add Rule</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="538"/>
-        <source>Type:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="542"/>
-        <source>e.g., example.com or 8.8.8.8</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="543"/>
-        <source>Value:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="547"/>
-        <source>Action:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="556"/>
-        <source>Save</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="557"/>
-        <source>Cancel</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>ServerCardWidget</name>
-    <message>
-        <location filename="../ui_pyside.py" line="320"/>
-        <source>Test Ping (TCP)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="325"/>
-        <source>Test Latency (URL)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="330"/>
-        <source>Edit Server</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="335"/>
-        <source>Copy Link</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="341"/>
-        <source>Show QR Code</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_pyside.py" line="346"/>
-        <source>Delete</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>ServerEditDialog</name>
     <message>
-        <location filename="../ui_pyside.py" line="401"/>
+        <location filename="../ui/dialogs/server_edit.py" line="14"/>
         <source>Edit Server Configuration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="411"/>
+        <location filename="../ui/dialogs/server_edit.py" line="24"/>
         <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="412"/>
+        <location filename="../ui/dialogs/server_edit.py" line="25"/>
         <source>Server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="414"/>
+        <location filename="../ui/dialogs/server_edit.py" line="27"/>
         <source>Port</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="420"/>
+        <location filename="../ui/dialogs/server_edit.py" line="33"/>
         <source>SNI</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="423"/>
+        <location filename="../ui/dialogs/server_edit.py" line="36"/>
         <source>UUID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="426"/>
+        <location filename="../ui/dialogs/server_edit.py" line="39"/>
         <source>Password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="429"/>
+        <location filename="../ui/dialogs/server_edit.py" line="42"/>
         <source>Transport</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="430"/>
+        <location filename="../ui/dialogs/server_edit.py" line="43"/>
         <source>WS Path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="434"/>
+        <location filename="../ui/dialogs/server_edit.py" line="47"/>
         <source>Private Key</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="435"/>
+        <location filename="../ui/dialogs/server_edit.py" line="48"/>
         <source>Public Key</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="437"/>
+        <location filename="../ui/dialogs/server_edit.py" line="50"/>
         <source>Preshared Key</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="439"/>
+        <location filename="../ui/dialogs/server_edit.py" line="52"/>
         <source>Local Address</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1393,22 +1010,22 @@ Please enter a valid {}.</source>
 <context>
     <name>SubscriptionEditDialog</name>
     <message>
-        <location filename="../ui_pyside.py" line="580"/>
+        <location filename="../ui/dialogs/subscription.py" line="24"/>
         <source>Edit Subscription</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="580"/>
+        <location filename="../ui/dialogs/subscription.py" line="24"/>
         <source>Add Subscription</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="592"/>
+        <location filename="../ui/dialogs/subscription.py" line="36"/>
         <source>Name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="593"/>
+        <location filename="../ui/dialogs/subscription.py" line="37"/>
         <source>URL:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1416,43 +1033,648 @@ Please enter a valid {}.</source>
 <context>
     <name>SubscriptionManagerDialog</name>
     <message>
-        <location filename="../ui_pyside.py" line="616"/>
+        <location filename="../ui/dialogs/subscription.py" line="60"/>
         <source>Subscription Manager</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="628"/>
+        <location filename="../ui/dialogs/subscription.py" line="72"/>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="630"/>
+        <location filename="../ui/dialogs/subscription.py" line="74"/>
         <source>Save &amp; Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="633"/>
+        <location filename="../ui/dialogs/subscription.py" line="77"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="664"/>
+        <location filename="../ui/dialogs/subscription.py" line="108"/>
         <source>Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="668"/>
+        <location filename="../ui/dialogs/subscription.py" line="112"/>
         <source>Delete</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="709"/>
+        <location filename="../ui/dialogs/subscription.py" line="153"/>
         <source>Confirm Deletion</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_pyside.py" line="710"/>
+        <location filename="../ui/dialogs/subscription.py" line="154"/>
         <source>Are you sure you want to delete subscription &apos;{}&apos;?</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>main_window</name>
+    <message>
+        <location filename="../ui/views/connection_view.py" line="33"/>
+        <source>Sort by: Default</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/connection_view.py" line="33"/>
+        <source>Name (A-Z)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/connection_view.py" line="33"/>
+        <source>Name (Z-A)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/connection_view.py" line="33"/>
+        <source>Ping (Low to High)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/connection_view.py" line="39"/>
+        <source>Search...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/connection_view.py" line="41"/>
+        <source>Subscriptions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/connection_view.py" line="43"/>
+        <source>Manage Chains</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/connection_view.py" line="45"/>
+        <source>Update Subs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/connection_view.py" line="47"/>
+        <source>Health Check TCP</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/connection_view.py" line="49"/>
+        <source>Health Check URL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/connection_view.py" line="51"/>
+        <source>Start/Stop periodic TCP health checking with exponential backoff</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/connection_view.py" line="53"/>
+        <source>Start/Stop periodic URL health checking with exponential backoff</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/connection_view.py" line="78"/>
+        <source>Import from Clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/connection_view.py" line="83"/>
+        <source>Scan QR from Screen</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/connection_view.py" line="88"/>
+        <source>Import WireGuard from File</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/connection_view.py" line="96"/>
+        <source>Copy Group Links</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/connection_view.py" line="102"/>
+        <source>Delete Current Group</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="80"/>
+        <source>General</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="83"/>
+        <source>Network</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="86"/>
+        <source>Protocols</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="121"/>
+        <source>Appearance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="126"/>
+        <source>System</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="127"/>
+        <source>Light</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="128"/>
+        <source>Dark</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="151"/>
+        <source>Appearance Mode:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="170"/>
+        <source>Apply &amp; Restart</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="174"/>
+        <source>Language:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="181"/>
+        <source>Profile Management</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="184"/>
+        <source>Import Profile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="188"/>
+        <source>Export Profile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="195"/>
+        <source>Log File Management</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="200"/>
+        <source>Clear Core Log File</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="209"/>
+        <source>Core Management</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="221"/>
+        <source>Active Core:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="226"/>
+        <source>Check for Core Updates</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="235"/>
+        <source>About Onix</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="247"/>
+        <source>Connection &amp; DNS</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="252"/>
+        <source>Rule-Based</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="253"/>
+        <source>Global</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="258"/>
+        <source>Connection Mode:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="264"/>
+        <source>e.g., 1.1.1.1,8.8.8.8</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="266"/>
+        <source>DNS Servers:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="270"/>
+        <source>Enable TUN Mode (System-wide Proxy)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="278"/>
+        <source>Bypass Rules</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="287"/>
+        <source>Comma-separated domains</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="289"/>
+        <source>Bypass Domains:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="302"/>
+        <source>Muxing Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="305"/>
+        <source>Enable Muxing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="317"/>
+        <source>Protocol:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="323"/>
+        <source>Max Streams:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="328"/>
+        <source>Advanced TLS Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="331"/>
+        <source>Enable TLS Fragment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="343"/>
+        <source>Fragment Size:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="350"/>
+        <source>Fragment Sleep:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="355"/>
+        <source>Hysteria2 Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="363"/>
+        <source>Default Upload (Mbps):</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="370"/>
+        <source>Default Download (Mbps):</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>self.main_window</name>
+    <message>
+        <location filename="../ui/app_logic.py" line="55"/>
+        <source>No enabled subscriptions to update.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="87"/>
+        <source>No server selected!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="91"/>
+        <location filename="../ui/app_logic.py" line="94"/>
+        <source>Latency testing server: {}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="97"/>
+        <source>Confirm Deletion</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="98"/>
+        <source>Are you sure you want to delete server
+&apos;{}&apos;?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="115"/>
+        <source>Copied link for &apos;{}&apos; to clipboard.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="117"/>
+        <source>Could not generate a link for &apos;{}&apos;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="124"/>
+        <source>Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="124"/>
+        <source>Could not generate a link for this server.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="130"/>
+        <source>Clipboard is empty.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="137"/>
+        <source>Imported {} server(s) from clipboard.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="140"/>
+        <source>Import WireGuard Config</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="140"/>
+        <source>Config Files (*.conf)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="147"/>
+        <source>Failed to read or parse WireGuard file: {}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="148"/>
+        <source>Import Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="148"/>
+        <source>Could not import the WireGuard file:
+{}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="152"/>
+        <source>Scanning screen for QR code...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="170"/>
+        <source>No QR code found on the screen.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="180"/>
+        <source>No visible servers to copy.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="181"/>
+        <source>Copy Links</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="181"/>
+        <source>There are no servers in the list to copy.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="190"/>
+        <source>Could not retrieve server data from the list.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="196"/>
+        <source>Copy Successful</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="196"/>
+        <source>Copied {} server link(s) to clipboard.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="198"/>
+        <source>Copy Failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="198"/>
+        <source>Could not generate links for the visible servers.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="203"/>
+        <source>No group selected to delete.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="205"/>
+        <source>Confirm Group Deletion</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="206"/>
+        <source>Are you sure you want to delete the entire group &apos;{}&apos; and all its servers?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="218"/>
+        <source>Log File</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="219"/>
+        <source>Core log file does not exist. Nothing to clear.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="220"/>
+        <source>Core log file not found, nothing to clear.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="225"/>
+        <source>Confirm Clear</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="229"/>
+        <source>Are you sure you want to delete the core log file?
+({})
+
+This action cannot be undone.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="237"/>
+        <source>Successfully deleted {}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="239"/>
+        <source>Failed to delete log file: {}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="242"/>
+        <source>Import Profile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="242"/>
+        <location filename="../ui/app_logic.py" line="251"/>
+        <source>JSON Files (*.json)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="246"/>
+        <source>Import Successful</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="246"/>
+        <source>Profile imported successfully. Please restart the application for the changes to take full effect.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="248"/>
+        <source>Import Failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="248"/>
+        <source>The selected file is not a valid Onix profile or is corrupted.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="251"/>
+        <source>Export Profile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="255"/>
+        <source>Export Successful</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="255"/>
+        <source>Profile successfully exported to:
+{}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="258"/>
+        <source>Checking for core updates...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="260"/>
+        <source>Checking...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="272"/>
+        <source>Check for Core Updates</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="286"/>
+        <source>Subscription list updated.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="287"/>
+        <source>Update Subscriptions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="288"/>
+        <source>Subscription list has changed. Do you want to update all enabled subscriptions now?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="302"/>
+        <source>Outbound chains updated.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="322"/>
+        <source>Invalid Input</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="324"/>
+        <source>The value for &apos;{}&apos; is invalid.
+Please enter a valid {}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="324"/>
+        <source>number</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="324"/>
+        <source>range (e.g., 10-100)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="337"/>
+        <source>System</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="337"/>
+        <source>Light</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="337"/>
+        <source>Dark</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="369"/>
+        <source>Settings saved.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/app_logic.py" line="398"/>
+        <source>Restarting to apply changes...</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

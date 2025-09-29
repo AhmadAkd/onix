@@ -11,14 +11,17 @@ This document explains how to build Onix for different platforms.
 ### Platform-specific requirements
 
 #### Windows
+
 - Visual Studio Build Tools (for some dependencies)
 - Windows 10/11
 
 #### macOS
+
 - Xcode Command Line Tools
 - macOS 10.15 or higher
 
 #### Linux
+
 - Build essentials (gcc, make, etc.)
 - libffi-dev, libssl-dev
 
@@ -42,6 +45,7 @@ python build_all.py
 ### Manual Build
 
 #### Windows
+
 ```cmd
 # Using batch script
 build.bat
@@ -51,6 +55,7 @@ python build_all.py
 ```
 
 #### macOS/Linux
+
 ```bash
 # Using shell script
 chmod +x build.sh
@@ -88,6 +93,7 @@ git push origin v1.0.0
 ```
 
 This will:
+
 1. Build for Windows, macOS, and Linux
 2. Create a GitHub release
 3. Upload all platform packages
@@ -97,16 +103,19 @@ This will:
 ### Common Issues
 
 1. **PyInstaller not found**
+
    ```bash
    pip install pyinstaller
    ```
 
 2. **Missing dependencies**
+
    ```bash
    pip install -r requirements.txt
    ```
 
 3. **Permission denied (Linux/macOS)**
+
    ```bash
    chmod +x build.sh
    ```
@@ -119,14 +128,17 @@ This will:
 ### Platform-specific Issues
 
 #### Windows
+
 - Ensure Visual Studio Build Tools are installed
 - Run as Administrator if needed
 
 #### macOS
+
 - Install Xcode Command Line Tools: `xcode-select --install`
 - May need to allow unsigned executables
 
 #### Linux
+
 - Install build essentials: `sudo apt-get install build-essential`
 - Install additional dependencies: `sudo apt-get install libffi-dev libssl-dev`
 
@@ -147,10 +159,12 @@ python main.py
 1. Update version numbers in relevant files
 2. Update CHANGELOG.md
 3. Create and push a tag:
+
    ```bash
    git tag v1.0.0
    git push origin v1.0.0
    ```
+
 4. GitHub Actions will automatically build and create a release
 
 ## File Structure

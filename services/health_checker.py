@@ -1,8 +1,9 @@
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Callable, Dict, List, Optional
 
-from constants import LogLevel, HEALTH_CHECK_EMA_ALPHA, HEALTH_CHECK_MAX_BACKOFF, HEALTH_CHECK_MIN_BACKOFF, TEST_ENDPOINTS
+from constants import LogLevel, HEALTH_CHECK_EMA_ALPHA, HEALTH_CHECK_MAX_BACKOFF, HEALTH_CHECK_MIN_BACKOFF, TEST_ENDPOINTS, MAX_CONCURRENT_CORE_TESTS
 from services.ping_service import direct_tcp, proxy_tcp_connect, url_latency_via_proxy
 
 
@@ -17,6 +18,8 @@ class HealthChecker:
         self._server_stats = {}  # server_id -> {tcp_ema, url_ema, failures, last_test}
         self._test_core_manager = None
         self._test_callback = None
+        self._progress_callback = None
+        self._thread_pool = ThreadPoolExecutor(max_workers=MAX_CONCURRENT_CORE_TESTS)
 
     def set_test_core_manager(self, core_manager):
         """Set the persistent test core manager for proxy-based tests."""
@@ -25,6 +28,10 @@ class HealthChecker:
     def set_test_callback(self, callback: Callable[[dict, int, str], None]):
         """Set callback to report test results to UI."""
         self._test_callback = callback
+
+    def set_progress_callback(self, callback: Callable[[int, int], None]):
+        """Set callback to report progress (current, total)."""
+        self._progress_callback = callback
 
     def start(self, servers: List[dict], test_types: List[str] = None, interval_seconds: int = 30):
         """Start periodic health checking."""
@@ -50,31 +57,60 @@ class HealthChecker:
         self._stop_event.set()
         if self._thread and self._thread.is_alive():
             self._thread.join(timeout=2)
+        self._thread_pool.shutdown(wait=False)
         self.log("Health checker stopped", LogLevel.INFO)
 
     def _health_check_loop(self, servers: List[dict], interval_seconds: int):
-        """Main health check loop."""
+        """Main health check loop with parallel testing."""
         while not self._stop_event.is_set():
+            # Filter servers that need testing
+            servers_to_test = []
             for server in servers:
                 if self._stop_event.is_set():
                     break
-
+                
                 server_id = server.get("id")
                 if not server_id:
                     continue
 
                 # Check if we should test this server (backoff logic)
-                if not self._should_test_server(server_id):
-                    continue
+                if self._should_test_server(server_id):
+                    servers_to_test.append(server)
 
-                # Test the server
-                self._test_single_server(server)
-
-                # Small delay between servers
-                time.sleep(0.5)
+            if servers_to_test:
+                self._test_servers_parallel(servers_to_test)
 
             # Wait for next interval
             self._stop_event.wait(interval_seconds)
+
+    def _test_servers_parallel(self, servers: List[dict]):
+        """Test multiple servers in parallel."""
+        if not servers:
+            return
+
+        total_servers = len(servers)
+        completed = 0
+
+        # Submit all test tasks
+        futures = []
+        for server in servers:
+            if self._stop_event.is_set():
+                break
+            future = self._thread_pool.submit(self._test_single_server, server)
+            futures.append(future)
+
+        # Wait for completion and update progress
+        for future in as_completed(futures):
+            if self._stop_event.is_set():
+                break
+            
+            try:
+                future.result()
+                completed += 1
+                if self._progress_callback:
+                    self._progress_callback(completed, total_servers)
+            except Exception as e:
+                self.log(f"Health check error: {e}", LogLevel.ERROR)
 
     def _should_test_server(self, server_id: str) -> bool:
         """Check if server should be tested based on backoff logic."""

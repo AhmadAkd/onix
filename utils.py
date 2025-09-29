@@ -68,11 +68,11 @@ def get_local_core_version(core_path, core_name):
         # sing-box: "sing-box version 1.9.0-alpha.4"
         # xray: "Xray 1.8.10 (Xray, Penetrates Everything.) ..."
         version_line = result.stdout.strip()
-        
+
         # Clean up the version line - remove extra text
         if "Environment:" in version_line:
             version_line = version_line.split("Environment:")[0].strip()
-        
+
         parts = version_line.split(" ")
         if core_name == "sing-box":
             # Extract version from "sing-box version 1.9.0-alpha.4"

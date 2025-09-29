@@ -33,6 +33,7 @@ from ui.dialogs.routing_rule import RoutingRuleDialog
 from ui.dialogs.server_edit import ServerEditDialog
 from ui.dialogs.chain_manager import ChainManagerDialog
 from ui.dialogs.subscription import SubscriptionEditDialog, SubscriptionManagerDialog
+from ui.dialogs.export_dialog import ExportDialog
 from ui.widgets.server_card import ServerCardWidget
 from ui.styles import THEMES, get_dark_stylesheet, get_light_stylesheet
 

@@ -22,13 +22,16 @@ class ServerCardWidget(QWidget):
         self.name_label = QLabel(server_data.get("name", "Unnamed"))
         self.name_label.setStyleSheet("font-size: 11pt; font-weight: bold;")
 
-        # Create a vertical layout for ping labels
+        # Create a vertical layout for ping labels and stats
         ping_layout = QVBoxLayout()
         ping_layout.setSpacing(0)
         self.tcp_ping_label = QLabel()
         self.url_ping_label = QLabel()
+        self.health_stats_label = QLabel()
+        self.health_stats_label.setStyleSheet("font-size: 8pt; color: #666;")
         ping_layout.addWidget(self.tcp_ping_label)
         ping_layout.addWidget(self.url_ping_label)
+        ping_layout.addWidget(self.health_stats_label)
 
         self.menu_button = QPushButton(
             QIcon(":/icons/more-horizontal.svg"), "")
@@ -132,3 +135,46 @@ class ServerCardWidget(QWidget):
 
         label_to_update.setText(text)
         label_to_update.setStyleSheet(f"color: {color};")
+
+    def update_health_stats(self, stats):
+        """Updates health check statistics display."""
+        if not stats:
+            self.health_stats_label.setText("")
+            return
+        
+        tcp_ema = stats.get("tcp_ema")
+        url_ema = stats.get("url_ema")
+        failures = stats.get("failures", 0)
+        last_test = stats.get("last_test", 0)
+        
+        if last_test > 0:
+            import time
+            time_ago = int(time.time() - last_test)
+            if time_ago < 60:
+                time_str = f"{time_ago}s ago"
+            elif time_ago < 3600:
+                time_str = f"{time_ago//60}m ago"
+            else:
+                time_str = f"{time_ago//3600}h ago"
+        else:
+            time_str = "Never"
+        
+        # Status indicator
+        if failures == 0:
+            status = "🟢"
+        elif failures < 3:
+            status = "🟡"
+        else:
+            status = "🔴"
+        
+        # Build stats text
+        stats_parts = [status]
+        if tcp_ema:
+            stats_parts.append(f"TCP: {int(tcp_ema)}ms")
+        if url_ema:
+            stats_parts.append(f"URL: {int(url_ema)}ms")
+        if failures > 0:
+            stats_parts.append(f"Fails: {failures}")
+        stats_parts.append(time_str)
+        
+        self.health_stats_label.setText(" | ".join(stats_parts))

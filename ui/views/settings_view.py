@@ -246,6 +246,32 @@ def _create_network_settings_page(main_window):
     # --- Network Settings Group ---
     network_group = QGroupBox(main_window.tr("Connection & DNS"))
     network_layout = QFormLayout(network_group)
+    
+    # --- Health Check Settings Group ---
+    health_group = QGroupBox(main_window.tr("Health Check Settings"))
+    health_layout = QFormLayout(health_group)
+    
+    # Health Check Interval
+    main_window.health_check_interval_combo = QComboBox()
+    main_window.health_check_interval_combo.addItems(["30 seconds", "60 seconds", "120 seconds", "300 seconds"])
+    main_window.health_check_interval_combo.setCurrentText("30 seconds")
+    health_layout.addRow(main_window.tr("Check Interval:"), main_window.health_check_interval_combo)
+    
+    # EMA Alpha
+    main_window.health_check_ema_combo = QComboBox()
+    main_window.health_check_ema_combo.addItems(["0.1 (Fast)", "0.3 (Balanced)", "0.5 (Slow)"])
+    main_window.health_check_ema_combo.setCurrentText("0.3 (Balanced)")
+    health_layout.addRow(main_window.tr("Smoothing:"), main_window.health_check_ema_combo)
+    
+    # Backoff Base
+    main_window.health_check_backoff_combo = QComboBox()
+    main_window.health_check_backoff_combo.addItems(["1 second", "2 seconds", "5 seconds"])
+    main_window.health_check_backoff_combo.setCurrentText("1 second")
+    health_layout.addRow(main_window.tr("Backoff Base:"), main_window.health_check_backoff_combo)
+    
+    # Auto-start for groups
+    main_window.health_check_auto_start = QCheckBox(main_window.tr("Auto-start Health Check for new groups"))
+    health_layout.addRow(main_window.health_check_auto_start)
 
     main_window.connection_mode_combo = QComboBox()
     main_window.connection_mode_combo.addItems(
@@ -273,6 +299,7 @@ def _create_network_settings_page(main_window):
     main_window.tun_checkbox.stateChanged.connect(main_window.save_settings)
     network_layout.addRow(main_window.tun_checkbox)
     layout.addWidget(network_group)
+    layout.addWidget(health_group)
 
     # --- Bypass Rules Group ---
     bypass_group = QGroupBox(main_window.tr("Bypass Rules"))

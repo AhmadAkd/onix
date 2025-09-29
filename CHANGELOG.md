@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [1.0.0] - 2025-09-29
 
 ### Added
+
 - Complete UI refactoring with modern PySide6 interface
 - Multi-language support (Persian, Russian, Arabic, Chinese)
 - Comprehensive server management system
@@ -17,6 +18,7 @@ All notable changes to this project will be documented in this file.
 - Comprehensive translation system
 
 ### Changed
+
 - **BREAKING**: Complete codebase refactoring and restructuring
 - Improved type safety with comprehensive type annotations
 - Enhanced error handling and logging
@@ -25,6 +27,7 @@ All notable changes to this project will be documented in this file.
 - Improved performance and stability
 
 ### Fixed
+
 - Fixed 81% of linter errors (276 → 53)
 - Resolved callback type safety issues
 - Fixed version parsing in core management
@@ -32,6 +35,7 @@ All notable changes to this project will be documented in this file.
 - Enhanced build system reliability
 
 ### Technical Improvements
+
 - Added `typing.Protocol` for callback interfaces
 - Implemented proper type hints throughout codebase
 - Removed unused imports and dead code
@@ -40,12 +44,14 @@ All notable changes to this project will be documented in this file.
 - Better separation of concerns
 
 ### Build System
+
 - Updated PyInstaller configuration
 - Enhanced translation compilation
 - Improved dependency management
 - Better cross-platform compatibility
 
 ### Files Changed
+
 - 92 files modified
 - 17,938 lines added
 - 4,013 lines removed
@@ -55,4 +61,5 @@ All notable changes to this project will be documented in this file.
 ---
 
 ## Previous Versions
+
 This is the first major release with complete refactoring. Previous versions were in development phase.

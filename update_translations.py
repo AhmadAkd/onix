@@ -8,11 +8,17 @@ TRANSLATIONS_DIR = os.path.join(PROJECT_ROOT, "translations")
 LANGUAGES = ["fa", "ru", "ar", "zh"]  # "ar" is already here, which is good.
 SOURCE_FILES = [
     "main.py",
-    "ui_pyside.py",
     "constants.py",
     "settings_manager.py",
     "managers/server_manager.py",
     "link_parser.py",
+    "ui/main_window.py",
+    "ui/app_logic.py",
+    "ui/dialogs/about.py",
+    "ui/dialogs/server_edit.py",
+    "ui/dialogs/subscription.py",
+    "ui/views/connection_view.py",
+    "ui/views/settings_view.py",
 ]
 TS_FILE_PREFIX = "onix"
 
