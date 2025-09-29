@@ -4,7 +4,7 @@ import time
 import json
 import threading
 import tempfile
-from typing import Dict, Any, Callable
+from typing import Dict, Any, Protocol
 
 import utils
 import network_tester
@@ -21,8 +21,17 @@ from constants import (
 )
 
 
+# --- Callback Protocol ---
+class XrayManagerCallbacks(Protocol):
+    def log(self, message: str, level: LogLevel = LogLevel.INFO) -> None: ...
+    def on_status_change(self, status: str, color: str) -> None: ...
+    def on_connect(self, result: int) -> None: ...
+    def on_stop(self) -> None: ...
+    def on_ip_update(self, ip_address: str) -> None: ...
+
+
 class XrayManager(CoreManager):
-    def __init__(self, settings: Dict[str, Any], callbacks: Dict[str, Callable]):
+    def __init__(self, settings: Dict[str, Any], callbacks: XrayManagerCallbacks):
         super().__init__(settings, callbacks)
         self.config_generator = XrayConfigGenerator()
 
@@ -34,8 +43,7 @@ class XrayManager(CoreManager):
             time.sleep(CONNECTION_STOP_DELAY)
 
         self.log("Starting Xray connection...", LogLevel.INFO)
-        self.callbacks.get("on_status_change", lambda s,
-                           c: None)("Connecting...", "yellow")
+        self.callbacks.on_status_change("Connecting...", "yellow")
 
         thread = threading.Thread(
             target=self._run_and_log, args=(config,), daemon=True)
@@ -98,7 +106,7 @@ class XrayManager(CoreManager):
         finally:
             if self.is_running:
                 self.is_running = False
-                self.callbacks.get("on_stop", lambda: None)()
+                self.callbacks.on_stop()
             if config_filename and os.path.exists(config_filename):
                 try:
                     os.remove(config_filename)
@@ -117,7 +125,7 @@ class XrayManager(CoreManager):
         self.is_running = False
         self.process = None
         system_proxy.set_system_proxy(False, self.settings, self.log)
-        self.callbacks.get("on_stop", lambda: None)()
+        self.callbacks.on_stop()
 
     def check_connection(self) -> None:
         result = network_tester.url_test(PROXY_SERVER_ADDRESS)
@@ -125,12 +133,11 @@ class XrayManager(CoreManager):
             self.log(
                 f"Connection successful! Latency: {result} ms.", LogLevel.SUCCESS)
             system_proxy.set_system_proxy(True, self.settings, self.log)
-            self.callbacks.get("on_connect", lambda r: None)(result)
+            self.callbacks.on_connect(result)
             ip_address = network_tester.get_external_ip(PROXY_SERVER_ADDRESS)
-            self.callbacks.get("on_ip_update", lambda ip: None)(ip_address)
+            self.callbacks.on_ip_update(ip_address)
         else:
             self.log(
                 "Error: Connection test failed. Check server config.", LogLevel.ERROR)
-            self.callbacks.get("on_status_change", lambda s,
-                               c: None)("Connection Failed", "red")
+            self.callbacks.on_status_change("Connection Failed", "red")
             self.stop()

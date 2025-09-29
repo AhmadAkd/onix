@@ -3,7 +3,7 @@ import binascii
 import threading
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any, Protocol
 
 import requests
 
@@ -12,12 +12,31 @@ import settings_manager
 from constants import (
     LogLevel, MAX_CONCURRENT_TESTS, HEALTH_CHECK_INTERVAL
 )
-import constants
+# Removed unused import: constants
 from managers.singbox_generator import SingboxConfigGenerator
 from managers.xray_generator import XrayConfigGenerator
 from managers.test_core_manager import TestCoreManager
 # Removed unused imports: tcp_ping, ping_service
 from services.health_checker import HealthChecker
+
+
+# --- Callback Protocol ---
+class ServerManagerCallbacks(Protocol):
+    def log(self, message: str, level: LogLevel = LogLevel.INFO) -> None: ...
+    def on_servers_loaded(self) -> None: ...
+    def on_servers_updated(self) -> None: ...
+    def on_ping_result(
+        self, server: Dict[str, Any], ping_result: int, test_type: str) -> None: ...
+
+    def on_ping_started(self, config: Dict[str, Any]) -> None: ...
+    def on_update_start(self) -> None: ...
+    def on_update_finish(
+        self, errors: Optional[List[Exception]] = None) -> None: ...
+
+    def request_save(self) -> None: ...
+    def show_warning(self, title: str, message: str) -> None: ...
+    def show_info(self, title: str, message: str) -> None: ...
+    def show_error(self, title: str, message: str) -> None: ...
 
 
 # --- Core Generator Factory ---
@@ -37,7 +56,7 @@ def get_core_generator(core_name: str):
 
 
 class ServerManager:
-    def __init__(self, settings: Dict[str, Any], callbacks: Dict[str, Callable]):
+    def __init__(self, settings: Dict[str, Any], callbacks: ServerManagerCallbacks):
         self.settings = settings
         self.callbacks = callbacks
         self.server_groups: Dict[str, List[Dict[str, Any]]] = {}
@@ -61,18 +80,18 @@ class ServerManager:
 
     # --- Logging ---
     def log(self, message: str, level: LogLevel = LogLevel.INFO) -> None:
-        self.callbacks.get("log", lambda msg, lvl: None)(message, level)
+        self.callbacks.log(message, level)
 
     # --- Settings Management ---
     def save_settings_to_disk(self) -> None:
         """Saves the current settings dictionary to the settings file on disk."""
         self.log("Debounced save: writing settings to disk.", LogLevel.DEBUG)
         settings_manager.save_settings(
-            self.settings, self.callbacks.get("log"))
+            self.settings, self.callbacks.log)
 
     def save_settings(self) -> None:
         """Requests a save of the settings. The UI will handle debouncing."""
-        self.callbacks.get("request_save", lambda: None)()
+        self.callbacks.request_save()
 
     def force_save_settings(self) -> None:
         """Saves settings to disk immediately. Called on application exit."""
@@ -100,7 +119,7 @@ class ServerManager:
             self.save_settings()  # This will now be a debounced save
 
         self.log("Saved servers loaded successfully.", LogLevel.SUCCESS)
-        self.callbacks.get("on_servers_loaded", lambda: None)()
+        self.callbacks.on_servers_loaded()
 
     def get_groups(self) -> List[str]:
         return list(self.server_groups.keys())
@@ -116,8 +135,9 @@ class ServerManager:
         return all_servers
 
     # --- Server Actions ---
-    def add_manual_server(self, server_link: str, group_name: Optional[str] = None, update_ui: bool = True, callbacks: Optional[Dict[str, Callable]] = None) -> bool:
-        config = link_parser.parse_server_link(server_link)
+    def add_manual_server(self, server_link: str, group_name: Optional[str] = None, update_ui: bool = True, callbacks: Optional[ServerManagerCallbacks] = None) -> bool:
+        config: Optional[Dict[str, Any]
+                         ] = link_parser.parse_server_link(server_link)
         if not config:
             self.log(
                 f"Failed to parse server link: {server_link}", LogLevel.ERROR)
@@ -130,16 +150,20 @@ class ServerManager:
                 for s_config in servers:
                     if f"{s_config.get('server')}:{s_config.get('port')}" == server_id:
                         # Use callback if available (from subscription update), otherwise log directly
-                        log_func = callbacks.get(
-                            'show_warning', self.log) if callbacks else self.log
-                        log_func(
-                            f"Server {config.get('name')} already exists in group '{grp}'. Skipping.",
-                            constants.LogLevel.WARNING
-                        )
+                        if callbacks:
+                            callbacks.show_warning(
+                                "Duplicate Server",
+                                f"Server {config.get('name')} already exists in group '{grp}'. Skipping."
+                            )
+                        else:
+                            self.log(
+                                f"Server {config.get('name')} already exists in group '{grp}'. Skipping.",
+                                LogLevel.WARNING
+                            )
                         return False
 
             # Use provided group_name, else fallback to parsed group, else default
-            final_group_name = group_name or config.get(
+            final_group_name: str = group_name or config.get(
                 "group", "Manual Servers")
             # Ensure the config itself has the correct group
             config["group"] = final_group_name
@@ -159,7 +183,7 @@ class ServerManager:
         if group_name in self.server_groups:
             del self.server_groups[group_name]
             self.log(f"Deleted group: {group_name}", LogLevel.INFO)
-            self.callbacks.get("on_servers_loaded", lambda: None)()
+            self.callbacks.on_servers_loaded()
         else:
             self.log(
                 f"Could not find group '{group_name}' to delete.", LogLevel.ERROR)
@@ -194,22 +218,22 @@ class ServerManager:
         return link_parser.generate_server_link(config)
 
     # --- Subscription Update ---
-    def update_subscriptions(self, subscriptions: List[Dict[str, Any]], callbacks: Optional[Dict[str, Callable]] = None) -> None:
-        self.callbacks.get("on_update_start", lambda: None)()
+    def update_subscriptions(self, subscriptions: List[Dict[str, Any]], callbacks: Optional[ServerManagerCallbacks] = None) -> None:
+        self.callbacks.on_update_start()
         # Submit the main task to the thread pool
         self.thread_pool.submit(
-            self._update_subscriptions_task, subscriptions, callbacks or {})
+            self._update_subscriptions_task, subscriptions, callbacks or self.callbacks)
 
-    def _fetch_and_process_subscription(self, sub: Dict[str, Any], callbacks: Dict[str, Callable]) -> tuple[int, Optional[Exception]]:
+    def _fetch_and_process_subscription(self, sub: Dict[str, Any], callbacks: ServerManagerCallbacks) -> tuple[int, Optional[Exception]]:
         """Fetches and processes a single subscription."""
         sub_name = sub.get("name")
         sub_url = sub.get("url")
         if not sub_url:
-            callbacks.get('show_warning', self.log)(
-                f"Subscription '{sub_name}' has no URL, skipping.", LogLevel.WARNING)
+            callbacks.show_warning(
+                "Missing URL", f"Subscription '{sub_name}' has no URL, skipping.")
             return 0, None
 
-        callbacks.get('show_info', lambda title, msg: self.log(msg))(
+        callbacks.show_info(
             "Subscription Update", f"Updating subscription: {sub_name}...")
         try:
             response = requests.get(sub_url, timeout=15)
@@ -233,22 +257,22 @@ class ServerManager:
                     added_for_sub += 1
 
             if added_for_sub > 0:
-                callbacks.get('show_info', lambda title, msg: self.log(msg, LogLevel.SUCCESS))(
+                callbacks.show_info(
                     "Subscription Update", f"Added {added_for_sub} new server(s) from subscription '{sub_name}'.")
             else:
-                callbacks.get('show_info', lambda title, msg: self.log(msg, LogLevel.INFO))(
+                callbacks.show_info(
                     "Subscription Update", f"No new servers found for subscription '{sub_name}'.")
 
             return added_for_sub, None
 
         except requests.exceptions.RequestException as e:
-            callbacks.get('show_error', self.log)(
+            callbacks.show_error(
                 f"Update Failed for '{sub_name}'", f"Could not fetch subscription data: {e}")
             return 0, e
 
-    def _update_subscriptions_task(self, subscriptions: List[Dict[str, Any]], callbacks: Dict[str, Callable]) -> None:
+    def _update_subscriptions_task(self, subscriptions: List[Dict[str, Any]], callbacks: ServerManagerCallbacks) -> None:
         """Task to update multiple subscriptions in parallel."""
-        errors = []
+        errors: List[Exception] = []
 
         future_to_sub = {self.thread_pool.submit(
             self._fetch_and_process_subscription, sub, callbacks): sub for sub in subscriptions}
@@ -260,15 +284,14 @@ class ServerManager:
                 if error:
                     errors.append(error)
             except Exception as exc:
-                callbacks.get('show_error', self.log)(
+                callbacks.show_error(
                     f"Error processing '{sub_name}'", f"An unexpected error occurred: {exc}")
                 errors.append(exc)
 
         self.save_settings()  # Save all newly added servers to settings
         self.log("Subscription update finished.")
-        self.callbacks.get("on_servers_updated", lambda: None)()
-        self.callbacks.get("on_update_finish", lambda err: None)(
-            errors if errors else None)
+        self.callbacks.on_servers_updated()
+        self.callbacks.on_update_finish(errors if errors else None)
 
     # --- Ping & URL Tests ---
 
@@ -288,7 +311,7 @@ class ServerManager:
         server["ping"] = ping_result  # Keep for sorting
 
         # Notify UI
-        self.callbacks.get("on_ping_result", lambda s, p, t: None)(server, ping_result, test_type)
+        self.callbacks.on_ping_result(server, ping_result, test_type)
 
     def start_health_check(self, group_name: Optional[str] = None, test_types: Optional[List[str]] = None) -> None:
         """Start periodic health checking for servers."""
@@ -312,7 +335,8 @@ class ServerManager:
                 self.settings, self.log, generator)
 
         self._health_checker.set_test_core_manager(self._test_core_manager)
-        self._health_checker.start(servers, test_types or [], HEALTH_CHECK_INTERVAL)
+        self._health_checker.start(
+            servers, test_types or [], HEALTH_CHECK_INTERVAL)
         self.log(
             f"Started health checking for {len(servers)} servers", LogLevel.INFO)
 
