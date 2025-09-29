@@ -39,7 +39,7 @@ echo "Building the executable with PyInstaller..."
 echo "This might take a few minutes."
 echo ""
 
-pyinstaller --noconfirm --onefile --windowed --name onix \
+python -m PyInstaller --noconfirm --onefile --windowed --name onix \
 --add-data "sing-box:." \
 --add-data "version.txt:." \
 --add-data "geoip.db:." \

@@ -70,7 +70,7 @@ echo [5/5] Building the executable with PyInstaller...
 echo This might take a few minutes.
 echo.
 
-pyinstaller --noconfirm --onefile --windowed --name onix --add-data "sing-box.exe;." --add-data "version.txt;." --add-data "geoip.db;." --add-data "translations;translations" --icon="assets/icon.ico" main.py
+python -m PyInstaller --noconfirm --onefile --windowed --name onix --add-data "sing-box.exe;." --add-data "version.txt;." --add-data "geoip.db;." --add-data "translations;translations" --icon="assets/icon.ico" main.py
 
 if %errorlevel% neq 0 (
     echo ERROR: PyInstaller build failed.
