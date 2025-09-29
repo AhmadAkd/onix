@@ -1,0 +1,134 @@
+name: Build All Platforms
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: Build Windows executable
+      run: |
+        python build_all.py
+    
+    - name: Upload Windows artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: onix-windows
+        path: dist/onix-v1.0.0-windows-*.zip
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: Build macOS executable
+      run: |
+        python build_all.py
+    
+    - name: Upload macOS artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: onix-macos
+        path: dist/onix-v1.0.0-darwin-*.zip
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: Build Linux executable
+      run: |
+        python build_all.py
+    
+    - name: Upload Linux artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: onix-linux
+        path: dist/onix-v1.0.0-linux-*.zip
+
+  create-release:
+    needs: [build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          onix-windows/onix-v1.0.0-windows-*.zip
+          onix-macos/onix-v1.0.0-darwin-*.zip
+          onix-linux/onix-v1.0.0-linux-*.zip
+        body: |
+          ## Onix v1.0.0 - Multi-Platform Release
+          
+          ### Downloads
+          - **Windows**: `onix-v1.0.0-windows-amd64.zip`
+          - **macOS**: `onix-v1.0.0-darwin-amd64.zip` / `onix-v1.0.0-darwin-arm64.zip`
+          - **Linux**: `onix-v1.0.0-linux-amd64.zip` / `onix-v1.0.0-linux-arm64.zip`
+          
+          ### Features
+          - Complete UI refactoring with modern PySide6 interface
+          - Multi-language support (Persian, Russian, Arabic, Chinese)
+          - Comprehensive server management system
+          - Health checking and ping services
+          - QR code generation for server configurations
+          - Advanced routing rules management
+          - Subscription management with auto-update
+          - System tray integration
+          - Modern icon set and UI components
+          
+          ### Installation
+          1. Download the appropriate package for your platform
+          2. Extract the archive
+          3. Run the executable
+          
+          ### Requirements
+          - Windows 10/11 (64-bit)
+          - macOS 10.15+ (Intel/Apple Silicon)
+          - Linux (64-bit)
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
