@@ -10,45 +10,45 @@
 
 ---
 
-Onix is a graphical user interface (GUI) client for Sing-box, designed to simplify managing your connections. Built with `customtkinter`, it offers a modern, feature-rich, and user-friendly interface for Windows.
+Onix is a graphical user interface (GUI) client for Sing-box, designed to simplify managing your connections. Built with `PySide6`, it offers a modern, feature-rich, and user-friendly interface for Windows.
 
 ## ✨ Features
 
-- **Extensive Protocol Support:** 
+- **Extensive Protocol Support:**
   - **Standard Protocols:** VLESS, VMess, Shadowsocks, Trojan.
   - **Modern Protocols:** **TUIC (v5)**, **Hysteria2**, and **WireGuard**.
 - **Automatic Core Management:** Onix automatically downloads and manages the latest `sing-box` core for you.
 - **Advanced Subscription Management:**
-    - Add, edit, and delete multiple subscription links.
-    - Enable or disable individual subscriptions.
-    - Update all subscriptions with a single click to fetch the latest servers.
+  - Add, edit, and delete multiple subscription links.
+  - Enable or disable individual subscriptions.
+  - Update all subscriptions with a single click to fetch the latest servers.
 - **Powerful Server Management:**
-    - Add servers from subscription links.
-    - Add servers manually via share links.
-    - Add servers by scanning QR codes directly from your screen.
-    - **Import WireGuard configs** directly from `.conf` files.
-    - Organize servers into groups for better management.
+  - Add servers from subscription links.
+  - Add servers manually via share links.
+  - Add servers by scanning QR codes directly from your screen.
+  - **Import WireGuard configs** directly from `.conf` files.
+  - Organize servers into groups for better management.
 - **Enhanced UI & UX:**
-    - **Search Bar:** Instantly filter your server list by name.
-    - **Sortable Columns:** Sort servers by name or ping latency with a single click.
-    - **Interactive Log Panel:** Filter logs by level (Info, Warning, Error, etc.) to easily debug issues.
-    - **Visual Feedback:** See "..." indicators next to servers during latency tests.
+  - **Search Bar:** Instantly filter your server list by name.
+  - **Sortable Columns:** Sort servers by name or ping latency with a single click.
+  - **Interactive Log Panel:** Filter logs by level (Info, Warning, Error, etc.) to easily debug issues.
+  - **Visual Feedback:** See "..." indicators next to servers during latency tests.
 - **Connection Testing & Analysis:**
-    - Perform TCP pings and URL tests for your servers to check their performance.
-    - Sort servers by ping results to easily find the fastest one.
+  - Perform TCP pings and URL tests for your servers to check their performance.
+  - Sort servers by ping results to easily find the fastest one.
 - **System Integration (Windows):**
-    - Easily enable or disable the system-wide proxy.
-    - Run the application in the system tray for discreet operation.
-    - **TUN Mode:** Enable system-wide proxying for all applications.
+  - Easily enable or disable the system-wide proxy.
+  - Run the application in the system tray for discreet operation.
+  - **TUN Mode:** Enable system-wide proxying for all applications.
 - **Advanced Configuration:**
-    - **Connection Mode:** Switch between Rule-Based and Global proxy modes.
-    - **Configurable Muxing:** Enable and configure multiplexing (h2mux, smux, yamux) to improve performance.
-    - **Hysteria2 Bandwidth:** Set default upload and download speeds for Hysteria2 connections.
-    - **Custom DNS:** Set custom DNS servers.
-    - **Bypass Rules:** Configure domains and IPs to bypass the proxy.
-    - **Custom Routing:** Define advanced, custom rules to control how network traffic is routed (e.g., by domain, IP, process, geosite, or geoip).
+  - **Connection Mode:** Switch between Rule-Based and Global proxy modes.
+  - **Configurable Muxing:** Enable and configure multiplexing (h2mux, smux, yamux) to improve performance.
+  - **Hysteria2 Bandwidth:** Set default upload and download speeds for Hysteria2 connections.
+  - **Custom DNS:** Set custom DNS servers.
+  - **Bypass Rules:** Configure domains and IPs to bypass the proxy.
+  - **Custom Routing:** Define advanced, custom rules to control how network traffic is routed (e.g., by domain, IP, process, geosite, or geoip).
 - **Profile Management:**
-    - **Import/Export:** Easily import and export your entire application profile (including servers, subscriptions, and settings) as a single JSON file.
+  - **Import/Export:** Easily import and export your entire application profile (including servers, subscriptions, and settings) as a single JSON file.
 
 ## 🚀 Getting Started
 
@@ -114,31 +114,19 @@ The script will automatically handle all steps, and the final executable (`onix.
 
 ## 🖥️ User Interface and Usage
 
-Onix features three main tabs: "Connection", "Settings", and "Routing".
+Onix features four main sections: "Connection", "Routing", "Logs", and "Settings", accessible via a navigation rail.
 
-### Connection Tab
+### Connection View
 
-This tab is for managing your servers and connections.
+This is the main view for managing your servers and connections.
 
-- **Server List (Left Panel):**
-  - **Group Dropdown:** Displays your server groups.
-  - **Search Bar:** Filter servers by name.
-  - **Sortable Headers:** Click "Name" or "Ping" to sort the list.
-  - **Server List:** Shows the servers within the selected group. Click on a server to select it. Right-click for more options.
-  - **Start/Stop Buttons:** To start or stop the Sing-box connection.
-  - **Status Bar:** Displays the current connection status, IP address, and latency.
-- **Management Panel (Right Panel):**
-  - **Subscription Management:** Manage and update your subscription links.
-  - **Group Actions:** Ping all servers, perform URL tests, or cancel ongoing tests.
-  - **Manual Add:**
-    - **Add Single Server:** Manually add a server by pasting its share link.
-    - **Scan QR Code from Screen:** Scans your screen for a QR code.
-    - **Import WireGuard Config:** Add a WireGuard server by importing a `.conf` file.
-  - **Log Panel:** Displays application logs with interactive filtering controls.
+- **Top Bar:** Contains controls for group selection, server search, subscription management, and connection testing.
+- **Server List:** Displays servers in the selected group. Each server is a card showing its name and ping. A context menu provides actions like edit, delete, and copy link.
+- **Status Bar (Bottom):** Shows connection status, IP, latency, speed, and the main connect/disconnect button.
 
-### Settings Tab
+### Settings View
 
-This tab is for configuring application settings.
+This view is for configuring application settings.
 
 - **Appearance Settings:** Change the display mode (Light, Dark) and color theme.
 - **Network Settings:**
@@ -146,21 +134,46 @@ This tab is for configuring application settings.
   - **DNS Servers:** Enter custom DNS servers.
   - **Bypass Rules:** Configure domains and IPs to bypass the proxy.
   - **Enable TUN Mode:** Enable system-wide proxying.
-  - **TLS Fragment:** Configure TLS fragmentation options.
-  - **Mux Settings:** Enable and configure multiplexing.
-  - **Hysteria2 Settings:** Set default upload/download speeds.
+  - **Hysteria2 Bandwidth:** Set default upload and download speeds for Hysteria2 connections.
 - **Profile Management:** Import and export your entire application profile.
 - **Updates:** Manually check for `sing-box` core updates.
 - **About:** Shows application information.
 
+### Logs View
+
+This view displays real-time logs from the application and the `sing-box` core.
+
+- **Search Bar:** Quickly search through logs to find specific messages or errors.
+- **Filter Controls:** Filter logs by level (Info, Warning, Error, Debug) to focus on what matters.
+- **Clear Logs:** Clear all log messages from the panel with a single click.
+- **Copy Logs:** Right-click to copy selected text or the entire log line.
 
 ### Routing Tab
 
-This tab allows you to define custom rules to control how network traffic is routed. You can specify which traffic goes directly to the internet, which goes through the proxy, and which is blocked based on domain, IP, process, geosite, or geoip.
+This view allows you to define custom rules to control how network traffic is routed. You can specify which traffic goes directly to the internet, which goes through the proxy, and which is blocked based on domain, IP, process, geosite, or geoip.
 
 ## 🤝 Contributing
 
 We welcome contributions to Onix! Please see the [CONTRIBUTING.md](CONTRIBUTING.md) file for guidelines on how to contribute, including our code style and commit message conventions.
+
+### Translating Onix
+
+We welcome contributions to translate Onix into more languages! Here’s how you can help:
+
+1. **Get the Tools:** You will need [Qt Linguist](https://doc.qt.io/qt-6/qtlinguist-index.html), which is part of the free Qt tools.
+2. **Find Your Language File:**
+    - Go to the `translations/` directory.
+    - Find the file for your language, like `onix_fa.ts` for Persian or `onix_ru.ts` for Russian.
+    - If your language file doesn't exist, please open an issue to request it, and we'll create the initial file for you.
+3. **Translate:**
+    - Open the `.ts` file in Qt Linguist.
+    - For each source text, enter the translation in the corresponding field and mark it as complete (Ctrl+Enter).
+    - Save your changes.
+4. **Submit Your Contribution:**
+    - Commit the updated `.ts` file.
+    - Create a Pull Request with your changes. You don't need to worry about compiling the `.qm` files; our build process handles that.
+
+Thank you for helping make Onix accessible to more users!
 
 ## 📄 License
 

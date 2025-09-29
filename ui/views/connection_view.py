@@ -1,0 +1,165 @@
+from PySide6.QtWidgets import (
+    QWidget,
+    QHBoxLayout,
+    QVBoxLayout,
+    QComboBox,
+    QLineEdit,
+    QPushButton,
+    QListWidget,
+    QTextEdit,
+    QMenu,
+    QLabel,
+)
+from PySide6.QtGui import QIcon, QAction, QMovie
+from PySide6.QtCore import QSize
+
+
+def create_connection_view(main_window):
+    widget = QWidget()
+    main_layout = QHBoxLayout(widget)
+    main_layout.setContentsMargins(0, 0, 0, 0)
+    main_layout.setSpacing(0)
+
+    top_bar = QWidget()
+    top_bar.setObjectName("TopBar")
+    top_bar_layout = QHBoxLayout(top_bar)
+    top_bar_layout.setContentsMargins(10, 5, 10, 5)
+    main_window.current_view_mode = "servers"  # "servers" or "chains"
+
+    main_window.group_dropdown = QComboBox()
+
+    main_window.sort_combo = QComboBox()
+    main_window.sort_combo.addItems(
+        [main_window.tr("Sort by: Default"), main_window.tr("Name (A-Z)"), main_window.tr("Name (Z-A)"), main_window.tr("Ping (Low to High)")])
+    main_window.sort_combo.setFixedWidth(150)
+    main_window.sort_combo.currentTextChanged.connect(
+        main_window.update_server_list)
+
+    main_window.search_field = QLineEdit()
+    main_window.search_field.setPlaceholderText(main_window.tr("Search..."))
+    main_window.manage_subs_button = QPushButton(
+        QIcon(":/icons/list.svg"), main_window.tr("Subscriptions"))
+    main_window.manage_chains_button = QPushButton(
+        QIcon(":/icons/git-merge.svg"), main_window.tr("Manage Chains"))
+    main_window.update_subs_button = QPushButton(
+        QIcon(":/icons/refresh-cw.svg"), main_window.tr("Update Subs"))
+    main_window.health_check_tcp_button = QPushButton(
+        QIcon(":/icons/zap.svg"), main_window.tr("Health Check TCP"))
+    main_window.health_check_url_button = QPushButton(
+        QIcon(":/icons/activity.svg"), main_window.tr("Health Check URL"))
+    main_window.health_check_tcp_button.setToolTip(
+        main_window.tr("Start/Stop periodic TCP health checking with exponential backoff"))
+    main_window.health_check_url_button.setToolTip(
+        main_window.tr("Start/Stop periodic URL health checking with exponential backoff"))
+    main_window.health_check_tcp_button.setCheckable(True)
+    main_window.health_check_url_button.setCheckable(True)
+
+    # Loading animation for sorting
+    main_window.sorting_spinner_label = QLabel()
+    sorting_spinner_movie = QMovie(":/icons/spinner.gif")
+    sorting_spinner_movie.setScaledSize(QSize(20, 20))
+    main_window.sorting_spinner_label.setMovie(sorting_spinner_movie)
+    main_window.sorting_spinner_label.hide()
+
+    # Loading animation for subscription update
+    main_window.update_spinner_label = QLabel()
+    spinner_movie = QMovie(":/icons/spinner.gif")
+    spinner_movie.setScaledSize(QSize(20, 20))
+    main_window.update_spinner_label.setMovie(spinner_movie)
+    main_window.update_spinner_label.hide()
+
+    # --- More Actions Menu ---
+    main_window.more_actions_button = QPushButton(
+        QIcon(":/icons/more-horizontal.svg"), "")
+    main_window.more_actions_button.setFixedWidth(40)
+    more_menu = QMenu(main_window)
+
+    import_action = QAction(
+        QIcon(":/icons/clipboard.svg"), main_window.tr("Import from Clipboard"), main_window)
+    import_action.triggered.connect(main_window.import_from_clipboard)
+    more_menu.addAction(import_action)
+
+    scan_qr_action = QAction(
+        QIcon(":/icons/camera.svg"), main_window.tr("Scan QR from Screen"), main_window)
+    scan_qr_action.triggered.connect(main_window.handle_scan_qr_from_screen)
+    more_menu.addAction(scan_qr_action)
+
+    import_wg_action = QAction(
+        QIcon(":/icons/clipboard.svg"), main_window.tr("Import WireGuard from File"), main_window)
+    import_wg_action.triggered.connect(
+        main_window.handle_import_wireguard_config)
+    more_menu.addAction(import_wg_action)
+
+    more_menu.addSeparator()
+
+    copy_links_action = QAction(
+        QIcon(":/icons/copy.svg"), main_window.tr("Copy Group Links"), main_window)
+    copy_links_action.triggered.connect(
+        main_window.copy_group_links_to_clipboard)
+    more_menu.addAction(copy_links_action)
+
+    delete_group_action = QAction(
+        QIcon(":/icons/trash-2.svg"), main_window.tr("Delete Current Group"), main_window)
+    delete_group_action.triggered.connect(main_window.delete_current_group)
+    more_menu.addAction(delete_group_action)
+
+    main_window.more_actions_button.setMenu(more_menu)
+
+    top_bar_layout.addWidget(main_window.group_dropdown)
+    top_bar_layout.addWidget(main_window.search_field)
+    top_bar_layout.addStretch()
+    top_bar_layout.addWidget(main_window.sort_combo)
+    top_bar_layout.addWidget(main_window.health_check_tcp_button)
+    top_bar_layout.addWidget(main_window.health_check_url_button)
+    top_bar_layout.addWidget(main_window.sorting_spinner_label)
+    top_bar_layout.addSpacing(10)
+    top_bar_layout.addWidget(main_window.manage_chains_button)
+    top_bar_layout.addWidget(main_window.manage_subs_button)
+    top_bar_layout.addWidget(main_window.update_spinner_label)
+    top_bar_layout.addWidget(main_window.update_subs_button)
+    top_bar_layout.addWidget(main_window.more_actions_button)
+
+    # --- Left Panel (List) ---
+    left_panel = QWidget()
+    left_layout = QVBoxLayout(left_panel)
+    left_layout.setContentsMargins(0, 0, 0, 0)
+    left_layout.setSpacing(0)
+    left_layout.addWidget(top_bar)
+
+    main_window.server_list_widget = QListWidget()
+    main_window.server_list_widget.setStyleSheet(
+        "QListWidget::item { padding: 5px; }")
+    main_window.server_list_widget.currentItemChanged.connect(
+        main_window.on_server_selected)
+    left_layout.addWidget(main_window.server_list_widget)
+
+    # --- Right Panel (Details) ---
+    main_window.server_details_panel = QWidget()
+    main_window.server_details_panel.setObjectName("ServerDetailsPanel")
+    main_window.server_details_panel.setFixedWidth(320)
+    main_window.server_details_panel.setStyleSheet(
+        "#ServerDetailsPanel { border-left: 1px solid #e9ecef; } [theme='dark'] #ServerDetailsPanel { border-left: 1px solid #495057; }")
+    details_layout = QVBoxLayout(main_window.server_details_panel)
+    main_window.server_details_content = QTextEdit()
+    main_window.server_details_content.setReadOnly(True)
+    details_layout.addWidget(main_window.server_details_content)
+    main_window.server_details_panel.hide()  # Initially hidden
+    main_layout.addWidget(left_panel)
+    main_layout.addWidget(main_window.server_details_panel)
+
+    main_window.group_dropdown.currentTextChanged.connect(
+        main_window.update_server_list)
+    main_window.search_field.textChanged.connect(
+        main_window.update_server_list)
+    main_window.health_check_tcp_button.clicked.connect(
+        main_window.toggle_health_check_tcp)
+    main_window.health_check_url_button.clicked.connect(
+        main_window.toggle_health_check_url)
+    main_window.manage_subs_button.clicked.connect(
+        main_window.show_subscription_manager)
+    main_window.manage_chains_button.clicked.connect(
+        main_window.show_chain_manager)  # This was already connected
+    main_window.update_subs_button.clicked.connect(
+        main_window.handle_update_subscriptions)
+
+    return widget

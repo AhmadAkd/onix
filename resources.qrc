@@ -1,0 +1,30 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+<qresource prefix="/">
+    <file alias="icons/spinner.gif">assets/spinner.gif</file>
+    <file alias="icons/link.svg">assets/icons/link.svg</file>
+    <file alias="icons/git-merge.svg">assets/icons/git-merge.svg</file>
+    <file alias="icons/file-text.svg">assets/icons/file-text.svg</file>
+    <file alias="icons/settings.svg">assets/icons/settings.svg</file>
+    <file alias="icons/clipboard.svg">assets/icons/clipboard.svg</file>
+    <file alias="icons/list.svg">assets/icons/list.svg</file>
+    <file alias="icons/camera.svg">assets/icons/camera.svg</file>
+    <file alias="icons/copy.svg">assets/icons/copy.svg</file>
+    <file alias="icons/trash-2.svg">assets/icons/trash-2.svg</file>
+    <file alias="icons/refresh-cw.svg">assets/icons/refresh-cw.svg</file>
+    <file alias="icons/activity.svg">assets/icons/activity.svg</file>
+    <file alias="icons/zap.svg">assets/icons/zap.svg</file>
+    <file alias="icons/more-horizontal.svg">assets/icons/more-horizontal.svg</file>
+    <file alias="icons/stop-circle.svg">assets/icons/stop-circle.svg</file>
+    <file alias="icons/play.svg">assets/icons/play.svg</file>
+    <file alias="icons/pause.svg">assets/icons/pause.svg</file>
+    <file alias="icons/edit-2.svg">assets/icons/edit-2.svg</file>
+    <file alias="icons/qr-code.svg">assets/icons/qr-code.svg</file>
+    <file alias="icons/arrow-up.svg">assets/icons/arrow-up.svg</file>
+    <file alias="icons/arrow-down.svg">assets/icons/arrow-down.svg</file>
+    <file alias="icons/app-icon.svg">assets/icons/app-icon.svg</file>
+    <file alias="icons/globe.svg">assets/icons/globe.svg</file>
+    <file alias="icons/sliders.svg">assets/icons/sliders.svg</file>
+    <file alias="icons/shield.svg">assets/icons/shield.svg</file>
+</qresource>
+</RCC>

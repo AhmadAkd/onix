@@ -49,11 +49,15 @@ jobs:
         }
         Set-Content -Path "version.txt" -Value $version
 
+    - name: Compile translations
+      run: python update_translations.py
+
     - name: Build with PyInstaller
       run: |
-        pyinstaller --noconfirm --onefile --windowed --name onix --add-data "sing-box.exe;." --add-data "version.txt;." --add-data "geoip.db;." --icon="assets/icon.ico" main.py
+        pyinstaller --noconfirm --onefile --windowed --name onix --add-data "sing-box.exe;." --add-data "version.txt;." --add-data "geoip.db;." --add-data "translations;translations" --icon="assets/icon.ico" main.py
 
     - name: Package executable for release
+      if: success()
       run: Compress-Archive -Path dist/onix.exe -DestinationPath onix-windows-exe.zip
 
     - name: Upload build artifact (for PRs and main branch)

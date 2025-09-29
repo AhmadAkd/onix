@@ -6,13 +6,15 @@ import io
 import platform
 import tarfile
 import subprocess
-from tkinter import messagebox
 from packaging import version
 
 from constants import (
     GITHUB_SINGBOX_RELEASE_API,
+    GITHUB_XRAY_RELEASE_API,
     SINGBOX_ASSET_KEYWORDS,
     SINGBOX_EXECUTABLE_NAMES,
+    XRAY_ASSET_KEYWORDS,
+    XRAY_EXECUTABLE_NAMES,
 )
 
 
@@ -51,30 +53,35 @@ def get_singbox_platform_arch():
     return platform_name, arch_name
 
 
-def get_local_singbox_version(singbox_path):
+def get_local_core_version(core_path, core_name):
     """Gets the version of the local sing-box executable."""
-    if not os.path.exists(singbox_path):
+    if not os.path.exists(core_path):
         return None
     try:
         result = subprocess.run(
-            [singbox_path, "version"],
+            [core_path, "version"],
             capture_output=True,
             text=True,
             check=True,
             creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0,
         )
-        # Output is like: "sing-box version 1.9.0-alpha.4"
+        # sing-box: "sing-box version 1.9.0-alpha.4"
+        # xray: "Xray 1.8.10 (Xray, Penetrates Everything.) ..."
         version_line = result.stdout.strip()
-        return version_line.split(" ")[2]
+        parts = version_line.split(" ")
+        if core_name == "sing-box":
+            return parts[2]
+        elif core_name == "xray":
+            return parts[1]
     except (subprocess.CalledProcessError, FileNotFoundError, IndexError) as e:
-        print(f"ERROR: Could not determine sing-box version: {e}")
+        print(f"ERROR: Could not determine {core_name} version: {e}")
         return None
 
 
-def get_latest_singbox_version():
-    """Gets the latest sing-box version from the GitHub API."""
+def get_latest_core_version(api_url):
+    """Gets the latest core version from the GitHub API."""
     try:
-        response = requests.get(GITHUB_SINGBOX_RELEASE_API, timeout=10)
+        response = requests.get(api_url, timeout=10)
         response.raise_for_status()
         release_data = response.json()
         # The tag name is usually the version number, e.g., "v1.9.0"
@@ -85,18 +92,27 @@ def get_latest_singbox_version():
         return None
 
 
-def download_singbox(asset_url, asset_name, singbox_path, target_executable_name):
+def download_core(asset_url, asset_name, core_path, target_executable_name, callbacks=None):
     """Downloads and extracts the sing-box executable."""
+    # Default to print if no callbacks are provided
+    callbacks = callbacks or {}
+    show_error = callbacks.get(
+        'show_error', lambda title, msg: print(f"ERROR [{title}]: {msg}"))
+    show_info = callbacks.get(
+        'show_info', lambda title, msg: print(f"INFO [{title}]: {msg}"))
+    ask_yes_no = callbacks.get('ask_yes_no', lambda title, msg: False)
+
     try:
         print(f"INFO: Downloading: {asset_name}")
         archive_response = requests.get(asset_url, timeout=60)
         archive_response.raise_for_status()
 
-        download_dir = os.path.dirname(singbox_path)
+        download_dir = os.path.dirname(core_path)
         if not download_dir:
             download_dir = os.getcwd()
 
-        print(f"INFO: Extracting {target_executable_name} from {asset_name}...")
+        print(
+            f"INFO: Extracting {target_executable_name} from {asset_name}...")
         if asset_name.endswith(".zip"):
             with zipfile.ZipFile(io.BytesIO(archive_response.content)) as z:
                 exe_path_in_archive = next(
@@ -111,8 +127,16 @@ def download_singbox(asset_url, asset_name, singbox_path, target_executable_name
                     raise FileNotFoundError(
                         f"Could not find {target_executable_name} in the zip file."
                     )
-                z.extract(exe_path_in_archive, path=download_dir)
-                extracted_path = os.path.join(download_dir, exe_path_in_archive)
+                # Extract the file directly to the final destination with the correct name
+                with z.open(exe_path_in_archive) as source, open(core_path, "wb") as target:
+                    target.write(source.read())
+                # Since we extracted directly, no rename is needed.
+                # The extracted_path is now just core_path.
+                extracted_path = core_path
+                # We don't need the os.rename part anymore for zip files.
+                if sys.platform != "win32":
+                    os.chmod(core_path, 0o755)
+                return True  # Exit early on success
 
         elif asset_name.endswith(".tar.gz"):
             with tarfile.open(
@@ -131,17 +155,13 @@ def download_singbox(asset_url, asset_name, singbox_path, target_executable_name
                         f"Could not find {target_executable_name} in the tar.gz file."
                     )
                 tar.extract(exe_path_in_archive, path=download_dir)
-                extracted_path = os.path.join(download_dir, exe_path_in_archive)
+                extracted_path = os.path.join(
+                    download_dir, exe_path_in_archive)
         else:
             raise ValueError(f"Unsupported archive format: {asset_name}")
 
-        # Move to final location and set permissions
-        if os.path.exists(singbox_path):
-            os.remove(singbox_path)
-        os.rename(extracted_path, singbox_path)
-
         if sys.platform != "win32":
-            os.chmod(singbox_path, 0o755)
+            os.chmod(core_path, 0o755)
 
         print(
             f"SUCCESS: {target_executable_name} downloaded and extracted successfully!"
@@ -149,81 +169,113 @@ def download_singbox(asset_url, asset_name, singbox_path, target_executable_name
         return True
 
     except requests.exceptions.RequestException as e:
-        messagebox.showerror(
-            "Download Error", f"Network error while downloading sing-box: {e}"
+        show_error(
+            "Download Error", f"Network error while downloading core: {e}"
         )
         return False
     except (zipfile.BadZipFile, tarfile.ReadError, FileNotFoundError) as e:
-        messagebox.showerror("Extraction Error", f"Failed to extract sing-box: {e}")
+        show_error("Extraction Error", f"Failed to extract core: {e}")
         return False
     except Exception as e:
-        messagebox.showerror(
+        show_error(
             "Error", f"An unexpected error occurred during download: {e}"
         )
         return False
 
 
-def download_singbox_if_needed(force_update=False):
+def download_core_if_needed(core_name="sing-box", force_update=False, callbacks=None):
     """
-    Checks for sing-box executable, compares versions, and downloads if it's missing or outdated.
+    Checks for a core executable, compares versions, and downloads if it's missing or outdated.
     """
+    callbacks = callbacks or {}
+    # Define core-specific details
+    core_details = {
+        "sing-box": {
+            "repo": "SagerNet/sing-box",
+            "asset_keywords": SINGBOX_ASSET_KEYWORDS,
+            "executable_names": SINGBOX_EXECUTABLE_NAMES,
+            "api_url": GITHUB_SINGBOX_RELEASE_API,
+        },
+        "xray": {
+            "repo": "XTLS/Xray-core",
+            "asset_keywords": XRAY_ASSET_KEYWORDS,
+            "executable_names": XRAY_EXECUTABLE_NAMES,
+            "api_url": GITHUB_XRAY_RELEASE_API,
+        },
+    }
+
+    if core_name not in core_details:
+        show_error = callbacks.get(
+            'show_error', lambda title, msg: print(f"ERROR [{title}]: {msg}"))
+        show_error("Unsupported Core",
+                   f"The selected core '{core_name}' is not supported for auto-updates.")
+        return
+
+    details = core_details[core_name]
+    show_error = callbacks.get(
+        'show_error', lambda title, msg: print(f"ERROR [{title}]: {msg}"))
+    show_info = callbacks.get(
+        'show_info', lambda title, msg: print(f"INFO [{title}]: {msg}"))
+    ask_yes_no = callbacks.get('ask_yes_no', lambda title, msg: False)
+
     platform_name, arch_name = get_singbox_platform_arch()
     if not platform_name or not arch_name:
-        messagebox.showerror(
+        show_error(
             "Unsupported Platform",
             f"Your OS/Architecture ({sys.platform}/{platform.machine()}) is not supported.",
         )
         return
 
-    target_executable_name = SINGBOX_EXECUTABLE_NAMES.get(platform_name)
-    singbox_path = get_resource_path(target_executable_name)
+    target_executable_name = details["executable_names"].get(platform_name)
+    core_path = get_resource_path(target_executable_name)
 
-    local_version = get_local_singbox_version(singbox_path)
+    local_version = get_local_core_version(core_path, core_name)
 
-    if not os.path.exists(singbox_path):
-        print("INFO: sing-box not found. Starting download process.")
+    if not os.path.exists(core_path):
+        print(f"INFO: {core_name} not found. Starting download process.")
         force_update = True  # Force download if it doesn't exist
 
     if not force_update and local_version:
-        latest_version = get_latest_singbox_version()
+        latest_version = get_latest_core_version(details["api_url"])
         if not latest_version:
-            print(
-                "WARNING: Could not fetch the latest sing-box version. Skipping update check."
+            show_info(
+                f"WARNING: Could not fetch the latest {core_name} version. Skipping update check."
             )
             return
 
         print(
-            f"INFO: Local sing-box version: {local_version}, Latest version: {latest_version}"
+            f"INFO: Local {core_name} version: {local_version}, Latest version: {latest_version}"
         )
 
         try:
             if version.parse(local_version) >= version.parse(latest_version):
-                print("INFO: Your sing-box is up to date.")
+                show_info("Up to Date",
+                          f"Your {core_name} core is up to date.")
                 return
         except version.InvalidVersion:
-            print(
-                f"WARNING: Could not parse local version '{local_version}'. Proceeding with update check."
+            show_warning(
+                "Version Warning", f"Could not parse local version '{local_version}'. Proceeding with update check."
             )
 
-        if not messagebox.askyesno(
+        if not ask_yes_no(
             "Update Available",
-            f"A new version of sing-box is available ({latest_version}). Your current version is {local_version}.\n\nDo you want to download and update it now?",
+            f"A new version of {core_name} is available ({latest_version}). Your current version is {local_version}.\n\nDo you want to download and update it now?",
         ):
             return
 
-    print("INFO: Proceeding with sing-box download/update...")
-    api_url = GITHUB_SINGBOX_RELEASE_API
-    asset_keyword = SINGBOX_ASSET_KEYWORDS.get(f"{platform_name}_{arch_name}")
+    print(f"INFO: Proceeding with {core_name} download/update...")
+    asset_keyword = details["asset_keywords"].get(
+        f"{platform_name}_{arch_name}")
 
     if not asset_keyword:
-        messagebox.showerror(
+        show_error(
             "Asset Error",
             f"No sing-box asset keyword defined for {platform_name}-{arch_name}.",
         )
         return
 
     try:
-        response = requests.get(api_url, timeout=10)
+        response = requests.get(details["api_url"], timeout=10)
         response.raise_for_status()
         release_data = response.json()
 
@@ -237,25 +289,26 @@ def download_singbox_if_needed(force_update=False):
         )
 
         if not asset:
-            messagebox.showerror(
+            show_error(
                 "Asset Error",
                 f"Could not find a download link for '{asset_keyword}' in the latest release.",
             )
             return
 
-        if download_singbox(
+        if download_core(
             asset["browser_download_url"],
             asset["name"],
-            singbox_path,
+            core_path,
             target_executable_name,
+            callbacks=callbacks
         ):
-            new_version = get_local_singbox_version(singbox_path)
-            messagebox.showinfo(
+            new_version = get_local_core_version(core_path, core_name)
+            show_info(
                 "Update Successful",
-                f"sing-box has been successfully updated to version {new_version}.",
+                f"{core_name} has been successfully updated to version {new_version}.",
             )
 
     except requests.exceptions.RequestException as e:
-        messagebox.showerror(
+        show_error(
             "API Error", f"Failed to get release information from GitHub: {e}"
         )

@@ -1,8 +1,7 @@
-customtkinter
 requests
-pystray
 Pillow
-pyinstaller
 qrcode
 pyzbar
 opencv-python
+PySide6
+mss

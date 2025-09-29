@@ -37,8 +37,18 @@ if not exist "version.txt" echo ERROR: Failed to create version.txt. & goto :fai
 echo version.txt created.
 echo.
 
-REM --- Step 3: Download GeoIP database ---
-echo [3/5] Checking for GeoIP database...
+REM --- Step 3: Compile Translations ---
+echo [3/5] Compiling translation files (.qm)...
+python update_translations.py
+if %errorlevel% neq 0 (
+    echo ERROR: Failed to compile translations.
+    goto :fail
+)
+echo Translations compiled successfully.
+echo.
+
+REM --- Step 4: Download GeoIP database ---
+echo [4/5] Checking for GeoIP database...
 if exist "geoip.db" (
     echo geoip.db already exists.
 ) else (
@@ -55,20 +65,20 @@ if exist "geoip.db" (
 )
 echo.
 
-REM --- Step 4: Build the executable ---
-echo [4/5] Building the executable with PyInstaller...
+REM --- Step 5: Build the executable ---
+echo [5/5] Building the executable with PyInstaller...
 echo This might take a few minutes.
 echo.
 
-pyinstaller --noconfirm --onefile --windowed --name onix --add-data "sing-box.exe;." --add-data "version.txt;." --add-data "geoip.db;." --icon="assets/icon.ico" main.py
+pyinstaller --noconfirm --onefile --windowed --name onix --add-data "sing-box.exe;." --add-data "version.txt;." --add-data "geoip.db;." --add-data "translations;translations" --icon="assets/icon.ico" main.py
 
 if %errorlevel% neq 0 (
     echo ERROR: PyInstaller build failed.
     goto :fail
 )
 
-REM --- Step 5: Cleanup and Final Message ---
-echo [5/5] Cleaning up...
+REM --- Step 6: Cleanup and Final Message ---
+echo [6/6] Cleaning up...
 del version.txt
 
 echo.

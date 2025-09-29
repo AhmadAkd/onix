@@ -1,6 +1,7 @@
 import json
 import os
 from constants import (
+    APP_VERSION,
     SETTINGS_FILE,
     DEFAULT_DNS_SERVERS,
     DEFAULT_BYPASS_DOMAINS,
@@ -9,18 +10,22 @@ from constants import (
 )
 
 DEFAULT_SETTINGS = {
+    "app_version": APP_VERSION,
     "subscriptions": [],
     "servers": {},
     "appearance_mode": "System",
-    "color_theme": "green",
+    "theme_color": "blue",
     "dns_servers": DEFAULT_DNS_SERVERS,
     "bypass_domains": DEFAULT_BYPASS_DOMAINS,
     "bypass_ips": DEFAULT_BYPASS_IPS,
     "connection_mode": "Rule-Based",
     "custom_routing_rules": [],
+    "outbound_chains": [],  # Added for outbound chaining
     "tls_fragment_enabled": False,
     "tls_fragment_size": "10-100",
     "tls_fragment_sleep": "10-100",
+    "window_geometry": None,  # To store window position and size
+    "window_maximized": False,  # To store if the window was maximized
 }
 
 
@@ -42,6 +47,10 @@ def load_settings(log_callback=None):
             with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
                 loaded_settings = json.load(f)
 
+                # Merge loaded settings into defaults to ensure all keys exist
+                settings.update(loaded_settings)
+                settings_version = settings.get("app_version", "0.0.0")
+
                 # --- Migration Logic ---
                 if (
                     "sub_link" in loaded_settings
@@ -54,7 +63,11 @@ def load_settings(log_callback=None):
                         ]
                     del loaded_settings["sub_link"]
 
-                settings.update(loaded_settings)  # Merge loaded settings with defaults
+                # You can add more complex migration logic based on version here
+                # if version.parse(settings_version) < version.parse("1.1.0"):
+                #     # Do something for versions older than 1.1.0
+                #     pass
+
     except (IOError, json.JSONDecodeError) as e:
         if log_callback:
             log_callback(f"Error loading settings: {e}", LogLevel.ERROR)
@@ -104,11 +117,13 @@ def import_settings(file_path, log_callback=None):
         return True
     except FileNotFoundError:
         if log_callback:
-            log_callback(f"Error: File not found at {file_path}", LogLevel.ERROR)
+            log_callback(
+                f"Error: File not found at {file_path}", LogLevel.ERROR)
         return False
     except json.JSONDecodeError:
         if log_callback:
-            log_callback(f"Error: Invalid JSON format in {file_path}", LogLevel.ERROR)
+            log_callback(
+                f"Error: Invalid JSON format in {file_path}", LogLevel.ERROR)
         return False
     except Exception as e:
         if log_callback:
