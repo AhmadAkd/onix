@@ -31,6 +31,11 @@ jobs:
       run: |
         python build_all.py
     
+    - name: List dist contents
+      run: |
+        dir dist
+        dir dist\onix* /s
+    
     - name: Upload Windows artifacts
       uses: actions/upload-artifact@v3
       with:
@@ -61,6 +66,11 @@ jobs:
       run: |
         python build_all.py
     
+    - name: List dist contents
+      run: |
+        ls -la dist
+        find dist -name "onix*" -type f
+    
     - name: Upload macOS artifacts
       uses: actions/upload-artifact@v3
       with:
@@ -90,6 +100,11 @@ jobs:
     - name: Build Linux executable
       run: |
         python build_all.py
+    
+    - name: List dist contents
+      run: |
+        ls -la dist
+        find dist -name "onix*" -type f
     
     - name: Upload Linux artifacts
       uses: actions/upload-artifact@v3
