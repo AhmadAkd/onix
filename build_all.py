@@ -132,7 +132,7 @@ def build_executable():
 
     # PyInstaller command
     cmd = [
-        "pyinstaller",
+        sys.executable, "-m", "PyInstaller",
         "--noconfirm",
         "--onefile",
         "--windowed",
