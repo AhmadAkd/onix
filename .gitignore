@@ -130,3 +130,11 @@ dummy_config.json
 settings.json
 temp_*.json
 sing-box.exe
+
+# Build artifacts
+*.zip
+*.tar.gz
+*.dmg
+*.deb
+*.rpm
+onix-v*.zip
