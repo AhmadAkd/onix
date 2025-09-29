@@ -10,18 +10,21 @@ import subprocess
 import platform
 from pathlib import Path
 
+
 def check_docker():
     """Check if Docker is available"""
     try:
-        result = subprocess.run(["docker", "--version"], capture_output=True, text=True)
+        result = subprocess.run(["docker", "--version"],
+                                capture_output=True, text=True)
         if result.returncode == 0:
             print(f"Docker found: {result.stdout.strip()}")
             return True
     except FileNotFoundError:
         pass
-    
+
     print("Docker not found. Please install Docker Desktop.")
     return False
+
 
 def create_dockerfile(platform_name):
     """Create Dockerfile for specific platform"""
@@ -83,19 +86,20 @@ RUN python build_all.py
 
 # The built files will be in /app/dist
 """
-    
+
     with open(f"Dockerfile.{platform_name}", "w") as f:
         f.write(dockerfile_content)
-    
+
     return f"Dockerfile.{platform_name}"
+
 
 def build_with_docker(platform_name):
     """Build using Docker"""
     print(f"Building for {platform_name} using Docker...")
-    
+
     # Create Dockerfile
     dockerfile = create_dockerfile(platform_name)
-    
+
     # Build Docker image
     image_name = f"onix-builder-{platform_name}"
     build_cmd = [
@@ -104,11 +108,11 @@ def build_with_docker(platform_name):
         "-t", image_name,
         "."
     ]
-    
+
     print(f"Building Docker image: {image_name}")
     if not run_command(build_cmd):
         return False
-    
+
     # Run container and copy files
     container_name = f"onix-build-{platform_name}"
     run_cmd = [
@@ -117,33 +121,35 @@ def build_with_docker(platform_name):
         image_name,
         "python", "build_all.py"
     ]
-    
+
     print(f"Running build in container: {container_name}")
     if not run_command(run_cmd):
         return False
-    
+
     # Copy built files from container
     copy_cmd = [
         "docker", "cp",
         f"{container_name}:/app/dist/",
         f"dist-{platform_name}/"
     ]
-    
+
     print(f"Copying built files from container...")
     if not run_command(copy_cmd):
         return False
-    
+
     # Clean up container
     cleanup_cmd = ["docker", "rm", container_name]
     run_command(cleanup_cmd)
-    
+
     return True
+
 
 def run_command(cmd):
     """Run a command and handle errors"""
     print(f"Running: {' '.join(cmd)}")
     try:
-        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        result = subprocess.run(
+            cmd, check=True, capture_output=True, text=True)
         if result.stdout:
             print(result.stdout)
         return True
@@ -152,6 +158,7 @@ def run_command(cmd):
         if e.stderr:
             print(f"Stderr: {e.stderr}")
         return False
+
 
 def create_github_workflow():
     """Create a GitHub workflow for cross-platform builds"""
@@ -275,28 +282,29 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 """
-    
+
     # Create .github/workflows directory if it doesn't exist
     workflows_dir = Path(".github/workflows")
     workflows_dir.mkdir(parents=True, exist_ok=True)
-    
+
     with open(workflows_dir / "cross-platform-build.yml", "w") as f:
         f.write(workflow_content)
-    
+
     print("GitHub workflow created: .github/workflows/cross-platform-build.yml")
+
 
 def main():
     """Main function"""
     print("=" * 60)
     print("    Onix Cross-Platform Build Script")
     print("=" * 60)
-    
+
     # Check if we're on Windows
     if platform.system().lower() != "windows":
         print("This script is designed to run on Windows for cross-platform builds.")
         print("For native builds, use build_all.py directly.")
         return False
-    
+
     # Check Docker availability
     if not check_docker():
         print("\nDocker is required for cross-platform builds from Windows.")
@@ -304,23 +312,24 @@ def main():
         print("\nAlternatively, you can use GitHub Actions for automated builds.")
         create_github_workflow()
         return False
-    
+
     # Build for different platforms
     platforms = ["linux"]  # macOS requires more complex setup
-    
+
     for platform_name in platforms:
         print(f"\n--- Building for {platform_name} ---")
         if not build_with_docker(platform_name):
             print(f"Failed to build for {platform_name}")
             continue
-        
+
         print(f"Successfully built for {platform_name}")
-    
+
     print("\n" + "=" * 60)
     print("    Cross-platform build completed!")
     print("=" * 60)
-    
+
     return True
+
 
 if __name__ == "__main__":
     success = main()

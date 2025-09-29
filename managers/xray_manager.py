@@ -34,6 +34,7 @@ class XrayManager(CoreManager):
     def __init__(self, settings: Dict[str, Any], callbacks: XrayManagerCallbacks):
         super().__init__(settings, callbacks)
         self.config_generator = XrayConfigGenerator()
+        self.connection_check_timer = None
 
     def start(self, config: Dict[str, Any]) -> None:
         if self.is_running and self.process and self.process.poll() is None:
@@ -43,16 +44,17 @@ class XrayManager(CoreManager):
             time.sleep(CONNECTION_STOP_DELAY)
 
         self.log("Starting Xray connection...", LogLevel.INFO)
-        self.callbacks.on_status_change("Connecting...", "yellow")
+        self.callbacks.get("on_status_change", lambda s,
+                           c: None)("Connecting...", "yellow")
 
         thread = threading.Thread(
             target=self._run_and_log, args=(config,), daemon=True)
         thread.start()
 
-        # Schedule connection check
-        check_connection_timer = threading.Timer(
+        # Schedule connection check and store the timer reference
+        self.connection_check_timer = threading.Timer(
             CONNECTION_CHECK_DELAY / 1000.0, self.check_connection)
-        check_connection_timer.start()
+        self.connection_check_timer.start()
 
     def _run_and_log(self, config: Dict[str, Any]) -> None:
         config_filename = None
@@ -106,7 +108,7 @@ class XrayManager(CoreManager):
         finally:
             if self.is_running:
                 self.is_running = False
-                self.callbacks.on_stop()
+                self.callbacks.get("on_stop", lambda: None)()
             if config_filename and os.path.exists(config_filename):
                 try:
                     os.remove(config_filename)
@@ -118,26 +120,36 @@ class XrayManager(CoreManager):
         if not self.is_running and not self.process:
             return
 
+        # Cancel connection check timer if it exists
+        if self.connection_check_timer:
+            self.connection_check_timer.cancel()
+            self.connection_check_timer = None
+
         if self.process and self.process.poll() is None:
             self.process.kill()
-            self.log("Xray process terminated.")
+            self.log("Xray process terminated.", LogLevel.INFO)
 
         self.is_running = False
         self.process = None
         system_proxy.set_system_proxy(False, self.settings, self.log)
-        self.callbacks.on_stop()
+        self.callbacks.get("on_stop", lambda: None)()
 
     def check_connection(self) -> None:
+        # Only check connection if we're actually running
+        if not self.is_running:
+            return
+
         result = network_tester.url_test(PROXY_SERVER_ADDRESS)
         if result != -1:
             self.log(
                 f"Connection successful! Latency: {result} ms.", LogLevel.SUCCESS)
             system_proxy.set_system_proxy(True, self.settings, self.log)
-            self.callbacks.on_connect(result)
+            self.callbacks.get("on_connect", lambda r: None)(result)
             ip_address = network_tester.get_external_ip(PROXY_SERVER_ADDRESS)
-            self.callbacks.on_ip_update(ip_address)
+            self.callbacks.get("on_ip_update", lambda ip: None)(ip_address)
         else:
             self.log(
                 "Error: Connection test failed. Check server config.", LogLevel.ERROR)
-            self.callbacks.on_status_change("Connection Failed", "red")
+            self.callbacks.get("on_status_change", lambda s,
+                               c: None)("Connection Failed", "red")
             self.stop()

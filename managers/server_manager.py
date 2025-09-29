@@ -10,14 +10,22 @@ import requests
 import link_parser
 import settings_manager
 from constants import (
-    LogLevel, MAX_CONCURRENT_TESTS, HEALTH_CHECK_INTERVAL
+    LogLevel, MAX_CONCURRENT_TESTS, HEALTH_CHECK_INTERVAL, TEST_ENDPOINTS
 )
 # Removed unused import: constants
 from managers.singbox_generator import SingboxConfigGenerator
 from managers.xray_generator import XrayConfigGenerator
 from managers.test_core_manager import TestCoreManager
-# Removed unused imports: tcp_ping, ping_service
 from services.health_checker import HealthChecker
+from services.ping_service import direct_tcp, proxy_tcp_connect, url_latency_via_proxy
+
+
+def get_core_generator(core_name: str):
+    """Get the appropriate config generator for the given core."""
+    if core_name == "xray":
+        return XrayConfigGenerator()
+    else:
+        return SingboxConfigGenerator()
 
 
 # --- Callback Protocol ---
@@ -80,18 +88,18 @@ class ServerManager:
 
     # --- Logging ---
     def log(self, message: str, level: LogLevel = LogLevel.INFO) -> None:
-        self.callbacks.log(message, level)
+        self.callbacks.get("log", lambda msg, lvl: None)(message, level)
 
     # --- Settings Management ---
     def save_settings_to_disk(self) -> None:
         """Saves the current settings dictionary to the settings file on disk."""
         self.log("Debounced save: writing settings to disk.", LogLevel.DEBUG)
         settings_manager.save_settings(
-            self.settings, self.callbacks.log)
+            self.settings, self.callbacks.get("log", lambda msg, lvl: None))
 
     def save_settings(self) -> None:
         """Requests a save of the settings. The UI will handle debouncing."""
-        self.callbacks.request_save()
+        self.callbacks.get("request_save", lambda: None)()
 
     def force_save_settings(self) -> None:
         """Saves settings to disk immediately. Called on application exit."""
@@ -119,7 +127,7 @@ class ServerManager:
             self.save_settings()  # This will now be a debounced save
 
         self.log("Saved servers loaded successfully.", LogLevel.SUCCESS)
-        self.callbacks.on_servers_loaded()
+        self.callbacks.get("on_servers_loaded", lambda: None)()
 
     def get_groups(self) -> List[str]:
         return list(self.server_groups.keys())
@@ -144,11 +152,15 @@ class ServerManager:
             return False
 
         with self._server_lock:
+            # Generate unique ID for the server
+            if "id" not in config or not config.get("id"):
+                config["id"] = str(uuid.uuid4())
+
             # Check for duplicates across all groups first
-            server_id = f"{config.get('server')}:{config.get('port')}"
+            server_id = config.get("id")
             for grp, servers in self.server_groups.items():
                 for s_config in servers:
-                    if f"{s_config.get('server')}:{s_config.get('port')}" == server_id:
+                    if s_config.get("id") == server_id:
                         # Use callback if available (from subscription update), otherwise log directly
                         if callbacks:
                             callbacks.show_warning(
@@ -177,13 +189,17 @@ class ServerManager:
                 LogLevel.SUCCESS,
             )
 
+            # Auto-start health check if enabled
+            if self.settings.get("health_check_auto_start", False):
+                self.start_health_check(final_group_name, ["tcp", "url"])
+
         return True
 
     def delete_group(self, group_name: str) -> None:
         if group_name in self.server_groups:
             del self.server_groups[group_name]
             self.log(f"Deleted group: {group_name}", LogLevel.INFO)
-            self.callbacks.on_servers_loaded()
+            self.callbacks.get("on_servers_loaded", lambda: None)()
         else:
             self.log(
                 f"Could not find group '{group_name}' to delete.", LogLevel.ERROR)
@@ -219,7 +235,7 @@ class ServerManager:
 
     # --- Subscription Update ---
     def update_subscriptions(self, subscriptions: List[Dict[str, Any]], callbacks: Optional[ServerManagerCallbacks] = None) -> None:
-        self.callbacks.on_update_start()
+        self.callbacks.get("on_update_start", lambda: None)()
         # Submit the main task to the thread pool
         self.thread_pool.submit(
             self._update_subscriptions_task, subscriptions, callbacks or self.callbacks)
@@ -253,7 +269,7 @@ class ServerManager:
                     continue
 
                 # Pass callbacks down to handle potential duplicate server warnings safely
-                if self.add_manual_server(link, group_name=sub_name, update_ui=False, callbacks=callbacks):
+                if self.add_manual_server(link, group_name=sub_name, update_ui=True, callbacks=callbacks):
                     added_for_sub += 1
 
             if added_for_sub > 0:
@@ -290,8 +306,9 @@ class ServerManager:
 
         self.save_settings()  # Save all newly added servers to settings
         self.log("Subscription update finished.")
-        self.callbacks.on_servers_updated()
-        self.callbacks.on_update_finish(errors if errors else None)
+        self.callbacks.get("on_servers_updated", lambda: None)()
+        self.callbacks.get("on_update_finish", lambda x: None)(
+            errors if errors else None)
 
     # --- Ping & URL Tests ---
 
@@ -311,7 +328,8 @@ class ServerManager:
         server["ping"] = ping_result  # Keep for sorting
 
         # Notify UI
-        self.callbacks.on_ping_result(server, ping_result, test_type)
+        self.callbacks.get("on_ping_result", lambda s, p, t: None)(
+            server, ping_result, test_type)
 
     def start_health_check(self, group_name: Optional[str] = None, test_types: Optional[List[str]] = None) -> None:
         """Start periodic health checking for servers."""
@@ -335,6 +353,8 @@ class ServerManager:
                 self.settings, self.log, generator)
 
         self._health_checker.set_test_core_manager(self._test_core_manager)
+        self._health_checker.set_progress_callback(
+            self._on_health_check_progress)
         self._health_checker.start(
             servers, test_types or [], HEALTH_CHECK_INTERVAL)
         self.log(
@@ -344,3 +364,108 @@ class ServerManager:
         """Stop periodic health checking."""
         self._health_checker.stop()
         self.log("Stopped health checking", LogLevel.INFO)
+
+    def _on_health_check_progress(self, current: int, total: int):
+        """Callback for health check progress updates."""
+        self.callbacks.get("on_health_check_progress",
+                           lambda c, t: None)(current, total)
+
+    def get_servers_by_group(self, group_name: str) -> List[dict]:
+        """Get all servers in a specific group."""
+        return self.server_groups.get(group_name, [])
+
+    def test_all_urls(self, servers: List[dict]) -> None:
+        """Test URL latency for specific servers."""
+        if not servers:
+            return
+
+        self.log(
+            f"Starting URL test for {len(servers)} servers", LogLevel.INFO)
+
+        # Use persistent test core manager
+        if self._test_core_manager is None:
+            active_core_name = self.settings.get("active_core", "sing-box")
+            generator = get_core_generator(active_core_name)
+            self._test_core_manager = TestCoreManager(
+                self.settings, self.log, generator)
+
+        if self._test_core_manager.start(servers):
+            # Test each server
+            for server in servers:
+                if self._cancel_event.is_set():
+                    break
+
+                server_id = server.get("id")
+                if not server_id:
+                    continue
+
+                proxy_address = self._test_core_manager.get_proxy_address(
+                    server_id)
+                if proxy_address:
+                    result = url_latency_via_proxy(proxy_address)
+                    self._process_ping_result(server, result, "url")
+                else:
+                    self.log(
+                        f"No proxy address for server {server.get('name')}", LogLevel.WARNING)
+
+            self._test_core_manager.stop()
+        else:
+            self.log("Failed to start test core", LogLevel.ERROR)
+
+    def test_all_tcp(self, servers: List[dict]) -> None:
+        """Test TCP latency for specific servers."""
+        if not servers:
+            return
+
+        self.log(
+            f"Starting TCP test for {len(servers)} servers", LogLevel.INFO)
+
+        # Use persistent test core manager
+        if self._test_core_manager is None:
+            active_core_name = self.settings.get("active_core", "sing-box")
+            generator = get_core_generator(active_core_name)
+            self._test_core_manager = TestCoreManager(
+                self.settings, self.log, generator)
+
+        if self._test_core_manager.start(servers):
+            # Test each server
+            for server in servers:
+                if self._cancel_event.is_set():
+                    break
+
+                server_id = server.get("id")
+                if not server_id:
+                    continue
+
+                proxy_address = self._test_core_manager.get_proxy_address(
+                    server_id)
+                if proxy_address:
+                    tcp_config = TEST_ENDPOINTS["tcp"]
+                    result = proxy_tcp_connect(
+                        proxy_address, tcp_config["host"], tcp_config["port"])
+                    self._process_ping_result(server, result, "tcp")
+                else:
+                    self.log(
+                        f"No proxy address for server {server.get('name')}", LogLevel.WARNING)
+
+            self._test_core_manager.stop()
+        else:
+            self.log("Failed to start test core", LogLevel.ERROR)
+
+    def _process_ping_result(self, server: dict, ping_result: int, test_type: str) -> None:
+        """Process ping result and update UI."""
+        server_id = server.get("id")
+        if not server_id:
+            return
+
+        # Update server data
+        if test_type == "tcp":
+            server["tcp_ping"] = ping_result
+        elif test_type == "url":
+            server["url_ping"] = ping_result
+
+        server["ping"] = ping_result  # Keep for sorting
+
+        # Notify UI
+        self.callbacks.get("on_ping_result", lambda s, p, t: None)(
+            server, ping_result, test_type)

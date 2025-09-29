@@ -27,6 +27,7 @@ class SingboxManager(CoreManager):
         super().__init__(settings, callbacks)
         self.stats_thread = None
         self.stop_stats_thread = threading.Event()
+        self.connection_check_timer = None
 
     def start(self, config):
         if self.is_running and self.process and self.process.poll() is None:
@@ -46,9 +47,10 @@ class SingboxManager(CoreManager):
             target=self._run_and_log, args=(config,), daemon=True)
         thread.start()
 
-        self.callbacks.get("schedule", lambda t, c: None)(
-            CONNECTION_CHECK_DELAY, self.check_connection
-        )
+        # Schedule connection check and store the timer reference
+        self.connection_check_timer = threading.Timer(
+            CONNECTION_CHECK_DELAY / 1000.0, self.check_connection)
+        self.connection_check_timer.start()
 
     def _run_and_log(self, config):
         config_filename = None
@@ -137,6 +139,11 @@ class SingboxManager(CoreManager):
         if not self.is_running and not self.process:
             return
 
+        # Cancel connection check timer if it exists
+        if self.connection_check_timer:
+            self.connection_check_timer.cancel()
+            self.connection_check_timer = None
+
         process_to_kill = self.process
         self.is_running = False
         self.process = None
@@ -157,6 +164,10 @@ class SingboxManager(CoreManager):
         self.callbacks.get("on_stop", lambda: None)()
 
     def check_connection(self):
+        # Only check connection if we're actually running
+        if not self.is_running:
+            return
+
         result = network_tester.url_test(PROXY_SERVER_ADDRESS)
         if result != -1:
             self.log(

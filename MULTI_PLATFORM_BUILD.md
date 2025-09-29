@@ -5,6 +5,7 @@ This guide explains how to build Onix for Windows, macOS, and Linux.
 ## 🚀 Quick Start
 
 ### Method 1: GitHub Actions (Recommended)
+
 ```bash
 # Create and push a tag to trigger automated builds
 git tag v1.0.3
@@ -12,11 +13,13 @@ git push origin v1.0.3
 ```
 
 This will automatically:
+
 - Build for Windows, macOS, and Linux
 - Create a GitHub release
 - Upload all platform packages
 
 ### Method 2: Local Build
+
 ```bash
 # Build for current platform
 python build_all.py
@@ -40,12 +43,14 @@ python build_cross_platform.py
 ### 1. GitHub Actions (Automated)
 
 **Advantages:**
+
 - ✅ No local setup required
 - ✅ Builds for all platforms automatically
 - ✅ Creates releases automatically
 - ✅ Uses clean environments
 
 **Steps:**
+
 1. Push code to GitHub
 2. Create a tag: `git tag v1.0.3 && git push origin v1.0.3`
 3. Wait for builds to complete
@@ -54,6 +59,7 @@ python build_cross_platform.py
 ### 2. Local Native Build
 
 **For Windows:**
+
 ```cmd
 # Using batch script
 build.bat
@@ -63,6 +69,7 @@ python build_all.py
 ```
 
 **For macOS:**
+
 ```bash
 # Install dependencies
 pip install -r requirements.txt
@@ -73,6 +80,7 @@ python build_all.py
 ```
 
 **For Linux:**
+
 ```bash
 # Install system dependencies
 sudo apt-get update
@@ -89,10 +97,12 @@ python build_all.py
 ### 3. Cross-Platform Build (Docker)
 
 **Requirements:**
+
 - Docker Desktop installed
 - Windows host system
 
 **Steps:**
+
 ```bash
 # Build for Linux from Windows
 python build_cross_platform.py
@@ -112,6 +122,7 @@ dist/
 ```
 
 Each package contains:
+
 - `onix` (or `onix.exe` on Windows) - Main executable
 - `README.md` - Documentation
 - `LICENSE` - License file
@@ -122,16 +133,19 @@ Each package contains:
 ### Common Issues
 
 1. **PyInstaller not found**
+
    ```bash
    pip install pyinstaller
    ```
 
 2. **Missing dependencies**
+
    ```bash
    pip install -r requirements.txt
    ```
 
 3. **Permission denied (Linux/macOS)**
+
    ```bash
    chmod +x build.sh
    ```
@@ -143,16 +157,19 @@ Each package contains:
 ### Platform-specific Issues
 
 #### Windows
+
 - **Visual Studio Build Tools**: Install if missing
 - **Antivirus**: May block PyInstaller output
 - **Long paths**: Enable long path support
 
 #### macOS
+
 - **Xcode Command Line Tools**: `xcode-select --install`
 - **Code signing**: May need to allow unsigned executables
 - **Gatekeeper**: May block unsigned apps
 
 #### Linux
+
 - **Build essentials**: `sudo apt-get install build-essential`
 - **Additional libraries**: `sudo apt-get install libffi-dev libssl-dev`
 - **Permissions**: Ensure executable permissions
@@ -160,6 +177,7 @@ Each package contains:
 ## 📊 Build Status
 
 ### Current Status
+
 - ✅ **Windows x64**: Built and tested locally
 - ⏳ **macOS Intel**: Ready for GitHub Actions
 - ⏳ **macOS ARM64**: Ready for GitHub Actions
@@ -167,22 +185,27 @@ Each package contains:
 - ⏳ **Linux ARM64**: Ready for GitHub Actions
 
 ### GitHub Actions Status
+
 Check build status at: `https://github.com/AhmadAkd/onix-client/actions`
 
 ## 🚀 Release Process
 
 ### Automated Release
+
 1. Update version in code
 2. Update CHANGELOG.md
 3. Create and push tag:
+
    ```bash
    git tag v1.0.3
    git push origin v1.0.3
    ```
+
 4. GitHub Actions builds and creates release
 5. Download from GitHub releases page
 
 ### Manual Release
+
 1. Build locally for each platform
 2. Create GitHub release manually
 3. Upload built packages
@@ -214,6 +237,7 @@ onix-client/
 ## 📞 Support
 
 If you encounter issues:
+
 1. Check the troubleshooting section above
 2. Review GitHub Actions logs
 3. Test locally first

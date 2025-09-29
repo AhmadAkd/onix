@@ -19,7 +19,10 @@ class HealthChecker:
         self._test_core_manager = None
         self._test_callback = None
         self._progress_callback = None
-        self._thread_pool = ThreadPoolExecutor(max_workers=MAX_CONCURRENT_CORE_TESTS)
+        self._thread_pool = ThreadPoolExecutor(
+            max_workers=MAX_CONCURRENT_CORE_TESTS)
+        self._cache_duration = 300  # 5 minutes cache for results
+        self._result_cache = {}  # server_id -> {result, timestamp}
 
     def set_test_core_manager(self, core_manager):
         """Set the persistent test core manager for proxy-based tests."""
@@ -43,6 +46,14 @@ class HealthChecker:
 
         self._test_types = test_types
         self._stop_event.clear()
+
+        # Start test core manager if needed for URL testing
+        if "url" in test_types and self._test_core_manager:
+            if not self._test_core_manager.start(servers):
+                self.log(
+                    "Failed to start test core manager for URL testing", LogLevel.ERROR)
+                return
+
         self._thread = threading.Thread(
             target=self._health_check_loop,
             args=(servers, interval_seconds),
@@ -57,8 +68,38 @@ class HealthChecker:
         self._stop_event.set()
         if self._thread and self._thread.is_alive():
             self._thread.join(timeout=2)
-        self._thread_pool.shutdown(wait=False)
+
+        # Stop test core manager if it's running
+        if self._test_core_manager:
+            self._test_core_manager.stop()
+
+        # Don't shutdown thread pool here, let it be reused
         self.log("Health checker stopped", LogLevel.INFO)
+
+    def get_server_stats(self, server_id: str) -> dict:
+        """Get health statistics for a specific server."""
+        return self._server_stats.get(server_id, {})
+
+    def _is_cached_result_valid(self, server_id: str) -> bool:
+        """Check if cached result is still valid."""
+        if server_id not in self._result_cache:
+            return False
+
+        cache_entry = self._result_cache[server_id]
+        return (time.time() - cache_entry["timestamp"]) < self._cache_duration
+
+    def _get_cached_result(self, server_id: str) -> dict:
+        """Get cached result if valid."""
+        if self._is_cached_result_valid(server_id):
+            return self._result_cache[server_id]["result"]
+        return None
+
+    def _cache_result(self, server_id: str, result: dict):
+        """Cache test result."""
+        self._result_cache[server_id] = {
+            "result": result,
+            "timestamp": time.time()
+        }
 
     def _health_check_loop(self, servers: List[dict], interval_seconds: int):
         """Main health check loop with parallel testing."""
@@ -68,7 +109,7 @@ class HealthChecker:
             for server in servers:
                 if self._stop_event.is_set():
                     break
-                
+
                 server_id = server.get("id")
                 if not server_id:
                     continue
@@ -91,19 +132,28 @@ class HealthChecker:
         total_servers = len(servers)
         completed = 0
 
+        # Check if thread pool is still usable
+        if self._thread_pool._shutdown:
+            return
+
         # Submit all test tasks
         futures = []
         for server in servers:
             if self._stop_event.is_set():
                 break
-            future = self._thread_pool.submit(self._test_single_server, server)
-            futures.append(future)
+            try:
+                future = self._thread_pool.submit(
+                    self._test_single_server, server)
+                futures.append(future)
+            except RuntimeError:
+                # Thread pool is shutdown, break out of loop
+                break
 
         # Wait for completion and update progress
         for future in as_completed(futures):
             if self._stop_event.is_set():
                 break
-            
+
             try:
                 future.result()
                 completed += 1
@@ -137,30 +187,52 @@ class HealthChecker:
                 "last_test": 0
             }
 
-        stats = self._server_stats[server_id]
-        stats["last_test"] = time.time()
-
-        # Test TCP (direct or via proxy) if enabled
+        # Initialize result variables
         tcp_result = -1
-        if "tcp" in self._test_types:
-            tcp_result = self._test_tcp(server)
-            if tcp_result != -1:
-                stats["failures"] = 0  # Reset failure count on success
-                stats["tcp_ema"] = self._update_ema(
-                    stats["tcp_ema"], tcp_result)
-            else:
-                stats["failures"] += 1
-                stats["tcp_ema"] = None
-
-        # Test URL (via proxy if available) if enabled
         url_result = -1
-        if "url" in self._test_types:
-            url_result = self._test_url(server)
-            if url_result != -1:
-                stats["url_ema"] = self._update_ema(
-                    stats["url_ema"], url_result)
-            else:
-                stats["url_ema"] = None
+
+        # Check cache first
+        cached_result = self._get_cached_result(server_id)
+        if cached_result:
+            # Use cached result
+            stats = cached_result
+            self._server_stats[server_id] = stats
+        else:
+            # Perform actual test
+            stats = self._server_stats[server_id]
+            stats["last_test"] = time.time()
+
+            # Test TCP (direct or via proxy) if enabled
+            if "tcp" in self._test_types:
+                tcp_result = self._test_tcp(server)
+                if tcp_result != -1:
+                    stats["failures"] = 0  # Reset failure count on success
+                    stats["tcp_ema"] = self._update_ema(
+                        stats["tcp_ema"], tcp_result)
+                else:
+                    stats["failures"] += 1
+                    stats["tcp_ema"] = None
+
+            # Test URL (via proxy if available) if enabled
+            if "url" in self._test_types:
+                url_result = self._test_url(server)
+                if url_result != -1:
+                    stats["url_ema"] = self._update_ema(
+                        stats["url_ema"], url_result)
+                else:
+                    stats["url_ema"] = None
+
+            # Cache the result
+            self._cache_result(server_id, stats)
+
+        # Check for server issues and log warnings
+        failures = stats.get("failures", 0)
+        if failures >= 3:
+            self.log(
+                f"⚠️ Server '{server.get('name', 'Unknown')}' has {failures} consecutive failures", LogLevel.WARNING)
+        elif failures > 0:
+            self.log(
+                f"Server '{server.get('name', 'Unknown')}' has {failures} failures", LogLevel.INFO)
 
         # Report results to UI
         if self._test_callback:

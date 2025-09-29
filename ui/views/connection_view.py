@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QMenu,
     QLabel,
     QProgressBar,
+    QSizePolicy,
 )
 from PySide6.QtGui import QIcon, QAction, QMovie
 from PySide6.QtCore import QSize
@@ -24,57 +25,102 @@ def create_connection_view(main_window):
     top_bar = QWidget()
     top_bar.setObjectName("TopBar")
     top_bar_layout = QHBoxLayout(top_bar)
-    top_bar_layout.setContentsMargins(10, 5, 10, 5)
+    top_bar_layout.setContentsMargins(12, 8, 12, 8)
+    top_bar_layout.setSpacing(8)  # Better spacing for responsiveness
     main_window.current_view_mode = "servers"  # "servers" or "chains"
 
     main_window.group_dropdown = QComboBox()
+    main_window.group_dropdown.setMinimumWidth(80)
+    main_window.group_dropdown.setMaximumWidth(150)
+    main_window.group_dropdown.setSizePolicy(
+        QSizePolicy.Minimum, QSizePolicy.Fixed)
 
     main_window.sort_combo = QComboBox()
     main_window.sort_combo.addItems(
         [main_window.tr("Sort by: Default"), main_window.tr("Name (A-Z)"), main_window.tr("Name (Z-A)"), main_window.tr("Ping (Low to High)")])
-    main_window.sort_combo.setFixedWidth(150)
+    main_window.sort_combo.setMinimumWidth(80)
+    main_window.sort_combo.setMaximumWidth(140)
+    main_window.sort_combo.setSizePolicy(
+        QSizePolicy.Minimum, QSizePolicy.Fixed)
     main_window.sort_combo.currentTextChanged.connect(
         main_window.update_server_list)
 
     main_window.search_field = QLineEdit()
     main_window.search_field.setPlaceholderText(main_window.tr("Search..."))
+    main_window.search_field.setMinimumWidth(100)
+    main_window.search_field.setMaximumWidth(180)
+    main_window.search_field.setSizePolicy(
+        QSizePolicy.Minimum, QSizePolicy.Fixed)
     main_window.manage_subs_button = QPushButton(
         QIcon(":/icons/list.svg"), main_window.tr("Subscriptions"))
+    main_window.manage_subs_button.setMinimumWidth(80)
+    main_window.manage_subs_button.setMaximumWidth(120)
+    main_window.manage_subs_button.setSizePolicy(
+        QSizePolicy.Minimum, QSizePolicy.Fixed)
+
     main_window.manage_chains_button = QPushButton(
         QIcon(":/icons/git-merge.svg"), main_window.tr("Manage Chains"))
+    main_window.manage_chains_button.setMinimumWidth(80)
+    main_window.manage_chains_button.setMaximumWidth(120)
+    main_window.manage_chains_button.setSizePolicy(
+        QSizePolicy.Minimum, QSizePolicy.Fixed)
+
     main_window.update_subs_button = QPushButton(
         QIcon(":/icons/refresh-cw.svg"), main_window.tr("Update Subs"))
+    main_window.update_subs_button.setMinimumWidth(80)
+    main_window.update_subs_button.setMaximumWidth(120)
+    main_window.update_subs_button.setSizePolicy(
+        QSizePolicy.Minimum, QSizePolicy.Fixed)
+
     main_window.health_check_tcp_button = QPushButton(
         QIcon(":/icons/zap.svg"), main_window.tr("Health Check TCP"))
+    main_window.health_check_tcp_button.setMinimumWidth(100)
+    main_window.health_check_tcp_button.setMaximumWidth(140)
+    main_window.health_check_tcp_button.setSizePolicy(
+        QSizePolicy.Minimum, QSizePolicy.Fixed)
+
     main_window.health_check_url_button = QPushButton(
         QIcon(":/icons/activity.svg"), main_window.tr("Health Check URL"))
+    main_window.health_check_url_button.setMinimumWidth(100)
+    main_window.health_check_url_button.setMaximumWidth(140)
+    main_window.health_check_url_button.setSizePolicy(
+        QSizePolicy.Minimum, QSizePolicy.Fixed)
     main_window.health_check_tcp_button.setToolTip(
         main_window.tr("Start/Stop periodic TCP health checking with exponential backoff"))
     main_window.health_check_url_button.setToolTip(
         main_window.tr("Start/Stop periodic URL health checking with exponential backoff"))
     main_window.health_check_tcp_button.setCheckable(True)
     main_window.health_check_url_button.setCheckable(True)
-    
+
     # Export button
     main_window.export_button = QPushButton(
         QIcon(":/icons/file-text.svg"), main_window.tr("Export"))
-    main_window.export_button.setToolTip(main_window.tr("Export server data and health statistics"))
-    
-    # Health Check Progress Bar
+    main_window.export_button.setMinimumWidth(60)
+    main_window.export_button.setMaximumWidth(100)
+    main_window.export_button.setSizePolicy(
+        QSizePolicy.Minimum, QSizePolicy.Fixed)
+    main_window.export_button.setToolTip(main_window.tr(
+        "Export server data and health statistics"))
+
+    # Health Check Progress Bar with modern styling
     main_window.health_check_progress = QProgressBar()
     main_window.health_check_progress.setVisible(False)
     main_window.health_check_progress.setMaximum(100)
     main_window.health_check_progress.setValue(0)
+    main_window.health_check_progress.setFixedHeight(8)
     main_window.health_check_progress.setStyleSheet("""
         QProgressBar {
-            border: 1px solid #ccc;
-            border-radius: 3px;
+            border: none;
+            border-radius: 4px;
             text-align: center;
-            background-color: #f0f0f0;
+            background-color: #f3f4f6;
+            font-size: 11px;
+            font-weight: 600;
+            color: #374151;
         }
         QProgressBar::chunk {
-            background-color: #4CAF50;
-            border-radius: 2px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 4px;
         }
     """)
 
@@ -95,7 +141,10 @@ def create_connection_view(main_window):
     # --- More Actions Menu ---
     main_window.more_actions_button = QPushButton(
         QIcon(":/icons/more-horizontal.svg"), "")
-    main_window.more_actions_button.setFixedWidth(40)
+    main_window.more_actions_button.setMinimumWidth(30)
+    main_window.more_actions_button.setMaximumWidth(40)
+    main_window.more_actions_button.setSizePolicy(
+        QSizePolicy.Fixed, QSizePolicy.Fixed)
     more_menu = QMenu(main_window)
 
     import_action = QAction(
@@ -129,16 +178,17 @@ def create_connection_view(main_window):
 
     main_window.more_actions_button.setMenu(more_menu)
 
+    # Add widgets with proper spacing and stretch
     top_bar_layout.addWidget(main_window.group_dropdown)
     top_bar_layout.addWidget(main_window.search_field)
-    top_bar_layout.addStretch()
+    top_bar_layout.addStretch()  # This will push everything to the sides
     top_bar_layout.addWidget(main_window.sort_combo)
     top_bar_layout.addWidget(main_window.health_check_tcp_button)
     top_bar_layout.addWidget(main_window.health_check_url_button)
     top_bar_layout.addWidget(main_window.export_button)
     top_bar_layout.addWidget(main_window.health_check_progress)
     top_bar_layout.addWidget(main_window.sorting_spinner_label)
-    top_bar_layout.addSpacing(10)
+    top_bar_layout.addStretch()  # This will push management buttons to the right
     top_bar_layout.addWidget(main_window.manage_chains_button)
     top_bar_layout.addWidget(main_window.manage_subs_button)
     top_bar_layout.addWidget(main_window.update_spinner_label)
@@ -162,7 +212,10 @@ def create_connection_view(main_window):
     # --- Right Panel (Details) ---
     main_window.server_details_panel = QWidget()
     main_window.server_details_panel.setObjectName("ServerDetailsPanel")
-    main_window.server_details_panel.setFixedWidth(320)
+    main_window.server_details_panel.setMinimumWidth(250)
+    main_window.server_details_panel.setMaximumWidth(350)
+    main_window.server_details_panel.setSizePolicy(
+        QSizePolicy.Preferred, QSizePolicy.Expanding)
     main_window.server_details_panel.setStyleSheet(
         "#ServerDetailsPanel { border-left: 1px solid #e9ecef; } [theme='dark'] #ServerDetailsPanel { border-left: 1px solid #495057; }")
     details_layout = QVBoxLayout(main_window.server_details_panel)

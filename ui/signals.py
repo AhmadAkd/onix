@@ -9,6 +9,7 @@ class ManagerSignals(QObject):
     # Server testing and updates
     ping_result = Signal(dict, int, str)  # config, ping, test_type
     ping_started = Signal(dict)  # config
+    health_check_progress = Signal(int, int)  # current, total
     servers_updated = Signal()  # Signal that server list has changed
 
     # Subscription updates

@@ -437,123 +437,123 @@
 <context>
     <name>PySideUI</name>
     <message>
-        <location filename="../ui/main_window.py" line="148"/>
-        <location filename="../ui/main_window.py" line="1169"/>
+        <location filename="../ui/main_window.py" line="151"/>
+        <location filename="../ui/main_window.py" line="1249"/>
         <source>Disconnected</source>
         <translation>غير متصل</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="158"/>
-        <location filename="../ui/main_window.py" line="1171"/>
+        <location filename="../ui/main_window.py" line="161"/>
+        <location filename="../ui/main_window.py" line="1251"/>
         <source>IP: N/A</source>
         <translation>IP: غير متاح</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="159"/>
-        <location filename="../ui/main_window.py" line="1170"/>
+        <location filename="../ui/main_window.py" line="162"/>
+        <location filename="../ui/main_window.py" line="1250"/>
         <source>Latency: N/A</source>
         <translation>الكمون: غير متاح</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="163"/>
-        <location filename="../ui/main_window.py" line="1174"/>
+        <location filename="../ui/main_window.py" line="166"/>
+        <location filename="../ui/main_window.py" line="1254"/>
         <source>Start</source>
         <translation>بدء</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="191"/>
+        <location filename="../ui/main_window.py" line="194"/>
         <source>Connection</source>
         <translation>الاتصال</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="191"/>
+        <location filename="../ui/main_window.py" line="194"/>
         <source>Routing</source>
         <translation>التوجيه</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="192"/>
+        <location filename="../ui/main_window.py" line="195"/>
         <source>Logs</source>
         <translation>السجلات</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="192"/>
+        <location filename="../ui/main_window.py" line="195"/>
         <source>Settings</source>
         <translation>الإعدادات</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="1029"/>
+        <location filename="../ui/main_window.py" line="1102"/>
         <source>Name (A-Z)</source>
         <translation>الاسم (أ-ي)</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="1031"/>
+        <location filename="../ui/main_window.py" line="1104"/>
         <source>Name (Z-A)</source>
         <translation>الاسم (ي-أ)</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="1034"/>
+        <location filename="../ui/main_window.py" line="1107"/>
         <source>Ping (Low to High)</source>
         <translation>الكمون (منخفض إلى مرتفع)</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="872"/>
+        <location filename="../ui/main_window.py" line="945"/>
         <source>Error</source>
         <translation>خطأ</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="351"/>
+        <location filename="../ui/main_window.py" line="371"/>
         <source>System</source>
         <translation>النظام</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="351"/>
-        <location filename="../ui/main_window.py" line="402"/>
+        <location filename="../ui/main_window.py" line="371"/>
+        <location filename="../ui/main_window.py" line="422"/>
         <source>Light</source>
         <translation>فاتح</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="351"/>
-        <location filename="../ui/main_window.py" line="400"/>
+        <location filename="../ui/main_window.py" line="371"/>
+        <location filename="../ui/main_window.py" line="420"/>
         <source>Dark</source>
         <translation>داكن</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="426"/>
+        <location filename="../ui/main_window.py" line="446"/>
         <source>Import Profile</source>
         <translation>استيراد ملف شخصي</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="445"/>
+        <location filename="../ui/main_window.py" line="465"/>
         <source>Export Profile</source>
         <translation>تصدير ملف شخصي</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="466"/>
+        <location filename="../ui/main_window.py" line="486"/>
         <source>Check for Core Updates</source>
         <translation>التحقق من تحديثات النواة</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="217"/>
+        <location filename="../ui/main_window.py" line="220"/>
         <source>Log File</source>
         <translation>ملف السجل</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="218"/>
+        <location filename="../ui/main_window.py" line="221"/>
         <source>Core log file does not exist. Nothing to clear.</source>
         <translation>ملف سجل النواة غير موجود. لا يوجد شيء لمسحه.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="220"/>
+        <location filename="../ui/main_window.py" line="223"/>
         <source>Core log file not found, nothing to clear.</source>
         <translation>لم يتم العثور على ملف سجل النواة، لا يوجد شيء لمسحه.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="225"/>
+        <location filename="../ui/main_window.py" line="228"/>
         <source>Confirm Clear</source>
         <translation>تأكيد المسح</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="228"/>
+        <location filename="../ui/main_window.py" line="231"/>
         <source>Are you sure you want to delete the core log file?
 ({})
 
@@ -564,383 +564,385 @@ This action cannot be undone.</source>
 لا يمكن التراجع عن هذا الإجراء.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="239"/>
+        <location filename="../ui/main_window.py" line="242"/>
         <source>Failed to delete log file: {}</source>
         <translation>فشل حذف ملف السجل: {}</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="262"/>
+        <location filename="../ui/main_window.py" line="265"/>
         <source>Invalid Input</source>
         <translation>إدخال غير صالح</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="264"/>
+        <location filename="../ui/main_window.py" line="267"/>
         <source>number</source>
         <translation>رقم</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="264"/>
+        <location filename="../ui/main_window.py" line="267"/>
         <source>range (e.g., 10-100)</source>
         <translation>نطاق (مثال: 10-100)</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="385"/>
+        <location filename="../ui/main_window.py" line="405"/>
         <source>Settings saved.</source>
         <translation>تم حفظ الإعدادات.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="302"/>
-        <location filename="../ui/main_window.py" line="339"/>
+        <location filename="../ui/main_window.py" line="305"/>
+        <location filename="../ui/main_window.py" line="342"/>
         <source>Restarting to apply changes...</source>
         <translation>جارٍ إعادة التشغيل لتطبيق التغييرات...</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="236"/>
+        <location filename="../ui/main_window.py" line="239"/>
         <source>Successfully deleted {}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="264"/>
+        <location filename="../ui/main_window.py" line="267"/>
         <source>The value for &apos;{}&apos; is invalid.
 Please enter a valid {}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="413"/>
+        <location filename="../ui/main_window.py" line="433"/>
         <source>Checking for core updates...</source>
         <translation>جارٍ التحقق من تحديثات النواة...</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="415"/>
+        <location filename="../ui/main_window.py" line="435"/>
         <source>Checking...</source>
         <translation>جارٍ التحقق...</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="426"/>
-        <location filename="../ui/main_window.py" line="445"/>
+        <location filename="../ui/main_window.py" line="446"/>
+        <location filename="../ui/main_window.py" line="465"/>
         <source>JSON Files (*.json)</source>
         <translation>ملفات JSON (*.json)</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="433"/>
+        <location filename="../ui/main_window.py" line="453"/>
         <source>Import Successful</source>
         <translation>نجح الاستيراد</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="436"/>
+        <location filename="../ui/main_window.py" line="456"/>
         <source>Profile imported successfully. Please restart the application for the changes to take full effect.</source>
         <translation>تم استيراد الملف الشخصي بنجاح. يرجى إعادة تشغيل التطبيق لتصبح التغييرات سارية المفعول بالكامل.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="441"/>
+        <location filename="../ui/main_window.py" line="461"/>
         <source>Import Failed</source>
         <translation>فشل الاستيراد</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="441"/>
+        <location filename="../ui/main_window.py" line="461"/>
         <source>The selected file is not a valid Onix profile or is corrupted.</source>
         <translation>الملف المحدد ليس ملفًا شخصيًا صالحًا لـ Onix أو أنه تالف.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="451"/>
+        <location filename="../ui/main_window.py" line="471"/>
         <source>Export Successful</source>
         <translation>نجح التصدير</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="451"/>
+        <location filename="../ui/main_window.py" line="471"/>
         <source>Profile successfully exported to:
 {}</source>
         <translation>تم تصدير الملف الشخصي بنجاح إلى:
 {}</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="478"/>
+        <location filename="../ui/main_window.py" line="498"/>
         <source>Subscription list updated.</source>
         <translation>تم تحديث قائمة الاشتراكات.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="480"/>
+        <location filename="../ui/main_window.py" line="500"/>
         <source>Update Subscriptions</source>
         <translation>تحديث الاشتراكات</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="482"/>
+        <location filename="../ui/main_window.py" line="502"/>
         <source>Subscription list has changed. Do you want to update all enabled subscriptions now?</source>
         <translation>لقد تغيرت قائمة الاشتراكات. هل تريد تحديث جميع الاشتراكات الممكّنة الآن؟</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="493"/>
+        <location filename="../ui/main_window.py" line="513"/>
         <source>Clipboard is empty.</source>
         <translation>الحافظة فارغة.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="502"/>
+        <location filename="../ui/main_window.py" line="522"/>
         <source>Imported {} server(s) from clipboard.</source>
         <translation>تم استيراد {} خادم (خوادم) من الحافظة.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="507"/>
+        <location filename="../ui/main_window.py" line="527"/>
         <source>Import WireGuard Config</source>
         <translation>استيراد تكوين WireGuard</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="507"/>
+        <location filename="../ui/main_window.py" line="527"/>
         <source>Config Files (*.conf)</source>
         <translation>ملفات التكوين (*.conf)</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="517"/>
+        <location filename="../ui/main_window.py" line="537"/>
         <source>Failed to read or parse WireGuard file: {}</source>
         <translation>فشل في قراءة أو تحليل ملف WireGuard: {}</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="519"/>
+        <location filename="../ui/main_window.py" line="539"/>
         <source>Import Error</source>
         <translation>خطأ في الاستيراد</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="519"/>
+        <location filename="../ui/main_window.py" line="539"/>
         <source>Could not import the WireGuard file:
 {}</source>
         <translation>تعذر استيراد ملف WireGuard:
 {}</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="524"/>
+        <location filename="../ui/main_window.py" line="544"/>
         <source>Scanning screen for QR code...</source>
         <translation>جارٍ مسح الشاشة بحثًا عن رمز QR...</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="550"/>
+        <location filename="../ui/main_window.py" line="570"/>
         <source>No QR code found on the screen.</source>
         <translation>لم يتم العثور على رمز QR على الشاشة.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="565"/>
+        <location filename="../ui/main_window.py" line="585"/>
         <source>No visible servers to copy.</source>
         <translation>لا توجد خوادم مرئية لنسخها.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="566"/>
+        <location filename="../ui/main_window.py" line="586"/>
         <source>Copy Links</source>
         <translation>نسخ الروابط</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="567"/>
+        <location filename="../ui/main_window.py" line="587"/>
         <source>There are no servers in the list to copy.</source>
         <translation>لا توجد خوادم في القائمة لنسخها.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="579"/>
+        <location filename="../ui/main_window.py" line="599"/>
         <source>Could not retrieve server data from the list.</source>
         <translation>تعذر استرداد بيانات الخادم من القائمة.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="589"/>
+        <location filename="../ui/main_window.py" line="609"/>
         <source>Copy Successful</source>
         <translation>نجح النسخ</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="589"/>
+        <location filename="../ui/main_window.py" line="609"/>
         <source>Copied {} server link(s) to clipboard.</source>
         <translation>تم نسخ {} رابط (روابط) خادم إلى الحافظة.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="592"/>
+        <location filename="../ui/main_window.py" line="612"/>
         <source>Copy Failed</source>
         <translation>فشل النسخ</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="592"/>
+        <location filename="../ui/main_window.py" line="612"/>
         <source>Could not generate links for the visible servers.</source>
         <translation>تعذر إنشاء روابط للخوادم المرئية.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="598"/>
+        <location filename="../ui/main_window.py" line="618"/>
         <source>No group selected to delete.</source>
         <translation>لم يتم تحديد مجموعة لحذفها.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="601"/>
+        <location filename="../ui/main_window.py" line="621"/>
         <source>Confirm Group Deletion</source>
         <translation>تأكيد حذف المجموعة</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="602"/>
+        <location filename="../ui/main_window.py" line="622"/>
         <source>Are you sure you want to delete the entire group &apos;{}&apos; and all its servers?</source>
         <translation>هل أنت متأكد من أنك تريد حذف المجموعة بأكملها &apos;{}&apos; وجميع خوادمها؟</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="639"/>
+        <location filename="../ui/main_window.py" line="659"/>
         <source>No enabled subscriptions to update.</source>
         <translation>لا توجد اشتراكات ممكّنة لتحديثها.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="734"/>
+        <location filename="../ui/main_window.py" line="754"/>
         <source>Input Error</source>
         <translation>خطأ في الإدخال</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="735"/>
+        <location filename="../ui/main_window.py" line="755"/>
         <source>The &apos;Value&apos; field cannot be empty.</source>
         <translation>لا يمكن أن يكون حقل &apos;القيمة&apos; فارغًا.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="742"/>
+        <location filename="../ui/main_window.py" line="762"/>
         <source>Rule updated: {}</source>
         <translation>تم تحديث القاعدة: {}</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="747"/>
+        <location filename="../ui/main_window.py" line="767"/>
         <source>Rule added: {}</source>
         <translation>تمت إضافة القاعدة: {}</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="758"/>
-        <location filename="../ui/main_window.py" line="841"/>
+        <location filename="../ui/main_window.py" line="778"/>
+        <location filename="../ui/main_window.py" line="914"/>
         <source>Confirm Deletion</source>
         <translation>تأكيد الحذف</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="759"/>
+        <location filename="../ui/main_window.py" line="779"/>
         <source>Are you sure you want to delete the rule for &apos;{}&apos;?</source>
         <translation>هل أنت متأكد من أنك تريد حذف القاعدة لـ &apos;{}&apos;؟</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="762"/>
+        <location filename="../ui/main_window.py" line="782"/>
         <source>Rule deleted: {}</source>
         <translation>تم حذف القاعدة: {}</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="780"/>
+        <location filename="../ui/main_window.py" line="800"/>
         <source>Stop TCP Health Check</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="788"/>
+        <location filename="../ui/main_window.py" line="810"/>
+        <location filename="../ui/main_window.py" line="883"/>
         <source>Health Check TCP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="805"/>
+        <location filename="../ui/main_window.py" line="828"/>
         <source>Stop URL Health Check</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="813"/>
+        <location filename="../ui/main_window.py" line="838"/>
+        <location filename="../ui/main_window.py" line="888"/>
         <source>Health Check URL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="826"/>
+        <location filename="../ui/main_window.py" line="899"/>
         <source>No server selected!</source>
         <translation>لم يتم تحديد خادم!</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="831"/>
-        <location filename="../ui/main_window.py" line="836"/>
+        <location filename="../ui/main_window.py" line="904"/>
+        <location filename="../ui/main_window.py" line="909"/>
         <source>Latency testing server: {}</source>
         <translation>خادم اختبار الكمون: {}</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="842"/>
+        <location filename="../ui/main_window.py" line="915"/>
         <source>Are you sure you want to delete server
 &apos;{}&apos;?</source>
         <translation>هل أنت متأكد من أنك تريد حذف الخادم
 &apos;{}&apos;؟</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="860"/>
+        <location filename="../ui/main_window.py" line="933"/>
         <source>Copied link for &apos;{}&apos; to clipboard.</source>
         <translation>تم نسخ الرابط لـ &apos;{}&apos; إلى الحافظة.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="864"/>
+        <location filename="../ui/main_window.py" line="937"/>
         <source>Could not generate a link for &apos;{}&apos;.</source>
         <translation>تعذر إنشاء رابط لـ &apos;{}&apos;.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="873"/>
+        <location filename="../ui/main_window.py" line="946"/>
         <source>Could not generate a link for this server.</source>
         <translation>تعذر إنشاء رابط لهذا الخادم.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="907"/>
+        <location filename="../ui/main_window.py" line="980"/>
         <source>Copy</source>
         <translation>نسخ</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="913"/>
+        <location filename="../ui/main_window.py" line="986"/>
         <source>Copy Line</source>
         <translation>نسخ السطر</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="931"/>
+        <location filename="../ui/main_window.py" line="1004"/>
         <source>Logs cleared.</source>
         <translation>تم مسح السجلات.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="1059"/>
+        <location filename="../ui/main_window.py" line="1132"/>
         <source>Selected server: {}</source>
         <translation>الخادم المحدد: {}</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="1087"/>
+        <location filename="../ui/main_window.py" line="1160"/>
         <source>Ping result for &apos;{}&apos; (ID: {}, Type: {}): {} ms. Emitting signal.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="1100"/>
+        <location filename="../ui/main_window.py" line="1173"/>
         <source>Found card for server ID {}. Updating {} ping value.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="1104"/>
+        <location filename="../ui/main_window.py" line="1184"/>
         <source>Could not find card widget for server ID {}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="1093"/>
+        <location filename="../ui/main_window.py" line="1166"/>
         <source>Server ID is missing in ping result. Cannot update UI.</source>
         <translation>معرف الخادم مفقود في نتيجة اختبار الاتصال. لا يمكن تحديث واجهة المستخدم.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="1127"/>
+        <location filename="../ui/main_window.py" line="1207"/>
         <source>Subscription update finished.</source>
         <translation>انتهى تحديث الاشتراك.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="1144"/>
+        <location filename="../ui/main_window.py" line="1224"/>
         <source>Outbound chains updated.</source>
         <translation>تم تحديث السلاسل الصادرة.</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="1154"/>
+        <location filename="../ui/main_window.py" line="1234"/>
         <source>Connecting...</source>
         <translation>جارٍ الاتصال...</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="1163"/>
+        <location filename="../ui/main_window.py" line="1243"/>
         <source>Connected</source>
         <translation>متصل</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="1164"/>
+        <location filename="../ui/main_window.py" line="1244"/>
         <source>Latency: {} ms</source>
         <translation>الكمون: {} مللي ثانية</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="1165"/>
+        <location filename="../ui/main_window.py" line="1245"/>
         <source>Disconnect</source>
         <translation>قطع الاتصال</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="1178"/>
+        <location filename="../ui/main_window.py" line="1258"/>
         <source>IP: {}</source>
         <translation>IP: {}</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="1316"/>
+        <location filename="../ui/main_window.py" line="1396"/>
         <source>The application is still running in the background.</source>
         <translation>لا يزال التطبيق يعمل في الخلفية.</translation>
     </message>
@@ -1054,27 +1056,22 @@ Please enter a valid {}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/subscription.py" line="77"/>
-        <source>Close</source>
-        <translation type="unfinished">إغلاق</translation>
-    </message>
-    <message>
-        <location filename="../ui/dialogs/subscription.py" line="108"/>
+        <location filename="../ui/dialogs/subscription.py" line="104"/>
         <source>Edit</source>
         <translation type="unfinished">تعديل</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/subscription.py" line="112"/>
+        <location filename="../ui/dialogs/subscription.py" line="108"/>
         <source>Delete</source>
         <translation type="unfinished">حذف</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/subscription.py" line="153"/>
+        <location filename="../ui/dialogs/subscription.py" line="149"/>
         <source>Confirm Deletion</source>
         <translation type="unfinished">تأكيد الحذف</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/subscription.py" line="154"/>
+        <location filename="../ui/dialogs/subscription.py" line="150"/>
         <source>Are you sure you want to delete subscription &apos;{}&apos;?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1082,87 +1079,97 @@ Please enter a valid {}</source>
 <context>
     <name>main_window</name>
     <message>
-        <location filename="../ui/views/connection_view.py" line="33"/>
+        <location filename="../ui/views/connection_view.py" line="34"/>
         <source>Sort by: Default</source>
         <translation type="unfinished">فرز حسب: الافتراضي</translation>
     </message>
     <message>
-        <location filename="../ui/views/connection_view.py" line="33"/>
+        <location filename="../ui/views/connection_view.py" line="34"/>
         <source>Name (A-Z)</source>
         <translation type="unfinished">الاسم (أ-ي)</translation>
     </message>
     <message>
-        <location filename="../ui/views/connection_view.py" line="33"/>
+        <location filename="../ui/views/connection_view.py" line="34"/>
         <source>Name (Z-A)</source>
         <translation type="unfinished">الاسم (ي-أ)</translation>
     </message>
     <message>
-        <location filename="../ui/views/connection_view.py" line="33"/>
+        <location filename="../ui/views/connection_view.py" line="34"/>
         <source>Ping (Low to High)</source>
         <translation type="unfinished">الكمون (منخفض إلى مرتفع)</translation>
     </message>
     <message>
-        <location filename="../ui/views/connection_view.py" line="39"/>
+        <location filename="../ui/views/connection_view.py" line="40"/>
         <source>Search...</source>
         <translation type="unfinished">بحث...</translation>
     </message>
     <message>
-        <location filename="../ui/views/connection_view.py" line="41"/>
+        <location filename="../ui/views/connection_view.py" line="42"/>
         <source>Subscriptions</source>
         <translation type="unfinished">الاشتراكات</translation>
     </message>
     <message>
-        <location filename="../ui/views/connection_view.py" line="43"/>
+        <location filename="../ui/views/connection_view.py" line="44"/>
         <source>Manage Chains</source>
         <translation type="unfinished">إدارة السلاسل</translation>
     </message>
     <message>
-        <location filename="../ui/views/connection_view.py" line="45"/>
+        <location filename="../ui/views/connection_view.py" line="46"/>
         <source>Update Subs</source>
         <translation type="unfinished">تحديث الاشتراكات</translation>
     </message>
     <message>
-        <location filename="../ui/views/connection_view.py" line="47"/>
+        <location filename="../ui/views/connection_view.py" line="48"/>
         <source>Health Check TCP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/views/connection_view.py" line="49"/>
+        <location filename="../ui/views/connection_view.py" line="50"/>
         <source>Health Check URL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/views/connection_view.py" line="51"/>
+        <location filename="../ui/views/connection_view.py" line="52"/>
         <source>Start/Stop periodic TCP health checking with exponential backoff</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/views/connection_view.py" line="53"/>
+        <location filename="../ui/views/connection_view.py" line="54"/>
         <source>Start/Stop periodic URL health checking with exponential backoff</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/views/connection_view.py" line="78"/>
+        <location filename="../ui/views/connection_view.py" line="60"/>
+        <source>Export</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/connection_view.py" line="62"/>
+        <source>Export server data and health statistics</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/connection_view.py" line="103"/>
         <source>Import from Clipboard</source>
         <translation type="unfinished">استيراد من الحافظة</translation>
     </message>
     <message>
-        <location filename="../ui/views/connection_view.py" line="83"/>
+        <location filename="../ui/views/connection_view.py" line="108"/>
         <source>Scan QR from Screen</source>
         <translation type="unfinished">مسح رمز QR من الشاشة</translation>
     </message>
     <message>
-        <location filename="../ui/views/connection_view.py" line="88"/>
+        <location filename="../ui/views/connection_view.py" line="113"/>
         <source>Import WireGuard from File</source>
         <translation type="unfinished">استيراد WireGuard من ملف</translation>
     </message>
     <message>
-        <location filename="../ui/views/connection_view.py" line="96"/>
+        <location filename="../ui/views/connection_view.py" line="121"/>
         <source>Copy Group Links</source>
         <translation type="unfinished">نسخ روابط المجموعة</translation>
     </message>
     <message>
-        <location filename="../ui/views/connection_view.py" line="102"/>
+        <location filename="../ui/views/connection_view.py" line="127"/>
         <source>Delete Current Group</source>
         <translation type="unfinished">حذف المجموعة الحالية</translation>
     </message>
@@ -1267,102 +1274,127 @@ Please enter a valid {}</source>
         <translation type="unfinished">الاتصال و DNS</translation>
     </message>
     <message>
-        <location filename="../ui/views/settings_view.py" line="252"/>
+        <location filename="../ui/views/settings_view.py" line="251"/>
+        <source>Health Check Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="261"/>
+        <source>Check Interval:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="271"/>
+        <source>Smoothing:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="281"/>
+        <source>Backoff Base:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="286"/>
+        <source>Auto-start Health Check for new groups</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/views/settings_view.py" line="293"/>
         <source>Rule-Based</source>
         <translation type="unfinished">مبني على القواعد</translation>
     </message>
     <message>
-        <location filename="../ui/views/settings_view.py" line="253"/>
+        <location filename="../ui/views/settings_view.py" line="294"/>
         <source>Global</source>
         <translation type="unfinished">عام</translation>
     </message>
     <message>
-        <location filename="../ui/views/settings_view.py" line="258"/>
+        <location filename="../ui/views/settings_view.py" line="299"/>
         <source>Connection Mode:</source>
         <translation type="unfinished">وضع الاتصال:</translation>
     </message>
     <message>
-        <location filename="../ui/views/settings_view.py" line="264"/>
+        <location filename="../ui/views/settings_view.py" line="305"/>
         <source>e.g., 1.1.1.1,8.8.8.8</source>
         <translation type="unfinished">مثال: 1.1.1.1,8.8.8.8</translation>
     </message>
     <message>
-        <location filename="../ui/views/settings_view.py" line="266"/>
+        <location filename="../ui/views/settings_view.py" line="307"/>
         <source>DNS Servers:</source>
         <translation type="unfinished">خوادم DNS:</translation>
     </message>
     <message>
-        <location filename="../ui/views/settings_view.py" line="270"/>
+        <location filename="../ui/views/settings_view.py" line="311"/>
         <source>Enable TUN Mode (System-wide Proxy)</source>
         <translation type="unfinished">تمكين وضع TUN (وكيل على مستوى النظام)</translation>
     </message>
     <message>
-        <location filename="../ui/views/settings_view.py" line="278"/>
+        <location filename="../ui/views/settings_view.py" line="320"/>
         <source>Bypass Rules</source>
         <translation type="unfinished">قواعد التجاوز</translation>
     </message>
     <message>
-        <location filename="../ui/views/settings_view.py" line="287"/>
+        <location filename="../ui/views/settings_view.py" line="329"/>
         <source>Comma-separated domains</source>
         <translation type="unfinished">نطاقات مفصولة بفواصل</translation>
     </message>
     <message>
-        <location filename="../ui/views/settings_view.py" line="289"/>
+        <location filename="../ui/views/settings_view.py" line="331"/>
         <source>Bypass Domains:</source>
         <translation type="unfinished">النطاقات المتجاوزة:</translation>
     </message>
     <message>
-        <location filename="../ui/views/settings_view.py" line="302"/>
+        <location filename="../ui/views/settings_view.py" line="344"/>
         <source>Muxing Settings</source>
         <translation type="unfinished">إعدادات Muxing</translation>
     </message>
     <message>
-        <location filename="../ui/views/settings_view.py" line="305"/>
+        <location filename="../ui/views/settings_view.py" line="347"/>
         <source>Enable Muxing</source>
         <translation type="unfinished">تمكين Muxing</translation>
     </message>
     <message>
-        <location filename="../ui/views/settings_view.py" line="317"/>
+        <location filename="../ui/views/settings_view.py" line="359"/>
         <source>Protocol:</source>
         <translation type="unfinished">البروتوكول:</translation>
     </message>
     <message>
-        <location filename="../ui/views/settings_view.py" line="323"/>
+        <location filename="../ui/views/settings_view.py" line="365"/>
         <source>Max Streams:</source>
         <translation type="unfinished">أقصى عدد من التدفقات:</translation>
     </message>
     <message>
-        <location filename="../ui/views/settings_view.py" line="328"/>
+        <location filename="../ui/views/settings_view.py" line="370"/>
         <source>Advanced TLS Settings</source>
         <translation type="unfinished">إعدادات TLS المتقدمة</translation>
     </message>
     <message>
-        <location filename="../ui/views/settings_view.py" line="331"/>
+        <location filename="../ui/views/settings_view.py" line="373"/>
         <source>Enable TLS Fragment</source>
         <translation type="unfinished">تمكين تجزئة TLS</translation>
     </message>
     <message>
-        <location filename="../ui/views/settings_view.py" line="343"/>
+        <location filename="../ui/views/settings_view.py" line="385"/>
         <source>Fragment Size:</source>
         <translation type="unfinished">حجم الجزء:</translation>
     </message>
     <message>
-        <location filename="../ui/views/settings_view.py" line="350"/>
+        <location filename="../ui/views/settings_view.py" line="392"/>
         <source>Fragment Sleep:</source>
         <translation type="unfinished">سكون الجزء:</translation>
     </message>
     <message>
-        <location filename="../ui/views/settings_view.py" line="355"/>
+        <location filename="../ui/views/settings_view.py" line="397"/>
         <source>Hysteria2 Settings</source>
         <translation type="unfinished">إعدادات Hysteria2</translation>
     </message>
     <message>
-        <location filename="../ui/views/settings_view.py" line="363"/>
+        <location filename="../ui/views/settings_view.py" line="405"/>
         <source>Default Upload (Mbps):</source>
         <translation type="unfinished">الرفع الافتراضي (ميجابت/ثانية):</translation>
     </message>
     <message>
-        <location filename="../ui/views/settings_view.py" line="370"/>
+        <location filename="../ui/views/settings_view.py" line="412"/>
         <source>Default Download (Mbps):</source>
         <translation type="unfinished">التنزيل الافتراضي (ميجابت/ثانية):</translation>
     </message>

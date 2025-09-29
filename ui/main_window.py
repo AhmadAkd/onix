@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
     QApplication, QMainWindow, QLabel, QWidget, QHBoxLayout, QVBoxLayout, QStyle,
     QListWidget, QStackedWidget, QListWidgetItem, QComboBox, QLineEdit, QPushButton, QDialogButtonBox, QSystemTrayIcon, QGraphicsOpacityEffect,
     QMenu, QTextEdit, QMessageBox, QInputDialog, QDialog, QFormLayout, QGroupBox, QCheckBox, QFileDialog, QScrollArea,
-    QTableWidget, QTableWidgetItem, QHeaderView
+    QTableWidget, QTableWidgetItem, QHeaderView, QSizePolicy
 )
 from PySide6.QtCore import Qt, QSize, QObject, Signal, QPropertyAnimation, QPoint, QEasingCurve, QParallelAnimationGroup, QTimer, QRegularExpression, QByteArray, QRect
 from PySide6.QtGui import QIcon, QAction, QPixmap, QPalette, QMovie, QPainter, QTextDocument, QTextCursor, QColor, QFont
@@ -67,6 +67,8 @@ class PySideUI(QMainWindow):
             self.on_ping_result, Qt.QueuedConnection)
         self.signals.ping_started.connect(
             self.on_ping_started, Qt.QueuedConnection)
+        self.signals.health_check_progress.connect(
+            self.on_health_check_progress, Qt.QueuedConnection)
         self.signals.update_started.connect(self.on_update_started)
         self.signals.log_message.connect(self._log_to_widget)
         self.signals.status_changed.connect(self.on_status_change)
@@ -87,7 +89,12 @@ class PySideUI(QMainWindow):
 
         # Title is a brand name, no need to translate
         self.setWindowTitle("Onix")
-        self.resize(1024, 600)
+        self.resize(1200, 800)  # Better initial size
+        self.setMinimumSize(900, 600)  # Set minimum size
+        self.setMaximumSize(2000, 1500)  # Set maximum size
+
+        # Enable responsive behavior
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # Main layout setup...
         self.setup_main_layout()
@@ -99,6 +106,9 @@ class PySideUI(QMainWindow):
 
         # Apply initial theme
         self.apply_theme(self.settings.get("appearance_mode", "System"))
+
+        # Apply RTL support based on language
+        self.apply_rtl_support()
 
         # Setup System Tray Icon
         self.create_tray_icon()
@@ -121,10 +131,15 @@ class PySideUI(QMainWindow):
 
         self.nav_rail = QListWidget()
         self.nav_rail.setObjectName("NavRail")
-        self.nav_rail.setFixedWidth(120)
+        self.nav_rail.setMinimumWidth(100)
+        self.nav_rail.setMaximumWidth(150)
+        self.nav_rail.setSizePolicy(
+            QSizePolicy.Preferred, QSizePolicy.Expanding)
         main_layout.addWidget(self.nav_rail)
 
         content_container = QWidget()
+        content_container.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Expanding)
         content_layout = QVBoxLayout(content_container)
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
@@ -138,53 +153,140 @@ class PySideUI(QMainWindow):
     def create_status_bar(self):
         status_bar = QWidget()
         status_bar.setObjectName("StatusBar")
-        status_bar.setFixedHeight(45)
+        status_bar.setFixedHeight(60)  # Fixed height
         layout = QHBoxLayout(status_bar)
-        layout.setContentsMargins(10, 5, 10, 5)
+        # Smaller margins for responsiveness
+        layout.setContentsMargins(8, 4, 8, 4)
 
+        # Connection status section
+        status_section = QHBoxLayout()
+        status_section.setSpacing(8)  # Better spacing
+
+        # Status icon with modern styling
         self.connection_status_icon = QLabel("●")
-        self.connection_status_icon.setStyleSheet(
-            "color: orange; font-size: 14pt;"
-        )
+        self.connection_status_icon.setStyleSheet("""
+            color: #f59e0b; 
+            font-size: 14px;
+            font-weight: bold;
+            background-color: #fef3c7;
+            padding: 3px 6px;
+            border-radius: 4px;
+        """)
+
+        # Status text with modern styling
         self.connection_status_text = QLabel(self.tr("Disconnected"))
-        self.connection_status_text.setStyleSheet("font-weight: bold;")
+        self.connection_status_text.setStyleSheet("""
+            font-weight: 600; 
+            font-size: 12px;
+            color: #374151;
+        """)
 
         # Connecting animation
         self.connecting_spinner_label = QLabel()
         spinner_movie = QMovie(":/icons/spinner.gif")
+        # Reduced from 20x20 to 16x16
         spinner_movie.setScaledSize(QSize(16, 16))
         self.connecting_spinner_label.setMovie(spinner_movie)
         self.connecting_spinner_label.hide()
 
-        self.ip_label = QLabel(self.tr("IP: N/A"))
-        self.latency_label = QLabel(self.tr("Latency: N/A"))
-        self.down_speed_label = QLabel("↓ 0 KB/s")
-        self.up_speed_label = QLabel("↑ 0 KB/s")
+        status_section.addWidget(self.connecting_spinner_label)
+        status_section.addWidget(self.connection_status_icon)
+        status_section.addWidget(self.connection_status_text)
 
+        # Network info section
+        network_section = QHBoxLayout()
+        network_section.setSpacing(10)  # Better spacing
+
+        # IP label with responsive styling
+        self.ip_label = QLabel(self.tr("IP: N/A"))
+        self.ip_label.setStyleSheet("""
+            font-size: 10px;
+            color: #6b7280;
+            background-color: #f3f4f6;
+            padding: 3px 6px;
+            border-radius: 4px;
+        """)
+        self.ip_label.setMinimumWidth(80)  # Minimum width for responsiveness
+
+        # Latency label with responsive styling
+        self.latency_label = QLabel(self.tr("Latency: N/A"))
+        self.latency_label.setStyleSheet("""
+            font-size: 10px;
+            color: #6b7280;
+            background-color: #f3f4f6;
+            padding: 3px 6px;
+            border-radius: 4px;
+        """)
+        self.latency_label.setMinimumWidth(
+            100)  # Minimum width for responsiveness
+
+        # Speed labels with responsive styling
+        self.down_speed_label = QLabel("↓ 0 KB/s")
+        self.down_speed_label.setStyleSheet("""
+            font-size: 10px;
+            color: #10b981;
+            background-color: #d1fae5;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+        """)
+        self.down_speed_label.setMinimumWidth(
+            80)  # Minimum width for responsiveness
+
+        self.up_speed_label = QLabel("↑ 0 KB/s")
+        self.up_speed_label.setStyleSheet("""
+            font-size: 10px;
+            color: #3b82f6;
+            background-color: #dbeafe;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+        """)
+        self.up_speed_label.setMinimumWidth(
+            80)  # Minimum width for responsiveness
+
+        network_section.addWidget(self.down_speed_label)
+        network_section.addWidget(self.up_speed_label)
+        network_section.addWidget(self.ip_label)
+        network_section.addWidget(self.latency_label)
+
+        # Start/Stop button with responsive styling
         self.start_stop_button = QPushButton(self.tr("Start"))
+        self.start_stop_button.setStyleSheet("""
+            QPushButton {
+                background-color: #10b981;
+                color: white;
+                border: none;
+                padding: 6px 12px;
+                border-radius: 4px;
+                font-weight: 500;
+                font-size: 12px;
+                min-width: 70px;
+            }
+            QPushButton:hover {
+                background-color: #059669;
+            }
+            QPushButton:pressed {
+                background-color: #047857;
+            }
+        """)
+        self.start_stop_button.setMaximumWidth(
+            120)  # Maximum width for responsiveness
         self.start_stop_button.clicked.connect(self.start_stop_toggle)
 
-        status_layout = QHBoxLayout()
-        status_layout.setSpacing(8)
-        status_layout.addWidget(self.connecting_spinner_label)
-        status_layout.addWidget(self.connection_status_icon)
-        status_layout.addWidget(self.connection_status_text)
-        layout.addLayout(status_layout)
+        # Add sections to main layout with responsive behavior
+        layout.addLayout(status_section)
         layout.addStretch()
-        layout.addWidget(self.down_speed_label,
-                         alignment=Qt.AlignVCenter)  # type: ignore
-        layout.addSpacing(20)
-        layout.addWidget(self.up_speed_label, alignment=Qt.AlignVCenter)
-        layout.addSpacing(20)
-        separator = QLabel("|")
-        separator.setStyleSheet("color: #ccc;")
-        layout.addWidget(separator, alignment=Qt.AlignVCenter)
-        layout.addSpacing(15)
-        layout.addWidget(self.ip_label)
-        layout.addSpacing(20)
-        layout.addWidget(self.latency_label)
-        layout.addStretch()
-        layout.addWidget(self.start_stop_button)
+
+        # Create a container for network section and button
+        right_container = QWidget()
+        right_layout = QHBoxLayout(right_container)
+        right_layout.setContentsMargins(0, 0, 0, 0)
+        right_layout.setSpacing(8)
+        right_layout.addLayout(network_section)
+        right_layout.addWidget(self.start_stop_button)
+
+        layout.addWidget(right_container)
 
         return status_bar
 
@@ -278,43 +380,8 @@ This action cannot be undone.""").format(log_file_path),
 
         if self.settings.get("language") != lang_code:
             self.settings["language"] = lang_code
-            self.restart_button.show()
-
-    def on_core_change(self, core_name):
-        """Handles core change from the settings dropdown."""
-        if self.settings.get("active_core") != core_name:
-            self.settings["active_core"] = core_name
-            self.restart_button.show()
-
-    def on_theme_change(self, theme_name):
-        """Handles theme color change from the settings dropdown."""
-        theme_code = "blue"  # Default
-        for code, name in self.theme_names.items():
-            if name == theme_name:
-                theme_code = code
-                break
-        if self.settings.get("theme_color") != theme_code:
-            self.settings["theme_color"] = theme_code
-            self.restart_button.show()
-
-    def handle_restart(self):
-        """Saves settings and signals the main application to restart."""
-        self.save_settings()
-        self.log(self.tr("Restarting to apply changes..."))
-        QApplication.instance().setProperty("restart_requested", True)
-        QApplication.instance().quit()
-
-    def on_language_change(self, lang_name):
-        """Handles language change from the settings dropdown."""
-        # Find the language code from the display name
-        lang_code = "en"  # Default
-        for code, name in self.languages.items():
-            if name == lang_name:
-                lang_code = code
-                break
-
-        if self.settings.get("language") != lang_code:
-            self.settings["language"] = lang_code
+            # Apply RTL support immediately for the new language
+            self.apply_rtl_support()
             self.restart_button.show()
 
     def on_core_change(self, core_name):
@@ -349,6 +416,23 @@ This action cannot be undone.""").format(log_file_path),
         self.settings["dns_servers"] = self.dns_entry.text()
         self.settings["bypass_domains"] = self.bypass_domains_entry.text()
         self.settings["tun_enabled"] = self.tun_checkbox.isChecked()
+
+        # Health Check Settings
+        if hasattr(self, 'health_check_interval_combo'):
+            interval_text = self.health_check_interval_combo.currentText()
+            self.settings["health_check_interval"] = int(
+                interval_text.split()[0])
+        if hasattr(self, 'health_check_ema_combo'):
+            ema_text = self.health_check_ema_combo.currentText()
+            self.settings["health_check_ema_alpha"] = float(
+                ema_text.split()[0])
+        if hasattr(self, 'health_check_backoff_combo'):
+            backoff_text = self.health_check_backoff_combo.currentText()
+            self.settings["health_check_backoff_base"] = int(
+                backoff_text.split()[0])
+        if hasattr(self, 'health_check_auto_start'):
+            self.settings["health_check_auto_start"] = self.health_check_auto_start.isChecked(
+            )
         self.settings["appearance_mode"] = {self.tr("System"): "System", self.tr("Light"): "Light", self.tr("Dark"): "Dark"}.get(
             self.appearance_mode_combo.currentText(), "System")
 
@@ -409,6 +493,25 @@ This action cannot be undone.""").format(log_file_path),
                 app.setStyleSheet(get_dark_stylesheet(theme_palette))
             else:
                 app.setStyleSheet(get_light_stylesheet(theme_palette))
+
+    def apply_rtl_support(self):
+        """Apply RTL support based on current language setting."""
+        current_lang = self.settings.get("language", "en")
+        # Persian, Arabic, Hebrew, Urdu
+        rtl_languages = ["fa", "ar", "he", "ur"]
+
+        if current_lang in rtl_languages:
+            self.setLayoutDirection(Qt.RightToLeft)
+            self.setAttribute(Qt.WA_RightToLeft, True)
+            # Apply RTL-specific styling
+            self.setStyleSheet(self.styleSheet() + """
+                QWidget[dir="rtl"] {
+                    direction: rtl;
+                }
+            """)
+        else:
+            self.setLayoutDirection(Qt.LeftToRight)
+            self.setAttribute(Qt.WA_RightToLeft, False)
 
     def handle_check_for_updates(self):
         self.log(self.tr("Checking for core updates..."))
@@ -781,6 +884,8 @@ This action cannot be undone.""").format(log_file_path),
                 self.tr("Stop TCP Health Check"))
             self.health_check_tcp_button.setStyleSheet(
                 "background-color: #F44336;")
+            self.health_check_progress.setVisible(True)
+            self.health_check_progress.setValue(0)
             self.log(
                 f"Started TCP health checking for group: {current_group}", LogLevel.INFO)
         else:
@@ -788,6 +893,7 @@ This action cannot be undone.""").format(log_file_path),
             self.server_manager.stop_health_check()
             self.health_check_tcp_button.setText(self.tr("Health Check TCP"))
             self.health_check_tcp_button.setStyleSheet("")
+            self.health_check_progress.setVisible(False)
             self.log("Stopped TCP health checking", LogLevel.INFO)
 
     def toggle_health_check_url(self):
@@ -806,6 +912,8 @@ This action cannot be undone.""").format(log_file_path),
                 self.tr("Stop URL Health Check"))
             self.health_check_url_button.setStyleSheet(
                 "background-color: #F44336;")
+            self.health_check_progress.setVisible(True)
+            self.health_check_progress.setValue(0)
             self.log(
                 f"Started URL health checking for group: {current_group}", LogLevel.INFO)
         else:
@@ -813,10 +921,58 @@ This action cannot be undone.""").format(log_file_path),
             self.server_manager.stop_health_check()
             self.health_check_url_button.setText(self.tr("Health Check URL"))
             self.health_check_url_button.setStyleSheet("")
+            self.health_check_progress.setVisible(False)
             self.log("Stopped URL health checking", LogLevel.INFO)
+
+    def show_export_dialog(self):
+        """Show export dialog for current group."""
+        current_group = self.group_dropdown.currentText()
+        if not current_group:
+            self.log("No group selected for export", LogLevel.WARNING)
+            return
+
+        servers = self.server_manager.get_servers_by_group(current_group)
+        if not servers:
+            self.log("No servers to export", LogLevel.WARNING)
+            return
+
+        # Get health stats from health checker
+        health_stats = {}
+        if hasattr(self.server_manager, '_health_checker'):
+            for server in servers:
+                server_id = server.get('id')
+                if server_id:
+                    health_stats[server_id] = self.server_manager._health_checker.get_server_stats(
+                        server_id)
+
+        dialog = ExportDialog(self, servers, health_stats)
+        dialog.exec()
+
+    def on_health_check_progress(self, current: int, total: int):
+        """Handle health check progress updates."""
+        if hasattr(self, 'health_check_progress'):
+            percentage = int((current / total) * 100) if total > 0 else 0
+            self.health_check_progress.setValue(percentage)
+            self.health_check_progress.setFormat(
+                f"{current}/{total} ({percentage}%)")
 
     def start_stop_toggle(self):
         if self.singbox_manager.is_running:
+            # Stop health check when manually disconnecting
+            self.server_manager.stop_health_check()
+            # Reset health check button states
+            if hasattr(self, 'health_check_tcp_button'):
+                self.health_check_tcp_button.setChecked(False)
+                self.health_check_tcp_button.setText(
+                    self.tr("Health Check TCP"))
+                self.health_check_tcp_button.setStyleSheet("")
+            if hasattr(self, 'health_check_url_button'):
+                self.health_check_url_button.setChecked(False)
+                self.health_check_url_button.setText(
+                    self.tr("Health Check URL"))
+                self.health_check_url_button.setStyleSheet("")
+            if hasattr(self, 'health_check_progress'):
+                self.health_check_progress.setVisible(False)
             threading.Thread(target=self.singbox_manager.stop,
                              daemon=True).start()
         else:
@@ -1100,6 +1256,13 @@ This action cannot be undone.""").format(log_file_path),
             self.log(
                 self.tr("Found card for server ID {}. Updating {} ping value.").format(server_id, test_type), LogLevel.DEBUG)
             card.update_ping(ping, test_type)
+
+            # Update health stats if this is from health checker
+            if hasattr(self.server_manager, '_health_checker'):
+                health_stats = self.server_manager._health_checker.get_server_stats(
+                    server_id)
+                if health_stats:
+                    card.update_health_stats(health_stats)
         else:
             self.log(
                 self.tr("Could not find card widget for server ID {}").format(server_id), LogLevel.WARNING)
@@ -1147,40 +1310,153 @@ This action cannot be undone.""").format(log_file_path),
 
     def on_status_change(self, status, color):
         self.connection_status_text.setText(status)
-        self.connection_status_icon.setStyleSheet(
-            f"color: {color}; font-size: 14pt;"
-        )
 
-        if status == self.tr("Connecting..."):
+        # Modern status styling based on status
+        if status == self.tr("Connected"):
+            self.connection_status_icon.setStyleSheet("""
+                color: #10b981; 
+                font-size: 16px;
+                font-weight: bold;
+                background-color: #d1fae5;
+                padding: 4px 8px;
+                border-radius: 6px;
+            """)
+        elif status == self.tr("Connecting..."):
             self.connecting_spinner_label.show()
             self.connecting_spinner_label.movie().start()
             self.connection_status_icon.hide()
-        else:
-            self.connecting_spinner_label.hide()
-            self.connecting_spinner_label.movie().stop()
-            self.connection_status_icon.show()
+            return
+        else:  # Disconnected
+            self.connection_status_icon.setStyleSheet("""
+                color: #f59e0b; 
+                font-size: 16px;
+                font-weight: bold;
+                background-color: #fef3c7;
+                padding: 4px 8px;
+                border-radius: 6px;
+            """)
+
+        self.connecting_spinner_label.hide()
+        self.connecting_spinner_label.movie().stop()
+        self.connection_status_icon.show()
 
     def on_connect(self, latency):
-        self.on_status_change(self.tr("Connected"), "#4CAF50")  # Green
+        self.on_status_change(self.tr("Connected"), "#10b981")
         self.latency_label.setText(self.tr("Latency: {} ms").format(latency))
+        self.latency_label.setStyleSheet("""
+            font-size: 12px;
+            color: #10b981;
+            background-color: #d1fae5;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        """)
         self.start_stop_button.setText(self.tr("Disconnect"))
-        self.start_stop_button.setIcon(QIcon(":/icons/pause.svg"))
+        self.start_stop_button.setStyleSheet("""
+            QPushButton {
+                background-color: #ef4444;
+                color: white;
+                border: none;
+                padding: 6px 12px;
+                border-radius: 4px;
+                font-weight: 500;
+                font-size: 12px;
+                min-width: 70px;
+            }
+            QPushButton:hover {
+                background-color: #dc2626;
+            }
+            QPushButton:pressed {
+                background-color: #b91c1c;
+            }
+        """)
 
     def on_stop(self):
-        self.on_status_change(self.tr("Disconnected"), "orange")  # Orange
+        self.on_status_change(self.tr("Disconnected"), "#f59e0b")
         self.latency_label.setText(self.tr("Latency: N/A"))
+        self.latency_label.setStyleSheet("""
+            font-size: 12px;
+            color: #6b7280;
+            background-color: #f3f4f6;
+            padding: 4px 8px;
+            border-radius: 4px;
+        """)
         self.ip_label.setText(self.tr("IP: N/A"))
         self.up_speed_label.setText("↑ 0 KB/s")
         self.down_speed_label.setText("↓ 0 KB/s")
         self.start_stop_button.setText(self.tr("Start"))
-        self.start_stop_button.setIcon(QIcon(":/icons/play.svg"))
+        self.start_stop_button.setStyleSheet("""
+            QPushButton {
+                background-color: #10b981;
+                color: white;
+                border: none;
+                padding: 6px 12px;
+                border-radius: 4px;
+                font-weight: 500;
+                font-size: 12px;
+                min-width: 70px;
+            }
+            QPushButton:hover {
+                background-color: #059669;
+            }
+            QPushButton:pressed {
+                background-color: #047857;
+            }
+        """)
 
     def on_ip_update(self, ip_address):
         self.ip_label.setText(self.tr("IP: {}").format(ip_address))
+        self.ip_label.setStyleSheet("""
+            font-size: 12px;
+            color: #10b981;
+            background-color: #d1fae5;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        """)
 
     def on_speed_update(self, up_speed, down_speed):
         self.up_speed_label.setText(f"↑ {self.format_speed(up_speed)}")
         self.down_speed_label.setText(f"↓ {self.format_speed(down_speed)}")
+
+        # Update speed label colors based on speed
+        if up_speed > 1024 * 1024:  # > 1MB/s
+            up_color = "#10b981"
+            up_bg = "#d1fae5"
+        elif up_speed > 100 * 1024:  # > 100KB/s
+            up_color = "#f59e0b"
+            up_bg = "#fef3c7"
+        else:
+            up_color = "#6b7280"
+            up_bg = "#f3f4f6"
+
+        if down_speed > 1024 * 1024:  # > 1MB/s
+            down_color = "#10b981"
+            down_bg = "#d1fae5"
+        elif down_speed > 100 * 1024:  # > 100KB/s
+            down_color = "#f59e0b"
+            down_bg = "#fef3c7"
+        else:
+            down_color = "#6b7280"
+            down_bg = "#f3f4f6"
+
+        self.up_speed_label.setStyleSheet(f"""
+            font-size: 12px;
+            color: {up_color};
+            background-color: {up_bg};
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        """)
+
+        self.down_speed_label.setStyleSheet(f"""
+            font-size: 12px;
+            color: {down_color};
+            background-color: {down_bg};
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        """)
 
         # Update the tray icon with the new speeds
         self.update_tray_icon(up_speed, down_speed)
@@ -1231,17 +1507,6 @@ This action cannot be undone.""").format(log_file_path),
 
         painter.end()
         self.tray_icon.setIcon(QIcon(pixmap))
-
-    @staticmethod
-    def format_speed(speed_bytes_per_sec):
-        if speed_bytes_per_sec < 1024:
-            return f"{speed_bytes_per_sec:.0f} B/s"
-        elif speed_bytes_per_sec < 1024 * 1024:
-            return f"{speed_bytes_per_sec / 1024:.1f} KB/s"
-        elif speed_bytes_per_sec < 1024 * 1024 * 1024:
-            return f"{speed_bytes_per_sec / (1024 * 1024):.2f} MB/s"
-        else:
-            return f"{speed_bytes_per_sec / (1024 * 1024 * 1024):.2f} GB/s"
 
     @staticmethod
     def format_speed(speed_bytes_per_sec, compact=False):

@@ -2,7 +2,7 @@ from enum import Enum
 from PySide6.QtCore import QCoreApplication
 
 PROXY_HOST = "127.0.0.1"
-PROXY_PORT = 2081
+PROXY_PORT = 2082
 STATS_API_PORT = 9090
 PROXY_SERVER_ADDRESS = f"{PROXY_HOST}:{PROXY_PORT}"
 PROXY_BYPASS = "localhost;127.0.0.1;[::1];<local>"
@@ -39,7 +39,8 @@ APPEARANCE_MODE_DARK = tr("Dark")
 APPEARANCE_MODE_SYSTEM = tr("System")
 THEME_GREEN = "green"
 THEME_BLUE = "blue"
-THEME_DARK_BLUE = "dark-blue"
+THEME_PURPLE = "purple"
+THEME_ROSE = "rose"
 # Tabs
 TAB_CONNECTION = tr("Connection")
 TAB_SETTINGS = tr("Settings")

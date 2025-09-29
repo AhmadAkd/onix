@@ -12,14 +12,12 @@ from PySide6.QtWidgets import (
     QPushButton,
     QLineEdit,
     QCheckBox,
+    QSizePolicy,
 )
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt, QSize
 from constants import (
     LBL_THEME_COLOR,
-    THEME_NAME_GREEN,
-    THEME_NAME_BLUE,
-    THEME_NAME_DARK_BLUE,
 )
 
 
@@ -31,7 +29,9 @@ def create_settings_view(main_window):
 
     # Navigation on the left
     settings_nav = QListWidget()
-    settings_nav.setFixedWidth(180)
+    settings_nav.setMinimumWidth(140)
+    settings_nav.setMaximumWidth(200)
+    settings_nav.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
     settings_nav.setObjectName("SettingsNav")
     settings_nav.setStyleSheet(
         """
@@ -134,15 +134,16 @@ def _create_general_settings_page(main_window):
 
     main_window.theme_combo = QComboBox()
     main_window.theme_names = {
-        "blue": main_window.tr(THEME_NAME_BLUE),
-        "green": main_window.tr(THEME_NAME_GREEN),
-        "dark-blue": main_window.tr(THEME_NAME_DARK_BLUE),
+        "blue": main_window.tr("Indigo"),
+        "green": main_window.tr("Emerald"),
+        "purple": main_window.tr("Violet"),
+        "rose": main_window.tr("Rose"),
     }
     main_window.theme_combo.addItems(main_window.theme_names.values())
     current_theme_code = main_window.settings.get("theme_color", "blue")
     main_window.theme_combo.setCurrentText(
         main_window.theme_names.get(
-            current_theme_code, main_window.tr(THEME_NAME_BLUE))
+            current_theme_code, main_window.tr("Indigo"))
     )
     main_window.theme_combo.currentTextChanged.connect(
         main_window.on_theme_change)
@@ -246,31 +247,46 @@ def _create_network_settings_page(main_window):
     # --- Network Settings Group ---
     network_group = QGroupBox(main_window.tr("Connection & DNS"))
     network_layout = QFormLayout(network_group)
-    
+
     # --- Health Check Settings Group ---
     health_group = QGroupBox(main_window.tr("Health Check Settings"))
     health_layout = QFormLayout(health_group)
-    
+
     # Health Check Interval
     main_window.health_check_interval_combo = QComboBox()
-    main_window.health_check_interval_combo.addItems(["30 seconds", "60 seconds", "120 seconds", "300 seconds"])
-    main_window.health_check_interval_combo.setCurrentText("30 seconds")
-    health_layout.addRow(main_window.tr("Check Interval:"), main_window.health_check_interval_combo)
-    
+    main_window.health_check_interval_combo.addItems(
+        ["30 seconds", "60 seconds", "120 seconds", "300 seconds"])
+    current_interval = main_window.settings.get("health_check_interval", 30)
+    main_window.health_check_interval_combo.setCurrentText(
+        f"{current_interval} seconds")
+    health_layout.addRow(main_window.tr("Check Interval:"),
+                         main_window.health_check_interval_combo)
+
     # EMA Alpha
     main_window.health_check_ema_combo = QComboBox()
-    main_window.health_check_ema_combo.addItems(["0.1 (Fast)", "0.3 (Balanced)", "0.5 (Slow)"])
-    main_window.health_check_ema_combo.setCurrentText("0.3 (Balanced)")
-    health_layout.addRow(main_window.tr("Smoothing:"), main_window.health_check_ema_combo)
-    
+    main_window.health_check_ema_combo.addItems(
+        ["0.1 (Fast)", "0.3 (Balanced)", "0.5 (Slow)"])
+    current_ema = main_window.settings.get("health_check_ema_alpha", 0.3)
+    main_window.health_check_ema_combo.setCurrentText(
+        f"{current_ema} (Balanced)" if current_ema == 0.3 else f"{current_ema} (Fast)" if current_ema == 0.1 else f"{current_ema} (Slow)")
+    health_layout.addRow(main_window.tr("Smoothing:"),
+                         main_window.health_check_ema_combo)
+
     # Backoff Base
     main_window.health_check_backoff_combo = QComboBox()
-    main_window.health_check_backoff_combo.addItems(["1 second", "2 seconds", "5 seconds"])
-    main_window.health_check_backoff_combo.setCurrentText("1 second")
-    health_layout.addRow(main_window.tr("Backoff Base:"), main_window.health_check_backoff_combo)
-    
+    main_window.health_check_backoff_combo.addItems(
+        ["1 second", "2 seconds", "5 seconds"])
+    current_backoff = main_window.settings.get("health_check_backoff_base", 1)
+    main_window.health_check_backoff_combo.setCurrentText(
+        f"{current_backoff} second" if current_backoff == 1 else f"{current_backoff} seconds")
+    health_layout.addRow(main_window.tr("Backoff Base:"),
+                         main_window.health_check_backoff_combo)
+
     # Auto-start for groups
-    main_window.health_check_auto_start = QCheckBox(main_window.tr("Auto-start Health Check for new groups"))
+    main_window.health_check_auto_start = QCheckBox(
+        main_window.tr("Auto-start Health Check for new groups"))
+    main_window.health_check_auto_start.setChecked(
+        main_window.settings.get("health_check_auto_start", False))
     health_layout.addRow(main_window.health_check_auto_start)
 
     main_window.connection_mode_combo = QComboBox()

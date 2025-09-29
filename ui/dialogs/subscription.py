@@ -74,14 +74,10 @@ class SubscriptionManagerDialog(QDialog):
         save_button = QPushButton(self.tr("Save & Close"))
         # Accept will trigger the save logic
         save_button.clicked.connect(self.accept)
-        close_button = QPushButton(self.tr("Close"))
-        # Reject will close without saving
-        close_button.clicked.connect(self.reject)
 
         button_layout.addStretch()
         button_layout.addWidget(add_button)
         button_layout.addWidget(save_button)
-        button_layout.addWidget(close_button)
         main_layout.addLayout(button_layout)
 
         self.populate_list()

@@ -9,16 +9,16 @@ class ExportService:
     """Service for exporting health check results and server data."""
 
     @staticmethod
-    def export_health_stats_to_csv(servers: List[Dict[str, Any]], 
-                                 health_stats: Dict[str, Dict], 
-                                 filename: str = None) -> str:
+    def export_health_stats_to_csv(servers: List[Dict[str, Any]],
+                                   health_stats: Dict[str, Dict],
+                                   filename: str = None) -> str:
         """Export health check statistics to CSV file."""
         if filename is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"health_check_results_{timestamp}.csv"
-        
+
         filepath = Path(filename)
-        
+
         with open(filepath, 'w', newline='', encoding='utf-8') as csvfile:
             fieldnames = [
                 'Server Name', 'Server ID', 'Protocol', 'Address', 'Port',
@@ -27,11 +27,11 @@ class ExportService:
             ]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
-            
+
             for server in servers:
                 server_id = server.get('id', '')
                 stats = health_stats.get(server_id, {})
-                
+
                 # Calculate status
                 failures = stats.get('failures', 0)
                 if failures == 0:
@@ -40,14 +40,15 @@ class ExportService:
                     status = 'Unstable'
                 else:
                     status = 'Offline'
-                
+
                 # Format last test time
                 last_test = stats.get('last_test', 0)
                 if last_test > 0:
-                    last_test_str = datetime.fromtimestamp(last_test).strftime('%Y-%m-%d %H:%M:%S')
+                    last_test_str = datetime.fromtimestamp(
+                        last_test).strftime('%Y-%m-%d %H:%M:%S')
                 else:
                     last_test_str = 'Never'
-                
+
                 writer.writerow({
                     'Server Name': server.get('name', 'Unknown'),
                     'Server ID': server_id,
@@ -63,19 +64,19 @@ class ExportService:
                     'Status': status,
                     'Export Time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 })
-        
+
         return str(filepath.absolute())
 
     @staticmethod
-    def export_server_list_to_csv(servers: List[Dict[str, Any]], 
-                                filename: str = None) -> str:
+    def export_server_list_to_csv(servers: List[Dict[str, Any]],
+                                  filename: str = None) -> str:
         """Export server list to CSV file."""
         if filename is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"server_list_{timestamp}.csv"
-        
+
         filepath = Path(filename)
-        
+
         with open(filepath, 'w', newline='', encoding='utf-8') as csvfile:
             fieldnames = [
                 'Name', 'Protocol', 'Address', 'Port', 'UUID', 'Password',
@@ -84,7 +85,7 @@ class ExportService:
             ]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
-            
+
             for server in servers:
                 writer.writerow({
                     'Name': server.get('name', 'Unknown'),
@@ -103,5 +104,5 @@ class ExportService:
                     'URL Ping (ms)': server.get('url_ping', 'N/A'),
                     'Export Time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 })
-        
+
         return str(filepath.absolute())

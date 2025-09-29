@@ -58,6 +58,7 @@ def main():
         "on_servers_updated": pyside_ui.signals.servers_updated.emit,
         "on_ping_result": lambda config, ping, test_type: pyside_ui.signals.ping_result.emit(config, ping, test_type),
         "on_ping_started": lambda config: pyside_ui.signals.ping_started.emit(config),
+        "on_health_check_progress": lambda current, total: pyside_ui.signals.health_check_progress.emit(current, total),
         "on_update_start": pyside_ui.signals.update_started.emit,
         "on_update_finish": pyside_ui.signals.update_finished.emit,
         "on_update_progress": lambda sub_name: pyside_ui.log(f"Updating {sub_name}..."),
