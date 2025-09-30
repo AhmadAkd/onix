@@ -2,3 +2,5 @@ pytest
 ruff
 black
 pre-commit
+mypy
+pytest-cov
