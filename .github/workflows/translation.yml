@@ -1,0 +1,77 @@
+name: Translation
+
+on:
+  push:
+    paths:
+      - 'translations/**'
+      - '*.ts'
+      - '*.qm'
+  pull_request:
+    paths:
+      - 'translations/**'
+      - '*.ts'
+      - '*.qm'
+
+jobs:
+  translation:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Check translation files
+      run: |
+        python -c "
+        import os
+        import glob
+        
+        # Check if all .ts files have corresponding .qm files
+        ts_files = glob.glob('translations/*.ts')
+        qm_files = glob.glob('translations/*.qm')
+        
+        print(f'Found {len(ts_files)} .ts files')
+        print(f'Found {len(qm_files)} .qm files')
+        
+        for ts_file in ts_files:
+            qm_file = ts_file.replace('.ts', '.qm')
+            if not os.path.exists(qm_file):
+                print(f'Missing .qm file for {ts_file}')
+                exit(1)
+        
+        print('All translation files are present')
+        "
+    
+    - name: Validate translation syntax
+      run: |
+        python -c "
+        import os
+        import glob
+        
+        # Basic validation of .ts files
+        ts_files = glob.glob('translations/*.ts')
+        
+        for ts_file in ts_files:
+            with open(ts_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+                
+            # Check for basic XML structure
+            if '<TS' not in content:
+                print(f'Invalid TS file: {ts_file}')
+                exit(1)
+                
+            if '</TS>' not in content:
+                print(f'Invalid TS file: {ts_file}')
+                exit(1)
+        
+        print('All translation files are valid')
+        "
