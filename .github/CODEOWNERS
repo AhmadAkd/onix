@@ -1,0 +1,38 @@
+# Global owners
+* @AhmadAkd
+
+# Core application files
+/main.py @AhmadAkd
+/constants.py @AhmadAkd
+/settings_manager.py @AhmadAkd
+
+# UI components
+/ui/ @AhmadAkd
+/ui/main_window.py @AhmadAkd
+/ui/app_logic.py @AhmadAkd
+/ui/styles.py @AhmadAkd
+
+# Managers
+/managers/ @AhmadAkd
+/managers/core_manager.py @AhmadAkd
+/managers/server_manager.py @AhmadAkd
+/managers/xray_generator.py @AhmadAkd
+/managers/singbox_generator.py @AhmadAkd
+
+# Services
+/services/ @AhmadAkd
+/services/speed_test_service.py @AhmadAkd
+/services/security_service.py @AhmadAkd
+/services/statistics_service.py @AhmadAkd
+
+# Documentation
+/README.md @AhmadAkd
+/CHANGELOG.md @AhmadAkd
+/BUILD.md @AhmadAkd
+/CONTRIBUTING.md @AhmadAkd
+/SECURITY.md @AhmadAkd
+
+# Configuration files
+/requirements.txt @AhmadAkd
+/requirements-dev.txt @AhmadAkd
+/.github/ @AhmadAkd
