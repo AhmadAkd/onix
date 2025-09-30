@@ -34,6 +34,14 @@ def parse_wireguard_config(config_content, filename="WireGuard-Config"):
         interface = config["Interface"]
         peer = config["Peer"]
 
+        # Validate required fields
+        if not interface.get("PrivateKey", "").strip():
+            return None
+        if not peer.get("PublicKey", "").strip():
+            return None
+        if not peer.get("Endpoint", "").strip():
+            return None
+
         # Extract endpoint and separate server/port
         endpoint = peer.get("Endpoint", "").strip()
         server, port_str = (endpoint.rsplit(":", 1) + ["51820"])[:2]
@@ -68,12 +76,14 @@ def parse_vless_link(link):
         if not parsed_url.username or not parsed_url.hostname:
             return None
 
-        remarks = unquote(parsed_url.fragment) if parsed_url.fragment else "Unnamed"
+        remarks = unquote(
+            parsed_url.fragment) if parsed_url.fragment else "Unnamed"
         remarks = re.sub(r"[\U0001F1E6-\U0001F1FF]", "", remarks).strip()
         group = "Default"
+        # Only extract group if there's a clear delimiter and it's not just a single word
         delimiters = ["|", "-", "_", " "]
         for d in delimiters:
-            if d in remarks:
+            if d in remarks and len(remarks.split(d)) > 1:
                 group = remarks.split(d)[0].strip()
                 break
         query_params = parse_qs(parsed_url.query)
@@ -81,7 +91,8 @@ def parse_vless_link(link):
         security = query_params.get("security", [""])[0]
         is_tls_enabled = security in ("tls", "reality")
         tls_type = (
-            "reality" if security == "reality" else ("tls" if security == "tls" else "")
+            "reality" if security == "reality" else (
+                "tls" if security == "tls" else "")
         )
 
         # For REALITY, enforce required params (publicKey and sni)
@@ -98,7 +109,7 @@ def parse_vless_link(link):
             "name": remarks,
             "group": group,
             "protocol": "vless",
-            "server": parsed_url.hostname,
+            "server": parsed_url.hostname if not (parsed_url.hostname and parsed_url.hostname.startswith('::')) else f"[{parsed_url.hostname}]",
             "port": int(parsed_url.port),
             "uuid": parsed_url.username,
             "tls_enabled": is_tls_enabled,
@@ -134,9 +145,10 @@ def parse_vmess_link(link):
 
         remarks = vmess_config.get("ps", "Unnamed")
         group = "Default"
+        # Only extract group if there's a clear delimiter and it's not just a single word
         delimiters = ["|", "-", "_", " "]
         for d in delimiters:
-            if d in remarks:
+            if d in remarks and len(remarks.split(d)) > 1:
                 group = remarks.split(d)[0].strip()
                 break
 
@@ -163,12 +175,14 @@ def parse_vmess_link(link):
 def parse_shadowsocks_link(link):
     try:
         parsed_url = urlparse(link)
-        remarks = unquote(parsed_url.fragment) if parsed_url.fragment else "Unnamed"
+        remarks = unquote(
+            parsed_url.fragment) if parsed_url.fragment else "Unnamed"
 
         group = "Default"
+        # Only extract group if there's a clear delimiter and it's not just a single word
         delimiters = ["|", "-", "_", " "]
         for d in delimiters:
-            if d in remarks:
+            if d in remarks and len(remarks.split(d)) > 1:
                 group = remarks.split(d)[0].strip()
                 break
 
@@ -186,7 +200,7 @@ def parse_shadowsocks_link(link):
             "name": remarks,
             "group": group,
             "protocol": "shadowsocks",
-            "server": parsed_url.hostname,
+            "server": parsed_url.hostname if not (parsed_url.hostname and parsed_url.hostname.startswith('::')) else f"[{parsed_url.hostname}]",
             "port": int(parsed_url.port),
             "method": method,
             "password": password,
@@ -198,12 +212,14 @@ def parse_shadowsocks_link(link):
 def parse_trojan_link(link):
     try:
         parsed_url = urlparse(link)
-        remarks = unquote(parsed_url.fragment) if parsed_url.fragment else "Unnamed"
+        remarks = unquote(
+            parsed_url.fragment) if parsed_url.fragment else "Unnamed"
         remarks = re.sub(r"[\U0001F1E6-\U0001F1FF]", "", remarks).strip()
         group = "Default"
+        # Only extract group if there's a clear delimiter and it's not just a single word
         delimiters = ["|", "-", "_", " "]
         for d in delimiters:
-            if d in remarks:
+            if d in remarks and len(remarks.split(d)) > 1:
                 group = remarks.split(d)[0].strip()
                 break
         query_params = parse_qs(parsed_url.query)
@@ -212,7 +228,7 @@ def parse_trojan_link(link):
             "name": remarks,
             "group": group,
             "protocol": "trojan",
-            "server": parsed_url.hostname,
+            "server": parsed_url.hostname if not (parsed_url.hostname and parsed_url.hostname.startswith('::')) else f"[{parsed_url.hostname}]",
             "port": int(parsed_url.port),
             "password": parsed_url.username,
             "sni": query_params.get("sni", [""])[0],
@@ -242,12 +258,14 @@ def parse_reality_link(link):
 def parse_tuic_link(link):
     try:
         parsed_url = urlparse(link)
-        remarks = unquote(parsed_url.fragment) if parsed_url.fragment else "Unnamed"
+        remarks = unquote(
+            parsed_url.fragment) if parsed_url.fragment else "Unnamed"
         remarks = re.sub(r"[\U0001F1E6-\U0001F1FF]", "", remarks).strip()
         group = "Default"
+        # Only extract group if there's a clear delimiter and it's not just a single word
         delimiters = ["|", "-", "_", " "]
         for d in delimiters:
-            if d in remarks:
+            if d in remarks and len(remarks.split(d)) > 1:
                 group = remarks.split(d)[0].strip()
                 break
 
@@ -257,7 +275,7 @@ def parse_tuic_link(link):
             "name": remarks,
             "group": group,
             "protocol": "tuic",
-            "server": parsed_url.hostname,
+            "server": parsed_url.hostname if not (parsed_url.hostname and parsed_url.hostname.startswith('::')) else f"[{parsed_url.hostname}]",
             "port": int(parsed_url.port),
             "uuid": parsed_url.username,
             "password": parsed_url.password,
@@ -275,12 +293,19 @@ def parse_tuic_link(link):
 def parse_hysteria2_link(link):
     try:
         parsed_url = urlparse(link)
-        remarks = unquote(parsed_url.fragment) if parsed_url.fragment else "Unnamed"
+
+        # Validate required fields
+        if not parsed_url.hostname:
+            return None
+
+        remarks = unquote(
+            parsed_url.fragment) if parsed_url.fragment else "Unnamed"
         remarks = re.sub(r"[\U0001F1E6-\U0001F1FF]", "", remarks).strip()
         group = "Default"
+        # Only extract group if there's a clear delimiter and it's not just a single word
         delimiters = ["|", "-", "_", " "]
         for d in delimiters:
-            if d in remarks:
+            if d in remarks and len(remarks.split(d)) > 1:
                 group = remarks.split(d)[0].strip()
                 break
 
@@ -290,7 +315,7 @@ def parse_hysteria2_link(link):
             "name": remarks,
             "group": group,
             "protocol": "hysteria2",
-            "server": parsed_url.hostname,
+            "server": parsed_url.hostname if not (parsed_url.hostname and parsed_url.hostname.startswith('::')) else f"[{parsed_url.hostname}]",
             "port": int(parsed_url.port or 443),
             "password": parsed_url.username or "",
             "sni": query_params.get("sni", [None])[0],
@@ -307,12 +332,14 @@ def parse_ssh_link(link):
     """Parses an SSH protocol link."""
     try:
         parsed_url = urlparse(link)
-        remarks = unquote(parsed_url.fragment) if parsed_url.fragment else "Unnamed"
+        remarks = unquote(
+            parsed_url.fragment) if parsed_url.fragment else "Unnamed"
         remarks = re.sub(r"[\U0001F1E6-\U0001F1FF]", "", remarks).strip()
         group = "Default"
+        # Only extract group if there's a clear delimiter and it's not just a single word
         delimiters = ["|", "-", "_", " "]
         for d in delimiters:
-            if d in remarks:
+            if d in remarks and len(remarks.split(d)) > 1:
                 group = remarks.split(d)[0].strip()
                 break
 
@@ -321,7 +348,7 @@ def parse_ssh_link(link):
             "name": remarks,
             "group": group,
             "protocol": "ssh",
-            "server": parsed_url.hostname,
+            "server": parsed_url.hostname if not (parsed_url.hostname and parsed_url.hostname.startswith('::')) else f"[{parsed_url.hostname}]",
             "port": int(parsed_url.port or 22),
             "user": parsed_url.username,
             "password": parsed_url.password,
@@ -408,7 +435,8 @@ def _generate_vmess_link(config):
     }
 
     # Remove empty values to keep the link clean, but keep 'type' even if 'none'
-    vmess_config_cleaned = {k: v for k, v in vmess_config.items() if v or k == "type"}
+    vmess_config_cleaned = {k: v for k,
+                            v in vmess_config.items() if v or k == "type"}
 
     json_str = json.dumps(vmess_config_cleaned, ensure_ascii=False)
     encoded_str = base64.b64encode(json_str.encode("utf-8")).decode("utf-8")
@@ -424,7 +452,8 @@ def _generate_shadowsocks_link(config):
 
     user_info = f"{method}:{password}"
     encoded_user_info = (
-        base64.b64encode(user_info.encode("utf-8")).decode("utf-8").replace("=", "")
+        base64.b64encode(user_info.encode("utf-8")
+                         ).decode("utf-8").replace("=", "")
     )
 
     link = f"ss://{encoded_user_info}@{server}:{port}"

@@ -3,7 +3,7 @@ import sys
 import time
 
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import QTranslator, QLocale
+from PySide6.QtCore import QTranslator, QLocale, Qt
 from ui.main_window import PySideUI
 from managers.server_manager import ServerManager
 
@@ -36,6 +36,79 @@ def main():
     # Load the translation file from the 'translations' directory
     if language != "en" and translator.load(f"onix_{language}.qm", translations_path):
         app.installTranslator(translator)
+
+    # --- RTL Support Setup ---
+    # Apply RTL support for Persian, Arabic, Hebrew, Urdu
+    rtl_languages = ["fa", "ar", "he", "ur"]
+    if language in rtl_languages:
+        app.setLayoutDirection(Qt.RightToLeft)
+        app.setAttribute(Qt.WA_RightToLeft, True)
+        # Apply RTL-specific styling to the entire application
+        rtl_styles = """
+            QWidget {
+                direction: rtl;
+            }
+            QMainWindow {
+                direction: rtl;
+            }
+            QLabel {
+                direction: rtl;
+            }
+            QPushButton {
+                direction: rtl;
+            }
+            QComboBox {
+                direction: rtl;
+            }
+            QLineEdit {
+                direction: rtl;
+            }
+            QTextEdit {
+                direction: rtl;
+            }
+            QListWidget {
+                direction: rtl;
+            }
+            QTableWidget {
+                direction: rtl;
+            }
+        """
+        app.setStyleSheet(app.styleSheet() + rtl_styles)
+    else:
+        app.setLayoutDirection(Qt.LeftToRight)
+        # app.setAttribute(Qt.WA_RightToLeft, False)  # This is a WidgetAttribute, not ApplicationAttribute
+        # Apply LTR-specific styling to the entire application
+        ltr_styles = """
+            QWidget {
+                direction: ltr;
+            }
+            QMainWindow {
+                direction: ltr;
+            }
+            QLabel {
+                direction: ltr;
+            }
+            QPushButton {
+                direction: ltr;
+            }
+            QComboBox {
+                direction: ltr;
+            }
+            QLineEdit {
+                direction: ltr;
+            }
+            QTextEdit {
+                direction: ltr;
+            }
+            QListWidget {
+                direction: ltr;
+            }
+            QTableWidget {
+                direction: ltr;
+            }
+        """
+        app.setStyleSheet(app.styleSheet() + ltr_styles)
+    # --- End RTL Support Setup ---
 
     # --- End Translator Setup ---
 
