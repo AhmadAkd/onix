@@ -2,6 +2,22 @@
 
 We welcome contributions to Onix! To ensure a smooth and collaborative development process, please follow these guidelines. Any contribution, whether it's a bug report, a new feature, or a documentation improvement, is greatly appreciated.
 
+## Recent Updates (v1.1.0)
+
+Onix has recently received major updates including:
+- Enhanced Settings UI with Security, Performance, and Privacy tabs
+- Real-time Speed Test functionality
+- Auto-failover and improved Health Check
+- Advanced Security features (Kill Switch, DNS Leak Protection)
+- Real-time Statistics and Monitoring
+- Custom Themes and improved RTL support
+- Comprehensive Privacy Controls
+- Performance Analytics and Diagnostics
+- Browser Integration and Keyboard Shortcuts
+- Multi-user Support and Auto-backup
+
+These new features provide a solid foundation for future contributions and improvements.
+
 ## How to Contribute
 
 ### Reporting Bugs
