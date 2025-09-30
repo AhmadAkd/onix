@@ -70,8 +70,8 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pyinstaller
         pip install -r requirements-dev.txt
+        pip install pyinstaller
     
     - name: Build application
       run: |
@@ -82,3 +82,141 @@ jobs:
       with:
         name: onix-${{ matrix.os }}-${{ matrix.python-version }}
         path: dist/
+
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+        pip install safety bandit
+    
+    - name: Run safety check
+      run: |
+        safety check --json --output safety-report.json
+    
+    - name: Run bandit security linter
+      run: |
+        bandit -r . -f json -o bandit-report.json
+    
+    - name: Upload security reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-reports
+        path: |
+          safety-report.json
+          bandit-report.json
+
+  translation:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+    
+    - name: Check translation files
+      run: |
+        python -c "
+        import os
+        import glob
+        
+        # Check if all .ts files have corresponding .qm files
+        ts_files = glob.glob('translations/*.ts')
+        qm_files = glob.glob('translations/*.qm')
+        
+        print(f'Found {len(ts_files)} .ts files')
+        print(f'Found {len(qm_files)} .qm files')
+        
+        for ts_file in ts_files:
+            qm_file = ts_file.replace('.ts', '.qm')
+            if not os.path.exists(qm_file):
+                print(f'Missing .qm file for {ts_file}')
+                exit(1)
+        
+        print('All translation files are present')
+        "
+    
+    - name: Validate translation syntax
+      run: |
+        python -c "
+        import os
+        import glob
+        
+        # Basic validation of .ts files
+        ts_files = glob.glob('translations/*.ts')
+        
+        for ts_file in ts_files:
+            with open(ts_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+                
+            # Check for basic XML structure
+            if '<TS' not in content:
+                print(f'Invalid TS file: {ts_file}')
+                exit(1)
+                
+            if '</TS>' not in content:
+                print(f'Invalid TS file: {ts_file}')
+                exit(1)
+        
+        print('All translation files are valid')
+        "
+
+  dependency-review:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Dependency Review
+      uses: actions/dependency-review-action@v4
+      with:
+        fail-on-severity: moderate
+        allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, GPL-2.0, GPL-3.0, LGPL-2.1, LGPL-3.0
+        deny-licenses: GPL-1.0, AGPL-1.0, AGPL-3.0
+
+  codeql:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'python' ]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v3
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
