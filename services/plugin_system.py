@@ -17,6 +17,7 @@ from constants import LogLevel
 @dataclass
 class PluginInfo:
     """Plugin information structure."""
+
     name: str
     version: str
     description: str
@@ -31,6 +32,7 @@ class PluginInfo:
 @dataclass
 class PluginEvent:
     """Plugin event structure."""
+
     event_type: str
     data: Dict[str, Any]
     timestamp: float
@@ -76,8 +78,7 @@ class PluginManager:
     """Manages plugins and their lifecycle."""
 
     def __init__(self, log_callback: Optional[Callable[[str, LogLevel], None]] = None):
-        self.log = log_callback or (
-            lambda msg, level: print(f"[{level}] {msg}"))
+        self.log = log_callback or (lambda msg, level: print(f"[{level}] {msg}"))
         self.plugins: Dict[str, PluginInterface] = {}
         self.plugin_info: Dict[str, PluginInfo] = {}
         self.event_handlers: Dict[str, List[Callable]] = {}
@@ -106,14 +107,15 @@ class PluginManager:
             try:
                 for root, dirs, files in os.walk(plugin_dir):
                     for file in files:
-                        if file.endswith('.py') and file != '__init__.py':
+                        if file.endswith(".py") and file != "__init__.py":
                             plugin_path = os.path.join(root, file)
                             plugin_info = self._load_plugin_info(plugin_path)
                             if plugin_info:
                                 discovered_plugins.append(plugin_info)
             except Exception as e:
                 self.log(
-                    f"Error discovering plugins in {plugin_dir}: {e}", LogLevel.ERROR)
+                    f"Error discovering plugins in {plugin_dir}: {e}", LogLevel.ERROR
+                )
 
         return discovered_plugins
 
@@ -121,41 +123,45 @@ class PluginManager:
         """Load plugin information from a file."""
         try:
             # Read the file to extract plugin metadata
-            with open(plugin_path, 'r', encoding='utf-8') as f:
+            with open(plugin_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
             # Look for plugin metadata in comments
-            lines = content.split('\n')
+            lines = content.split("\n")
             metadata = {}
 
             for line in lines:
-                if line.strip().startswith('# PLUGIN_'):
-                    key_value = line.strip()[2:].split(':', 1)
+                if line.strip().startswith("# PLUGIN_"):
+                    key_value = line.strip()[2:].split(":", 1)
                     if len(key_value) == 2:
                         key = key_value[0].strip().lower()
                         value = key_value[1].strip()
                         metadata[key] = value
 
-            if 'name' not in metadata:
+            if "name" not in metadata:
                 return None
 
             plugin_info = PluginInfo(
-                name=metadata.get('name', 'Unknown'),
-                version=metadata.get('version', '1.0.0'),
-                description=metadata.get('description', 'No description'),
-                author=metadata.get('author', 'Unknown'),
-                category=metadata.get('category', 'General'),
-                dependencies=metadata.get('dependencies', '').split(
-                    ',') if metadata.get('dependencies') else [],
-                api_version=metadata.get('api_version', '1.0'),
-                path=plugin_path
+                name=metadata.get("name", "Unknown"),
+                version=metadata.get("version", "1.0.0"),
+                description=metadata.get("description", "No description"),
+                author=metadata.get("author", "Unknown"),
+                category=metadata.get("category", "General"),
+                dependencies=(
+                    metadata.get("dependencies", "").split(",")
+                    if metadata.get("dependencies")
+                    else []
+                ),
+                api_version=metadata.get("api_version", "1.0"),
+                path=plugin_path,
             )
 
             return plugin_info
 
         except Exception as e:
             self.log(
-                f"Error loading plugin info from {plugin_path}: {e}", LogLevel.WARNING)
+                f"Error loading plugin info from {plugin_path}: {e}", LogLevel.WARNING
+            )
             return None
 
     def load_plugin(self, plugin_path: str) -> bool:
@@ -170,13 +176,13 @@ class PluginManager:
                 # Check if already loaded
                 if plugin_info.name in self.plugins:
                     self.log(
-                        f"Plugin {plugin_info.name} already loaded", LogLevel.WARNING)
+                        f"Plugin {plugin_info.name} already loaded", LogLevel.WARNING
+                    )
                     return False
 
                 # Import the plugin module
                 module_name = f"plugin_{plugin_info.name.lower().replace(' ', '_')}"
-                spec = importlib.util.spec_from_file_location(
-                    module_name, plugin_path)
+                spec = importlib.util.spec_from_file_location(module_name, plugin_path)
                 module = importlib.util.module_from_spec(spec)
                 sys.modules[module_name] = module
                 spec.loader.exec_module(module)
@@ -184,15 +190,18 @@ class PluginManager:
                 # Find the plugin class
                 plugin_class = None
                 for name, obj in inspect.getmembers(module):
-                    if (inspect.isclass(obj) and
-                        issubclass(obj, PluginInterface) and
-                            obj != PluginInterface):
+                    if (
+                        inspect.isclass(obj)
+                        and issubclass(obj, PluginInterface)
+                        and obj != PluginInterface
+                    ):
                         plugin_class = obj
                         break
 
                 if not plugin_class:
                     self.log(
-                        f"No valid plugin class found in {plugin_path}", LogLevel.ERROR)
+                        f"No valid plugin class found in {plugin_path}", LogLevel.ERROR
+                    )
                     return False
 
                 # Create plugin instance
@@ -207,16 +216,19 @@ class PluginManager:
                     plugin_instance.on_enable()
 
                     self.log(
-                        f"Loaded plugin: {plugin_info.name} v{plugin_info.version}", LogLevel.INFO)
+                        f"Loaded plugin: {plugin_info.name} v{plugin_info.version}",
+                        LogLevel.INFO,
+                    )
                     return True
                 else:
                     self.log(
-                        f"Failed to initialize plugin: {plugin_info.name}", LogLevel.ERROR)
+                        f"Failed to initialize plugin: {plugin_info.name}",
+                        LogLevel.ERROR,
+                    )
                     return False
 
         except Exception as e:
-            self.log(
-                f"Error loading plugin {plugin_path}: {e}", LogLevel.ERROR)
+            self.log(f"Error loading plugin {plugin_path}: {e}", LogLevel.ERROR)
             return False
 
     def unload_plugin(self, plugin_name: str) -> bool:
@@ -224,8 +236,7 @@ class PluginManager:
         try:
             with self._plugin_lock:
                 if plugin_name not in self.plugins:
-                    self.log(
-                        f"Plugin {plugin_name} not loaded", LogLevel.WARNING)
+                    self.log(f"Plugin {plugin_name} not loaded", LogLevel.WARNING)
                     return False
 
                 plugin = self.plugins[plugin_name]
@@ -240,8 +251,7 @@ class PluginManager:
                 return True
 
         except Exception as e:
-            self.log(
-                f"Error unloading plugin {plugin_name}: {e}", LogLevel.ERROR)
+            self.log(f"Error unloading plugin {plugin_name}: {e}", LogLevel.ERROR)
             return False
 
     def enable_plugin(self, plugin_name: str) -> bool:
@@ -249,8 +259,7 @@ class PluginManager:
         try:
             with self._plugin_lock:
                 if plugin_name not in self.plugins:
-                    self.log(
-                        f"Plugin {plugin_name} not loaded", LogLevel.WARNING)
+                    self.log(f"Plugin {plugin_name} not loaded", LogLevel.WARNING)
                     return False
 
                 plugin = self.plugins[plugin_name]
@@ -265,8 +274,7 @@ class PluginManager:
                 return True
 
         except Exception as e:
-            self.log(
-                f"Error enabling plugin {plugin_name}: {e}", LogLevel.ERROR)
+            self.log(f"Error enabling plugin {plugin_name}: {e}", LogLevel.ERROR)
             return False
 
     def disable_plugin(self, plugin_name: str) -> bool:
@@ -274,8 +282,7 @@ class PluginManager:
         try:
             with self._plugin_lock:
                 if plugin_name not in self.plugins:
-                    self.log(
-                        f"Plugin {plugin_name} not loaded", LogLevel.WARNING)
+                    self.log(f"Plugin {plugin_name} not loaded", LogLevel.WARNING)
                     return False
 
                 plugin = self.plugins[plugin_name]
@@ -290,8 +297,7 @@ class PluginManager:
                 return True
 
         except Exception as e:
-            self.log(
-                f"Error disabling plugin {plugin_name}: {e}", LogLevel.ERROR)
+            self.log(f"Error disabling plugin {plugin_name}: {e}", LogLevel.ERROR)
             return False
 
     def register_event_handler(self, event_type: str, handler: Callable) -> None:
@@ -300,14 +306,13 @@ class PluginManager:
             self.event_handlers[event_type] = []
         self.event_handlers[event_type].append(handler)
 
-    def emit_event(self, event_type: str, data: Dict[str, Any], source: str = "system") -> None:
+    def emit_event(
+        self, event_type: str, data: Dict[str, Any], source: str = "system"
+    ) -> None:
         """Emit an event to all registered handlers."""
         try:
             event = PluginEvent(
-                event_type=event_type,
-                data=data,
-                timestamp=time.time(),
-                source=source
+                event_type=event_type, data=data, timestamp=time.time(), source=source
             )
 
             # Add to event queue for processing
@@ -323,7 +328,8 @@ class PluginManager:
 
         self._stop_events.clear()
         self._event_thread = threading.Thread(
-            target=self._event_processing_loop, daemon=True)
+            target=self._event_processing_loop, daemon=True
+        )
         self._event_thread.start()
 
         self.log("Started plugin event processing", LogLevel.INFO)
@@ -347,8 +353,7 @@ class PluginManager:
                     time.sleep(0.1)  # Small delay when no events
 
             except Exception as e:
-                self.log(
-                    f"Error in event processing loop: {e}", LogLevel.ERROR)
+                self.log(f"Error in event processing loop: {e}", LogLevel.ERROR)
                 time.sleep(1)
 
     def _process_event(self, event: PluginEvent) -> None:
@@ -360,8 +365,7 @@ class PluginManager:
                     try:
                         handler(event)
                     except Exception as e:
-                        self.log(
-                            f"Error in global event handler: {e}", LogLevel.ERROR)
+                        self.log(f"Error in global event handler: {e}", LogLevel.ERROR)
 
             # Process plugin event handlers
             for plugin_name, plugin in self.plugins.items():
@@ -371,11 +375,12 @@ class PluginManager:
                             handler(event)
                         except Exception as e:
                             self.log(
-                                f"Error in plugin {plugin_name} event handler: {e}", LogLevel.ERROR)
+                                f"Error in plugin {plugin_name} event handler: {e}",
+                                LogLevel.ERROR,
+                            )
 
         except Exception as e:
-            self.log(
-                f"Error processing event {event.event_type}: {e}", LogLevel.ERROR)
+            self.log(f"Error processing event {event.event_type}: {e}", LogLevel.ERROR)
 
     def get_plugin_info(self, plugin_name: str) -> Optional[PluginInfo]:
         """Get information about a plugin."""
@@ -402,7 +407,9 @@ class PluginManager:
                         self.unload_plugin(plugin_name)
                     except Exception as e:
                         self.log(
-                            f"Error unloading plugin {plugin_name}: {e}", LogLevel.WARNING)
+                            f"Error unloading plugin {plugin_name}: {e}",
+                            LogLevel.WARNING,
+                        )
 
             # Clear all data structures
             self.plugins.clear()
@@ -424,7 +431,8 @@ class ExamplePlugin(PluginInterface):
         """Initialize the example plugin."""
         try:
             self.log = app_context.get(
-                'log_callback', lambda msg, level: print(f"[{level}] {msg}"))
+                "log_callback", lambda msg, level: print(f"[{level}] {msg}")
+            )
             self.log("Example plugin initialized", LogLevel.INFO)
             return True
         except Exception as e:
@@ -449,10 +457,15 @@ class PluginAPI:
     """API utilities for plugins."""
 
     @staticmethod
-    def create_plugin_info(name: str, version: str, description: str,
-                           author: str, category: str = "General",
-                           dependencies: List[str] = None,
-                           api_version: str = "1.0") -> PluginInfo:
+    def create_plugin_info(
+        name: str,
+        version: str,
+        description: str,
+        author: str,
+        category: str = "General",
+        dependencies: List[str] = None,
+        api_version: str = "1.0",
+    ) -> PluginInfo:
         """Create a plugin info object."""
         return PluginInfo(
             name=name,
@@ -461,7 +474,7 @@ class PluginAPI:
             author=author,
             category=category,
             dependencies=dependencies or [],
-            api_version=api_version
+            api_version=api_version,
         )
 
     @staticmethod
@@ -473,7 +486,7 @@ class PluginAPI:
                 return False
 
             # Check required methods
-            required_methods = ['initialize', 'cleanup']
+            required_methods = ["initialize", "cleanup"]
             for method in required_methods:
                 if not hasattr(plugin_class, method):
                     return False

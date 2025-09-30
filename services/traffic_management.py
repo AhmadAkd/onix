@@ -16,6 +16,7 @@ import random
 
 class TrafficPriority(Enum):
     """اولویت ترافیک"""
+
     CRITICAL = 1
     HIGH = 2
     NORMAL = 3
@@ -25,6 +26,7 @@ class TrafficPriority(Enum):
 
 class LoadBalancingStrategy(Enum):
     """استراتژی‌های Load Balancing"""
+
     ROUND_ROBIN = "round_robin"
     LEAST_CONNECTIONS = "least_connections"
     WEIGHTED_ROUND_ROBIN = "weighted_round_robin"
@@ -36,6 +38,7 @@ class LoadBalancingStrategy(Enum):
 @dataclass
 class TrafficRule:
     """قانون ترافیک"""
+
     name: str
     priority: TrafficPriority
     source_pattern: str
@@ -52,6 +55,7 @@ class TrafficRule:
 @dataclass
 class ServerStats:
     """آمار سرور"""
+
     server_id: str
     active_connections: int = 0
     total_requests: int = 0
@@ -68,6 +72,7 @@ class ServerStats:
 @dataclass
 class TrafficMetrics:
     """معیارهای ترافیک"""
+
     timestamp: float
     total_bandwidth: float
     active_connections: int
@@ -98,7 +103,9 @@ class TrafficShaping:
             self.rules = [r for r in self.rules if r.name != rule_name]
             print(f"[{LogLevel.INFO}] Traffic rule removed: {rule_name}")
 
-    def apply_shaping(self, connection_id: str, data_size: int, source: str, destination: str) -> bool:
+    def apply_shaping(
+        self, connection_id: str, data_size: int, source: str, destination: str
+    ) -> bool:
         """اعمال شکل‌دهی ترافیک"""
         with self._lock:
             for rule in self.rules:
@@ -106,14 +113,16 @@ class TrafficShaping:
                     continue
 
                 # بررسی تطبیق الگوها
-                if self._matches_pattern(source, rule.source_pattern) and \
-                   self._matches_pattern(destination, rule.destination_pattern):
+                if self._matches_pattern(
+                    source, rule.source_pattern
+                ) and self._matches_pattern(destination, rule.destination_pattern):
 
                     # بررسی محدودیت پهنای باند
                     current_usage = self.bandwidth_usage.get(connection_id, 0)
                     if current_usage + data_size > rule.bandwidth_limit:
                         print(
-                            f"[{LogLevel.WARNING}] Bandwidth limit exceeded for {rule.name}")
+                            f"[{LogLevel.WARNING}] Bandwidth limit exceeded for {rule.name}"
+                        )
                         return False
 
                     # به‌روزرسانی استفاده از پهنای باند
@@ -158,7 +167,8 @@ class LoadBalancer:
             if server_id in self.servers:
                 del self.servers[server_id]
                 print(
-                    f"[{LogLevel.INFO}] Server removed from load balancer: {server_id}")
+                    f"[{LogLevel.INFO}] Server removed from load balancer: {server_id}"
+                )
 
     def update_server_stats(self, server_id: str, stats: Dict[str, Any]):
         """به‌روزرسانی آمار سرور"""
@@ -166,14 +176,16 @@ class LoadBalancer:
             if server_id in self.servers:
                 server = self.servers[server_id]
                 server.active_connections = stats.get(
-                    'active_connections', server.active_connections)
+                    "active_connections", server.active_connections
+                )
                 server.total_requests = stats.get(
-                    'total_requests', server.total_requests)
-                server.response_time = stats.get(
-                    'response_time', server.response_time)
+                    "total_requests", server.total_requests
+                )
+                server.response_time = stats.get("response_time", server.response_time)
                 server.bandwidth_usage = stats.get(
-                    'bandwidth_usage', server.bandwidth_usage)
-                server.error_rate = stats.get('error_rate', server.error_rate)
+                    "bandwidth_usage", server.bandwidth_usage
+                )
+                server.error_rate = stats.get("error_rate", server.error_rate)
                 server.last_updated = time.time()
 
     def select_server(self, client_ip: str = None) -> Optional[str]:
@@ -182,8 +194,7 @@ class LoadBalancer:
             if not self.servers:
                 return None
 
-            available_servers = [
-                s for s in self.servers.values() if s.error_rate < 0.5]
+            available_servers = [s for s in self.servers.values() if s.error_rate < 0.5]
             if not available_servers:
                 return None
 
@@ -272,8 +283,7 @@ class LoadBalancer:
             if server_id in self.servers:
                 server = self.servers[server_id]
                 server.total_requests += 1
-                server.response_time = (
-                    server.response_time + response_time) / 2
+                server.response_time = (server.response_time + response_time) / 2
 
                 if not success:
                     server.error_rate = (server.error_rate + 1) / 2
@@ -281,12 +291,14 @@ class LoadBalancer:
                 server.last_updated = time.time()
 
             # ثبت در تاریخچه
-            self._request_history.append({
-                'timestamp': time.time(),
-                'server_id': server_id,
-                'response_time': response_time,
-                'success': success
-            })
+            self._request_history.append(
+                {
+                    "timestamp": time.time(),
+                    "server_id": server_id,
+                    "response_time": response_time,
+                    "success": success,
+                }
+            )
 
     def get_server_stats(self) -> Dict[str, ServerStats]:
         """دریافت آمار سرورها"""
@@ -296,28 +308,35 @@ class LoadBalancer:
     def get_load_balancing_stats(self) -> Dict[str, Any]:
         """دریافت آمار Load Balancing"""
         with self._lock:
-            total_requests = sum(
-                s.total_requests for s in self.servers.values())
-            total_connections = sum(
-                s.active_connections for s in self.servers.values())
-            avg_response_time = statistics.mean(
-                [s.response_time for s in self.servers.values()]) if self.servers else 0
-            avg_error_rate = statistics.mean(
-                [s.error_rate for s in self.servers.values()]) if self.servers else 0
+            total_requests = sum(s.total_requests for s in self.servers.values())
+            total_connections = sum(s.active_connections for s in self.servers.values())
+            avg_response_time = (
+                statistics.mean([s.response_time for s in self.servers.values()])
+                if self.servers
+                else 0
+            )
+            avg_error_rate = (
+                statistics.mean([s.error_rate for s in self.servers.values()])
+                if self.servers
+                else 0
+            )
 
             return {
-                'strategy': self.strategy.value,
-                'total_servers': len(self.servers),
-                'total_requests': total_requests,
-                'total_connections': total_connections,
-                'average_response_time': avg_response_time,
-                'average_error_rate': avg_error_rate,
-                'servers': {sid: {
-                    'active_connections': s.active_connections,
-                    'total_requests': s.total_requests,
-                    'response_time': s.response_time,
-                    'error_rate': s.error_rate
-                } for sid, s in self.servers.items()}
+                "strategy": self.strategy.value,
+                "total_servers": len(self.servers),
+                "total_requests": total_requests,
+                "total_connections": total_connections,
+                "average_response_time": avg_response_time,
+                "average_error_rate": avg_error_rate,
+                "servers": {
+                    sid: {
+                        "active_connections": s.active_connections,
+                        "total_requests": s.total_requests,
+                        "response_time": s.response_time,
+                        "error_rate": s.error_rate,
+                    }
+                    for sid, s in self.servers.items()
+                },
             }
 
 
@@ -338,7 +357,8 @@ class TrafficAnalyzer:
         self.is_monitoring = True
         self._stop_event.clear()
         self._monitoring_thread = threading.Thread(
-            target=self._monitor_traffic, daemon=True)
+            target=self._monitor_traffic, daemon=True
+        )
         self._monitoring_thread.start()
         print(f"[{LogLevel.INFO}] Traffic monitoring started")
 
@@ -366,7 +386,7 @@ class TrafficAnalyzer:
                     active_connections=random.randint(50, 500),
                     requests_per_second=random.uniform(10, 100),
                     average_response_time=random.uniform(50, 200),  # ms
-                    error_rate=random.uniform(0.01, 0.05)
+                    error_rate=random.uniform(0.01, 0.05),
                 )
 
                 self.metrics_history.append(metrics)
@@ -389,14 +409,18 @@ class TrafficAnalyzer:
         error_rates = [m.error_rate for m in recent_metrics]
 
         return {
-            'current_bandwidth': bandwidth_values[-1] if bandwidth_values else 0,
-            'average_bandwidth': statistics.mean(bandwidth_values) if bandwidth_values else 0,
-            'peak_bandwidth': max(bandwidth_values) if bandwidth_values else 0,
-            'average_response_time': statistics.mean(response_times) if response_times else 0,
-            'peak_response_time': max(response_times) if response_times else 0,
-            'average_error_rate': statistics.mean(error_rates) if error_rates else 0,
-            'total_samples': len(recent_metrics),
-            'trend': self._calculate_trend(bandwidth_values)
+            "current_bandwidth": bandwidth_values[-1] if bandwidth_values else 0,
+            "average_bandwidth": (
+                statistics.mean(bandwidth_values) if bandwidth_values else 0
+            ),
+            "peak_bandwidth": max(bandwidth_values) if bandwidth_values else 0,
+            "average_response_time": (
+                statistics.mean(response_times) if response_times else 0
+            ),
+            "peak_response_time": max(response_times) if response_times else 0,
+            "average_error_rate": statistics.mean(error_rates) if error_rates else 0,
+            "total_samples": len(recent_metrics),
+            "trend": self._calculate_trend(bandwidth_values),
         }
 
     def _calculate_trend(self, values: List[float]) -> str:
@@ -404,10 +428,16 @@ class TrafficAnalyzer:
         if len(values) < 2:
             return "stable"
 
-        recent_avg = statistics.mean(
-            values[-10:]) if len(values) >= 10 else statistics.mean(values[-len(values)//2:])
-        older_avg = statistics.mean(
-            values[:len(values)//2]) if len(values) >= 4 else values[0]
+        recent_avg = (
+            statistics.mean(values[-10:])
+            if len(values) >= 10
+            else statistics.mean(values[-len(values) // 2 :])
+        )
+        older_avg = (
+            statistics.mean(values[: len(values) // 2])
+            if len(values) >= 4
+            else values[0]
+        )
 
         if recent_avg > older_avg * 1.1:
             return "increasing"
@@ -450,8 +480,7 @@ class TrafficManagementService:
 
     def _start_cleanup_timer(self):
         """شروع تایمر پاکسازی"""
-        self._cleanup_timer = threading.Timer(
-            300, self._cleanup_old_data)  # هر 5 دقیقه
+        self._cleanup_timer = threading.Timer(300, self._cleanup_old_data)  # هر 5 دقیقه
         self._cleanup_timer.daemon = True
         self._cleanup_timer.start()
 
@@ -467,7 +496,10 @@ class TrafficManagementService:
             # پاکسازی قوانین قدیمی
             current_time = time.time()
             old_rules = [
-                r for r in self.traffic_shaping.rules if current_time - r.created_at > 86400]  # 24 ساعت
+                r
+                for r in self.traffic_shaping.rules
+                if current_time - r.created_at > 86400
+            ]  # 24 ساعت
             for rule in old_rules:
                 self.traffic_shaping.remove_rule(rule.name)
 
@@ -500,8 +532,7 @@ class TrafficManagementService:
     def set_load_balancing_strategy(self, strategy: LoadBalancingStrategy):
         """تنظیم استراتژی Load Balancing"""
         self.load_balancer.strategy = strategy
-        self.log(
-            f"[{LogLevel.INFO}] Load balancing strategy set to: {strategy.value}")
+        self.log(f"[{LogLevel.INFO}] Load balancing strategy set to: {strategy.value}")
 
     def select_best_server(self, client_ip: str = None) -> Optional[str]:
         """انتخاب بهترین سرور"""
@@ -514,10 +545,10 @@ class TrafficManagementService:
     def get_service_status(self) -> Dict[str, Any]:
         """دریافت وضعیت سرویس"""
         return {
-            'is_running': self.is_running,
-            'traffic_rules_count': len(self.traffic_shaping.rules),
-            'load_balancer_stats': self.load_balancer.get_load_balancing_stats(),
-            'traffic_analysis': self.traffic_analyzer.get_traffic_analysis()
+            "is_running": self.is_running,
+            "traffic_rules_count": len(self.traffic_shaping.rules),
+            "load_balancer_stats": self.load_balancer.get_load_balancing_stats(),
+            "traffic_analysis": self.traffic_analyzer.get_traffic_analysis(),
         }
 
     def cleanup(self):

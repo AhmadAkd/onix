@@ -4,15 +4,29 @@ Protocol Extensions View
 """
 
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QTabWidget, QGroupBox, QGridLayout, QTextEdit, QComboBox, QSpinBox,
-    QLineEdit, QTableWidget, QTableWidgetItem,
-    QHeaderView
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QTabWidget,
+    QGroupBox,
+    QGridLayout,
+    QTextEdit,
+    QComboBox,
+    QSpinBox,
+    QLineEdit,
+    QTableWidget,
+    QTableWidgetItem,
+    QHeaderView,
 )
 from PySide6.QtCore import Qt, QTimer, Signal, QThread
 from PySide6.QtGui import QPainter, QPen, QColor, QFont
 from services.protocol_extensions import (
-    get_protocol_manager, ProtocolType, ProtocolConfig, ConnectionMetrics
+    get_protocol_manager,
+    ProtocolType,
+    ProtocolConfig,
+    ConnectionMetrics,
 )
 from constants import LogLevel
 import time
@@ -22,6 +36,7 @@ from collections import deque
 
 class ProtocolTestThread(QThread):
     """Thread برای تست پروتکل‌ها"""
+
     test_completed = Signal(str, dict)
     test_failed = Signal(str, str)
 
@@ -49,26 +64,26 @@ class ProtocolTestThread(QThread):
                 if self.protocol_type == ProtocolType.QUIC:
                     connection_id = await manager.create_connection(
                         ProtocolType.QUIC,
-                        host=self.test_params.get('host', 'localhost'),
-                        port=self.test_params.get('port', 443),
-                        server_name=self.test_params.get('server_name')
+                        host=self.test_params.get("host", "localhost"),
+                        port=self.test_params.get("port", 443),
+                        server_name=self.test_params.get("server_name"),
                     )
                     return connection_id
 
                 elif self.protocol_type == ProtocolType.HTTP3:
                     result = await manager.create_connection(
                         ProtocolType.HTTP3,
-                        url=self.test_params.get('url', 'https://example.com'),
-                        method=self.test_params.get('method', 'GET'),
-                        headers=self.test_params.get('headers', {})
+                        url=self.test_params.get("url", "https://example.com"),
+                        method=self.test_params.get("method", "GET"),
+                        headers=self.test_params.get("headers", {}),
                     )
                     return result
 
                 elif self.protocol_type == ProtocolType.WEBSOCKET:
                     connection_id = await manager.create_connection(
                         ProtocolType.WEBSOCKET,
-                        url=self.test_params.get('url', 'ws://localhost:8080'),
-                        protocols=self.test_params.get('protocols', [])
+                        url=self.test_params.get("url", "ws://localhost:8080"),
+                        protocols=self.test_params.get("protocols", []),
                     )
                     return connection_id
 
@@ -77,11 +92,11 @@ class ProtocolTestThread(QThread):
             if not self._stop_requested:
                 result = asyncio.run(run_test())
                 if result and not self._stop_requested:
-                    self.test_completed.emit(self.protocol_type.value, {
-                                             'connection_id': result})
+                    self.test_completed.emit(
+                        self.protocol_type.value, {"connection_id": result}
+                    )
                 elif not self._stop_requested:
-                    self.test_failed.emit(
-                        self.protocol_type.value, "Test failed")
+                    self.test_failed.emit(self.protocol_type.value, "Test failed")
 
         except Exception as e:
             if not self._stop_requested:
@@ -117,30 +132,35 @@ class ProtocolMetricsWidget(QWidget):
         # جدول معیارها
         self.metrics_table = QTableWidget(0, 3)
         self.metrics_table.setHorizontalHeaderLabels(
-            ["Protocol", "Latency (ms)", "Bandwidth (Mbps)"])
+            ["Protocol", "Latency (ms)", "Bandwidth (Mbps)"]
+        )
         self.metrics_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         layout.addWidget(self.metrics_table)
 
         # نمودار ساده
         self.chart_widget = QLabel("Real-time Chart")
         self.chart_widget.setMinimumHeight(200)
-        self.chart_widget.setStyleSheet("""
+        self.chart_widget.setStyleSheet(
+            """
             QLabel {
                 border: 1px solid #ccc;
                 background-color: #f9f9f9;
                 border-radius: 5px;
             }
-        """)
+        """
+        )
         layout.addWidget(self.chart_widget)
 
     def add_metrics(self, protocol: str, metrics: ConnectionMetrics):
         """اضافه کردن معیارهای جدید"""
-        self.metrics_data.append({
-            'protocol': protocol,
-            'latency': metrics.latency,
-            'bandwidth': metrics.bandwidth,
-            'timestamp': time.time()
-        })
+        self.metrics_data.append(
+            {
+                "protocol": protocol,
+                "latency": metrics.latency,
+                "bandwidth": metrics.bandwidth,
+                "timestamp": time.time(),
+            }
+        )
 
     def update_display(self):
         """به‌روزرسانی نمایش"""
@@ -148,12 +168,11 @@ class ProtocolMetricsWidget(QWidget):
         self.metrics_table.setRowCount(len(self.metrics_data))
 
         for i, data in enumerate(self.metrics_data):
+            self.metrics_table.setItem(i, 0, QTableWidgetItem(data["protocol"]))
+            self.metrics_table.setItem(i, 1, QTableWidgetItem(f"{data['latency']:.1f}"))
             self.metrics_table.setItem(
-                i, 0, QTableWidgetItem(data['protocol']))
-            self.metrics_table.setItem(
-                i, 1, QTableWidgetItem(f"{data['latency']:.1f}"))
-            self.metrics_table.setItem(
-                i, 2, QTableWidgetItem(f"{data['bandwidth']:.1f}"))
+                i, 2, QTableWidgetItem(f"{data['bandwidth']:.1f}")
+            )
 
         # رسم نمودار ساده
         self.draw_simple_chart()
@@ -181,12 +200,13 @@ class ProtocolMetricsWidget(QWidget):
             points = []
             for i, data in enumerate(self.metrics_data):
                 x = int((i / (len(self.metrics_data) - 1)) * width)
-                y = int(height - (data['latency'] / 100) * height)
+                y = int(height - (data["latency"] / 100) * height)
                 points.append((x, y))
 
             for i in range(len(points) - 1):
-                painter.drawLine(points[i][0], points[i]
-                                 [1], points[i+1][0], points[i+1][1])
+                painter.drawLine(
+                    points[i][0], points[i][1], points[i + 1][0], points[i + 1][1]
+                )
 
         painter.end()
         self.chart_widget.setPixmap(pixmap)
@@ -263,8 +283,11 @@ def create_quic_tab(main_window) -> QWidget:
     control_layout = QHBoxLayout()
 
     test_button = QPushButton("Test QUIC Connection")
-    test_button.clicked.connect(lambda: test_quic_connection(
-        main_window, host_input.text(), port_input.value(), server_name_input.text()))
+    test_button.clicked.connect(
+        lambda: test_quic_connection(
+            main_window, host_input.text(), port_input.value(), server_name_input.text()
+        )
+    )
     control_layout.addWidget(test_button)
 
     enable_button = QPushButton("Enable QUIC")
@@ -316,8 +339,11 @@ def create_http3_tab(main_window) -> QWidget:
     control_layout = QHBoxLayout()
 
     test_button = QPushButton("Test HTTP/3 Request")
-    test_button.clicked.connect(lambda: test_http3_request(
-        main_window, url_input.text(), method_combo.currentText()))
+    test_button.clicked.connect(
+        lambda: test_http3_request(
+            main_window, url_input.text(), method_combo.currentText()
+        )
+    )
     control_layout.addWidget(test_button)
 
     enable_button = QPushButton("Enable HTTP/3")
@@ -367,13 +393,15 @@ def create_websocket_tab(main_window) -> QWidget:
     control_layout = QHBoxLayout()
 
     connect_button = QPushButton("Connect WebSocket")
-    connect_button.clicked.connect(lambda: connect_websocket(
-        main_window, url_input.text(), protocols_input.text().split(',')))
+    connect_button.clicked.connect(
+        lambda: connect_websocket(
+            main_window, url_input.text(), protocols_input.text().split(",")
+        )
+    )
     control_layout.addWidget(connect_button)
 
     disconnect_button = QPushButton("Disconnect")
-    disconnect_button.clicked.connect(
-        lambda: disconnect_websocket(main_window))
+    disconnect_button.clicked.connect(lambda: disconnect_websocket(main_window))
     control_layout.addWidget(disconnect_button)
 
     layout.addLayout(control_layout)
@@ -387,8 +415,9 @@ def create_websocket_tab(main_window) -> QWidget:
     message_layout.addWidget(message_input)
 
     send_button = QPushButton("Send Message")
-    send_button.clicked.connect(lambda: send_websocket_message(
-        main_window, message_input.text()))
+    send_button.clicked.connect(
+        lambda: send_websocket_message(main_window, message_input.text())
+    )
     message_layout.addWidget(send_button)
 
     message_log = QTextEdit()
@@ -435,8 +464,14 @@ def create_custom_tab(main_window) -> QWidget:
     register_layout.addWidget(timeout_input, 2, 1)
 
     register_button = QPushButton("Register Protocol")
-    register_button.clicked.connect(lambda: register_custom_protocol(
-        main_window, name_input.text(), priority_input.value(), timeout_input.value()))
+    register_button.clicked.connect(
+        lambda: register_custom_protocol(
+            main_window,
+            name_input.text(),
+            priority_input.value(),
+            timeout_input.value(),
+        )
+    )
     register_layout.addWidget(register_button, 3, 0, 1, 2)
 
     layout.addWidget(register_group)
@@ -446,8 +481,7 @@ def create_custom_tab(main_window) -> QWidget:
     protocols_layout = QVBoxLayout(protocols_group)
 
     protocols_table = QTableWidget(0, 4)
-    protocols_table.setHorizontalHeaderLabels(
-        ["Name", "Priority", "Timeout", "Status"])
+    protocols_table.setHorizontalHeaderLabels(["Name", "Priority", "Timeout", "Status"])
     protocols_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
     protocols_layout.addWidget(protocols_table)
 
@@ -476,7 +510,8 @@ def create_metrics_tab(main_window) -> QWidget:
 
     refresh_button = QPushButton("Refresh Metrics")
     refresh_button.clicked.connect(
-        lambda: refresh_protocol_metrics(main_window, metrics_widget))
+        lambda: refresh_protocol_metrics(main_window, metrics_widget)
+    )
     control_layout.addWidget(refresh_button)
 
     clear_button = QPushButton("Clear Data")
@@ -486,6 +521,7 @@ def create_metrics_tab(main_window) -> QWidget:
     layout.addLayout(control_layout)
 
     return widget
+
 
 # توابع کمکی
 
@@ -497,27 +533,25 @@ def test_quic_connection(main_window, host: str, port: int, server_name: str):
 
         # پیکربندی QUIC
         config = ProtocolConfig(
-            name="QUIC Test",
-            protocol_type=ProtocolType.QUIC,
-            enabled=True
+            name="QUIC Test", protocol_type=ProtocolType.QUIC, enabled=True
         )
         manager.configure_protocol(ProtocolType.QUIC, config)
 
         # شروع تست
-        test_thread = ProtocolTestThread(ProtocolType.QUIC, {
-            'host': host,
-            'port': port,
-            'server_name': server_name
-        })
+        test_thread = ProtocolTestThread(
+            ProtocolType.QUIC, {"host": host, "port": port, "server_name": server_name}
+        )
 
         def on_completed(protocol, result):
             main_window.protocol_view.quic_tab.log_text.append(
-                f"QUIC connection successful: {result}")
+                f"QUIC connection successful: {result}"
+            )
             test_thread.deleteLater()
 
         def on_failed(protocol, error):
             main_window.protocol_view.quic_tab.log_text.append(
-                f"QUIC connection failed: {error}")
+                f"QUIC connection failed: {error}"
+            )
             test_thread.deleteLater()
 
         test_thread.test_completed.connect(on_completed)
@@ -535,26 +569,25 @@ def test_http3_request(main_window, url: str, method: str):
 
         # پیکربندی HTTP/3
         config = ProtocolConfig(
-            name="HTTP/3 Test",
-            protocol_type=ProtocolType.HTTP3,
-            enabled=True
+            name="HTTP/3 Test", protocol_type=ProtocolType.HTTP3, enabled=True
         )
         manager.configure_protocol(ProtocolType.HTTP3, config)
 
         # شروع تست
-        test_thread = ProtocolTestThread(ProtocolType.HTTP3, {
-            'url': url,
-            'method': method
-        })
+        test_thread = ProtocolTestThread(
+            ProtocolType.HTTP3, {"url": url, "method": method}
+        )
 
         def on_completed(protocol, result):
             main_window.protocol_view.http3_tab.log_text.append(
-                f"HTTP/3 request successful: {result}")
+                f"HTTP/3 request successful: {result}"
+            )
             test_thread.deleteLater()
 
         def on_failed(protocol, error):
             main_window.protocol_view.http3_tab.log_text.append(
-                f"HTTP/3 request failed: {error}")
+                f"HTTP/3 request failed: {error}"
+            )
             test_thread.deleteLater()
 
         test_thread.test_completed.connect(on_completed)
@@ -572,26 +605,25 @@ def connect_websocket(main_window, url: str, protocols: List[str]):
 
         # پیکربندی WebSocket
         config = ProtocolConfig(
-            name="WebSocket Test",
-            protocol_type=ProtocolType.WEBSOCKET,
-            enabled=True
+            name="WebSocket Test", protocol_type=ProtocolType.WEBSOCKET, enabled=True
         )
         manager.configure_protocol(ProtocolType.WEBSOCKET, config)
 
         # شروع اتصال
-        test_thread = ProtocolTestThread(ProtocolType.WEBSOCKET, {
-            'url': url,
-            'protocols': protocols
-        })
+        test_thread = ProtocolTestThread(
+            ProtocolType.WEBSOCKET, {"url": url, "protocols": protocols}
+        )
 
         def on_completed(protocol, result):
             main_window.protocol_view.websocket_tab.message_log.append(
-                f"WebSocket connected: {result}")
+                f"WebSocket connected: {result}"
+            )
             test_thread.deleteLater()
 
         def on_failed(protocol, error):
             main_window.protocol_view.websocket_tab.message_log.append(
-                f"WebSocket connection failed: {error}")
+                f"WebSocket connection failed: {error}"
+            )
             test_thread.deleteLater()
 
         test_thread.test_completed.connect(on_completed)
@@ -608,7 +640,8 @@ def disconnect_websocket(main_window):
         manager = get_protocol_manager()
         manager.websocket_manager.close_connection("all")
         main_window.protocol_view.websocket_tab.message_log.append(
-            "WebSocket disconnected")
+            "WebSocket disconnected"
+        )
     except Exception as e:
         print(f"[{LogLevel.ERROR}] WebSocket disconnect error: {e}")
 
@@ -620,8 +653,7 @@ def send_websocket_message(main_window, message: str):
 
     try:
         # شبیه‌سازی ارسال پیام
-        main_window.protocol_view.websocket_tab.message_log.append(
-            f"Sent: {message}")
+        main_window.protocol_view.websocket_tab.message_log.append(f"Sent: {message}")
         main_window.protocol_view.websocket_tab.message_input.clear()
     except Exception as e:
         print(f"[{LogLevel.ERROR}] WebSocket send error: {e}")
@@ -640,7 +672,7 @@ def register_custom_protocol(main_window, name: str, priority: int, timeout: int
             protocol_type=ProtocolType.CUSTOM,
             enabled=True,
             priority=priority,
-            timeout=timeout
+            timeout=timeout,
         )
 
         manager.custom_manager.register_protocol(config)
@@ -687,7 +719,7 @@ def refresh_protocol_metrics(main_window, metrics_widget: ProtocolMetricsWidget)
         status = manager.get_protocol_status()
 
         for protocol, data in status.items():
-            if data['active_connections'] > 0:
+            if data["active_connections"] > 0:
                 # شبیه‌سازی معیارها
                 metrics = ConnectionMetrics(
                     protocol=protocol,
@@ -696,7 +728,7 @@ def refresh_protocol_metrics(main_window, metrics_widget: ProtocolMetricsWidget)
                     packet_loss=0.01,
                     jitter=5.0,
                     connection_time=time.time(),
-                    stability_score=0.9
+                    stability_score=0.9,
                 )
                 metrics_widget.add_metrics(protocol, metrics)
 

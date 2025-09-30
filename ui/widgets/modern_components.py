@@ -4,21 +4,40 @@ Provides modern, customizable UI components with advanced features
 """
 
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QLabel, QPushButton,
-    QSlider, QProgressBar, QFrame, QSizePolicy,
-    QGraphicsDropShadowEffect
+    QWidget,
+    QVBoxLayout,
+    QLabel,
+    QPushButton,
+    QSlider,
+    QProgressBar,
+    QFrame,
+    QSizePolicy,
+    QGraphicsDropShadowEffect,
 )
 from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QTimer
-from PySide6.QtGui import QPainter, QPen, QBrush, QColor, QFont, QLinearGradient, QFontMetrics
+from PySide6.QtGui import (
+    QPainter,
+    QPen,
+    QBrush,
+    QColor,
+    QFont,
+    QLinearGradient,
+    QFontMetrics,
+)
 
 
 class ModernCard(QFrame):
     """Modern card component with shadow and rounded corners."""
 
-    def __init__(self, parent=None, title: str = "", content: str = "",
-                 shadow_color: QColor = QColor(0, 0, 0, 30),
-                 corner_radius: int = 12,
-                 padding: int = 16):
+    def __init__(
+        self,
+        parent=None,
+        title: str = "",
+        content: str = "",
+        shadow_color: QColor = QColor(0, 0, 0, 30),
+        corner_radius: int = 12,
+        padding: int = 16,
+    ):
         super().__init__(parent)
         self.title = title
         self.content = content
@@ -37,7 +56,8 @@ class ModernCard(QFrame):
         # Main layout
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setContentsMargins(
-            self.padding, self.padding, self.padding, self.padding)
+            self.padding, self.padding, self.padding, self.padding
+        )
         self.main_layout.setSpacing(12)
 
         # Title label
@@ -66,7 +86,8 @@ class ModernCard(QFrame):
         self.setGraphicsEffect(shadow)
 
         # Set background and border
-        self.setStyleSheet(f"""
+        self.setStyleSheet(
+            f"""
             ModernCard {{
                 background-color: rgba(255, 255, 255, 0.95);
                 border: 1px solid rgba(0, 0, 0, 0.1);
@@ -83,18 +104,23 @@ class ModernCard(QFrame):
                 color: #666666;
                 line-height: 1.4;
             }}
-        """)
+        """
+        )
 
 
 class AnimatedButton(QPushButton):
     """Modern animated button with hover effects."""
 
-    def __init__(self, text: str = "", parent=None,
-                 primary_color: QColor = QColor(59, 130, 246),
-                 hover_color: QColor = QColor(37, 99, 235),
-                 text_color: QColor = QColor(255, 255, 255),
-                 corner_radius: int = 8,
-                 padding: int = 12):
+    def __init__(
+        self,
+        text: str = "",
+        parent=None,
+        primary_color: QColor = QColor(59, 130, 246),
+        hover_color: QColor = QColor(37, 99, 235),
+        text_color: QColor = QColor(255, 255, 255),
+        corner_radius: int = 8,
+        padding: int = 12,
+    ):
         super().__init__(text, parent)
         self.primary_color = primary_color
         self.hover_color = hover_color
@@ -168,11 +194,15 @@ class AnimatedButton(QPushButton):
 class ProgressRing(QWidget):
     """Modern circular progress indicator."""
 
-    def __init__(self, parent=None, size: int = 100,
-                 line_width: int = 8,
-                 primary_color: QColor = QColor(59, 130, 246),
-                 background_color: QColor = QColor(229, 231, 235),
-                 show_percentage: bool = True):
+    def __init__(
+        self,
+        parent=None,
+        size: int = 100,
+        line_width: int = 8,
+        primary_color: QColor = QColor(59, 130, 246),
+        background_color: QColor = QColor(229, 231, 235),
+        show_percentage: bool = True,
+    ):
         super().__init__(parent)
         self.size = size
         self.line_width = line_width
@@ -200,19 +230,27 @@ class ProgressRing(QWidget):
         radius = min(rect.width(), rect.height()) // 2 - self.line_width // 2
 
         # Draw background circle
-        painter.setPen(QPen(self.background_color,
-                       self.line_width, Qt.SolidLine, Qt.RoundCap))
+        painter.setPen(
+            QPen(self.background_color, self.line_width, Qt.SolidLine, Qt.RoundCap)
+        )
         painter.drawEllipse(center, radius, radius)
 
         # Draw progress arc
         if self.progress > 0:
             painter.setPen(
-                QPen(self.primary_color, self.line_width, Qt.SolidLine, Qt.RoundCap))
+                QPen(self.primary_color, self.line_width, Qt.SolidLine, Qt.RoundCap)
+            )
             start_angle = 90 * 16  # Start from top
             # Negative for clockwise
             span_angle = int(-self.progress * 360 * 16)
-            painter.drawArc(center.x() - radius, center.y() - radius,
-                            radius * 2, radius * 2, start_angle, span_angle)
+            painter.drawArc(
+                center.x() - radius,
+                center.y() - radius,
+                radius * 2,
+                radius * 2,
+                start_angle,
+                span_angle,
+            )
 
         # Draw percentage text
         if self.show_percentage:
@@ -232,12 +270,16 @@ class ProgressRing(QWidget):
 class ModernSlider(QSlider):
     """Modern styled slider with custom appearance."""
 
-    def __init__(self, orientation: Qt.Orientation = Qt.Horizontal, parent=None,
-                 primary_color: QColor = QColor(59, 130, 246),
-                 track_color: QColor = QColor(229, 231, 235),
-                 handle_color: QColor = QColor(255, 255, 255),
-                 track_height: int = 6,
-                 handle_size: int = 20):
+    def __init__(
+        self,
+        orientation: Qt.Orientation = Qt.Horizontal,
+        parent=None,
+        primary_color: QColor = QColor(59, 130, 246),
+        track_color: QColor = QColor(229, 231, 235),
+        handle_color: QColor = QColor(255, 255, 255),
+        track_height: int = 6,
+        handle_size: int = 20,
+    ):
         super().__init__(orientation, parent)
         self.primary_color = primary_color
         self.track_color = track_color
@@ -340,7 +382,7 @@ class StatusIndicator(QWidget):
             self.WARNING: QColor(245, 158, 11),
             self.ERROR: QColor(239, 68, 68),
             self.INFO: QColor(59, 130, 246),
-            self.LOADING: QColor(59, 130, 246)
+            self.LOADING: QColor(59, 130, 246),
         }
 
         color = color_map.get(self.status, QColor(107, 114, 128))
@@ -350,8 +392,14 @@ class StatusIndicator(QWidget):
             painter.setPen(QPen(color, 3, Qt.SolidLine, Qt.RoundCap))
             start_angle = self.animation_angle * 16
             span_angle = 270 * 16  # 3/4 circle
-            painter.drawArc(center.x() - radius, center.y() - radius,
-                            radius * 2, radius * 2, start_angle, span_angle)
+            painter.drawArc(
+                center.x() - radius,
+                center.y() - radius,
+                radius * 2,
+                radius * 2,
+                start_angle,
+                span_angle,
+            )
         else:
             # Draw filled circle
             painter.setBrush(QBrush(color))
@@ -362,11 +410,15 @@ class StatusIndicator(QWidget):
 class ModernTooltip(QWidget):
     """Modern tooltip with custom styling."""
 
-    def __init__(self, text: str, parent=None,
-                 bg_color: QColor = QColor(31, 41, 55),
-                 text_color: QColor = QColor(255, 255, 255),
-                 corner_radius: int = 8,
-                 padding: int = 12):
+    def __init__(
+        self,
+        text: str,
+        parent=None,
+        bg_color: QColor = QColor(31, 41, 55),
+        text_color: QColor = QColor(255, 255, 255),
+        corner_radius: int = 8,
+        padding: int = 12,
+    ):
         super().__init__(parent)
         self.text = text
         self.bg_color = bg_color
@@ -384,7 +436,8 @@ class ModernTooltip(QWidget):
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(
-            self.padding, self.padding, self.padding, self.padding)
+            self.padding, self.padding, self.padding, self.padding
+        )
 
         self.label = QLabel(self.text)
         self.label.setWordWrap(True)
@@ -393,7 +446,8 @@ class ModernTooltip(QWidget):
 
     def setup_style(self):
         """Setup tooltip styling."""
-        self.setStyleSheet(f"""
+        self.setStyleSheet(
+            f"""
             ModernTooltip {{
                 background-color: {self.bg_color.name()};
                 border-radius: {self.corner_radius}px;
@@ -403,16 +457,21 @@ class ModernTooltip(QWidget):
                 font-size: 12px;
                 font-weight: 500;
             }}
-        """)
+        """
+        )
 
 
 class GradientButton(QPushButton):
     """Button with gradient background."""
 
-    def __init__(self, text: str = "", parent=None,
-                 start_color: QColor = QColor(59, 130, 246),
-                 end_color: QColor = QColor(147, 51, 234),
-                 direction: Qt.Orientation = Qt.Horizontal):
+    def __init__(
+        self,
+        text: str = "",
+        parent=None,
+        start_color: QColor = QColor(59, 130, 246),
+        end_color: QColor = QColor(147, 51, 234),
+        direction: Qt.Orientation = Qt.Horizontal,
+    ):
         super().__init__(text, parent)
         self.start_color = start_color
         self.end_color = end_color
@@ -435,7 +494,8 @@ class GradientButton(QPushButton):
         gradient.setColorAt(1, self.end_color)
 
         # Apply gradient as background
-        self.setStyleSheet(f"""
+        self.setStyleSheet(
+            f"""
             QPushButton {{
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
                     stop:0 {self.start_color.name()}, 
@@ -457,18 +517,22 @@ class GradientButton(QPushButton):
                     stop:0 {self.start_color.darker(120).name()}, 
                     stop:1 {self.end_color.darker(120).name()});
             }}
-        """)
+        """
+        )
 
 
 class ModernProgressBar(QProgressBar):
     """Modern progress bar with custom styling."""
 
-    def __init__(self, parent=None,
-                 primary_color: QColor = QColor(59, 130, 246),
-                 background_color: QColor = QColor(229, 231, 235),
-                 text_color: QColor = QColor(31, 41, 55),
-                 height: int = 8,
-                 corner_radius: int = 4):
+    def __init__(
+        self,
+        parent=None,
+        primary_color: QColor = QColor(59, 130, 246),
+        background_color: QColor = QColor(229, 231, 235),
+        text_color: QColor = QColor(31, 41, 55),
+        height: int = 8,
+        corner_radius: int = 4,
+    ):
         super().__init__(parent)
         self.primary_color = primary_color
         self.background_color = background_color
@@ -483,7 +547,8 @@ class ModernProgressBar(QProgressBar):
         self.setMinimumHeight(self.height)
         self.setMaximumHeight(self.height)
 
-        self.setStyleSheet(f"""
+        self.setStyleSheet(
+            f"""
             QProgressBar {{
                 border: none;
                 border-radius: {self.corner_radius}px;
@@ -496,15 +561,20 @@ class ModernProgressBar(QProgressBar):
                 background-color: {self.primary_color.name()};
                 border-radius: {self.corner_radius}px;
             }}
-        """)
+        """
+        )
 
 
 class FloatingActionButton(QPushButton):
     """Floating action button with shadow and animation."""
 
-    def __init__(self, icon_text: str = "+", parent=None,
-                 primary_color: QColor = QColor(59, 130, 246),
-                 size: int = 56):
+    def __init__(
+        self,
+        icon_text: str = "+",
+        parent=None,
+        primary_color: QColor = QColor(59, 130, 246),
+        size: int = 56,
+    ):
         super().__init__(icon_text, parent)
         self.primary_color = primary_color
         self.size = size
@@ -529,7 +599,8 @@ class FloatingActionButton(QPushButton):
         shadow.setColor(QColor(0, 0, 0, 40))
         self.setGraphicsEffect(shadow)
 
-        self.setStyleSheet(f"""
+        self.setStyleSheet(
+            f"""
             QPushButton {{
                 background-color: {self.primary_color.name()};
                 color: white;
@@ -546,7 +617,8 @@ class FloatingActionButton(QPushButton):
                 background-color: {self.primary_color.darker(120).name()};
                 transform: scale(0.95);
             }}
-        """)
+        """
+        )
 
     def setup_animations(self):
         """Setup FAB animations."""

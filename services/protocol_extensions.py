@@ -14,6 +14,7 @@ from constants import LogLevel
 
 class ProtocolType(Enum):
     """انواع پروتکل‌های پشتیبانی شده"""
+
     QUIC = "quic"
     HTTP3 = "http3"
     WEBSOCKET = "websocket"
@@ -24,6 +25,7 @@ class ProtocolType(Enum):
 @dataclass
 class ProtocolConfig:
     """پیکربندی پروتکل"""
+
     name: str
     protocol_type: ProtocolType
     enabled: bool = True
@@ -40,6 +42,7 @@ class ProtocolConfig:
 @dataclass
 class ConnectionMetrics:
     """معیارهای اتصال"""
+
     protocol: str
     latency: float
     bandwidth: float
@@ -63,7 +66,9 @@ class QUICManager:
         self.config = config
         print(f"[{LogLevel.INFO}] QUIC configured: {config.name}")
 
-    async def create_connection(self, host: str, port: int, server_name: str = None) -> Optional[Any]:
+    async def create_connection(
+        self, host: str, port: int, server_name: str = None
+    ) -> Optional[Any]:
         """ایجاد اتصال QUIC"""
         try:
             # شبیه‌سازی اتصال QUIC
@@ -71,18 +76,18 @@ class QUICManager:
 
             with self._lock:
                 self.connections[connection_id] = {
-                    'host': host,
-                    'port': port,
-                    'server_name': server_name,
-                    'created_at': time.time(),
-                    'status': 'connecting'
+                    "host": host,
+                    "port": port,
+                    "server_name": server_name,
+                    "created_at": time.time(),
+                    "status": "connecting",
                 }
 
             # شبیه‌سازی تأخیر اتصال
             await asyncio.sleep(0.1)
 
             with self._lock:
-                self.connections[connection_id]['status'] = 'connected'
+                self.connections[connection_id]["status"] = "connected"
 
             print(f"[{LogLevel.INFO}] QUIC connection established: {host}:{port}")
             return connection_id
@@ -95,7 +100,7 @@ class QUICManager:
         """بستن اتصال QUIC"""
         with self._lock:
             if connection_id in self.connections:
-                self.connections[connection_id]['status'] = 'closed'
+                self.connections[connection_id]["status"] = "closed"
                 del self.connections[connection_id]
                 print(f"[{LogLevel.INFO}] QUIC connection closed: {connection_id}")
 
@@ -112,8 +117,8 @@ class QUICManager:
                 bandwidth=100.0,
                 packet_loss=0.01,
                 jitter=5.0,
-                connection_time=time.time() - conn['created_at'],
-                stability_score=0.95
+                connection_time=time.time() - conn["created_at"],
+                stability_score=0.95,
             )
 
 
@@ -130,7 +135,9 @@ class HTTP3Manager:
         self.config = config
         print(f"[{LogLevel.INFO}] HTTP/3 configured: {config.name}")
 
-    async def make_request(self, url: str, method: str = "GET", headers: Dict[str, str] = None) -> Optional[Dict[str, Any]]:
+    async def make_request(
+        self, url: str, method: str = "GET", headers: Dict[str, str] = None
+    ) -> Optional[Dict[str, Any]]:
         """ارسال درخواست HTTP/3"""
         try:
             if headers is None:
@@ -141,26 +148,26 @@ class HTTP3Manager:
 
             with self._lock:
                 self.connections[request_id] = {
-                    'url': url,
-                    'method': method,
-                    'headers': headers,
-                    'created_at': time.time(),
-                    'status': 'pending'
+                    "url": url,
+                    "method": method,
+                    "headers": headers,
+                    "created_at": time.time(),
+                    "status": "pending",
                 }
 
             # شبیه‌سازی تأخیر شبکه
             await asyncio.sleep(0.05)
 
             with self._lock:
-                self.connections[request_id]['status'] = 'completed'
+                self.connections[request_id]["status"] = "completed"
 
             print(f"[{LogLevel.INFO}] HTTP/3 request completed: {method} {url}")
 
             return {
-                'status_code': 200,
-                'headers': {'content-type': 'application/json'},
-                'body': {'message': 'HTTP/3 response'},
-                'request_id': request_id
+                "status_code": 200,
+                "headers": {"content-type": "application/json"},
+                "body": {"message": "HTTP/3 response"},
+                "request_id": request_id,
             }
 
         except Exception as e:
@@ -180,8 +187,8 @@ class HTTP3Manager:
                 bandwidth=150.0,
                 packet_loss=0.005,
                 jitter=3.0,
-                connection_time=time.time() - conn['created_at'],
-                stability_score=0.98
+                connection_time=time.time() - conn["created_at"],
+                stability_score=0.98,
             )
 
 
@@ -208,17 +215,17 @@ class WebSocketManager:
 
             with self._lock:
                 self.connections[connection_id] = {
-                    'url': url,
-                    'protocols': protocols,
-                    'created_at': time.time(),
-                    'status': 'connecting'
+                    "url": url,
+                    "protocols": protocols,
+                    "created_at": time.time(),
+                    "status": "connecting",
                 }
 
             # شبیه‌سازی تأخیر اتصال
             await asyncio.sleep(0.08)
 
             with self._lock:
-                self.connections[connection_id]['status'] = 'connected'
+                self.connections[connection_id]["status"] = "connected"
 
             print(f"[{LogLevel.INFO}] WebSocket connected: {url}")
             return connection_id
@@ -234,7 +241,7 @@ class WebSocketManager:
                 return False
 
             conn = self.connections[connection_id]
-            if conn['status'] != 'connected':
+            if conn["status"] != "connected":
                 return False
 
         # شبیه‌سازی ارسال پیام
@@ -246,10 +253,9 @@ class WebSocketManager:
         """بستن اتصال WebSocket"""
         with self._lock:
             if connection_id in self.connections:
-                self.connections[connection_id]['status'] = 'closed'
+                self.connections[connection_id]["status"] = "closed"
                 del self.connections[connection_id]
-                print(
-                    f"[{LogLevel.INFO}] WebSocket connection closed: {connection_id}")
+                print(f"[{LogLevel.INFO}] WebSocket connection closed: {connection_id}")
 
 
 class CustomProtocolManager:
@@ -266,7 +272,9 @@ class CustomProtocolManager:
             self.protocols[config.name] = config
             print(f"[{LogLevel.INFO}] Custom protocol registered: {config.name}")
 
-    async def create_connection(self, protocol_name: str, host: str, port: int, params: Dict[str, Any] = None) -> Optional[str]:
+    async def create_connection(
+        self, protocol_name: str, host: str, port: int, params: Dict[str, Any] = None
+    ) -> Optional[str]:
         """ایجاد اتصال با پروتکل سفارشی"""
         try:
             with self._lock:
@@ -277,22 +285,23 @@ class CustomProtocolManager:
 
             with self._lock:
                 self.connections[connection_id] = {
-                    'protocol': protocol_name,
-                    'host': host,
-                    'port': port,
-                    'params': params or {},
-                    'created_at': time.time(),
-                    'status': 'connecting'
+                    "protocol": protocol_name,
+                    "host": host,
+                    "port": port,
+                    "params": params or {},
+                    "created_at": time.time(),
+                    "status": "connecting",
                 }
 
             # شبیه‌سازی تأخیر اتصال
             await asyncio.sleep(0.12)
 
             with self._lock:
-                self.connections[connection_id]['status'] = 'connected'
+                self.connections[connection_id]["status"] = "connected"
 
             print(
-                f"[{LogLevel.INFO}] Custom protocol connection established: {protocol_name} {host}:{port}")
+                f"[{LogLevel.INFO}] Custom protocol connection established: {protocol_name} {host}:{port}"
+            )
             return connection_id
 
         except Exception as e:
@@ -313,7 +322,7 @@ class ProtocolExtensionsManager:
             ProtocolType.QUIC: self.quic_manager,
             ProtocolType.HTTP3: self.http3_manager,
             ProtocolType.WEBSOCKET: self.websocket_manager,
-            ProtocolType.CUSTOM: self.custom_manager
+            ProtocolType.CUSTOM: self.custom_manager,
         }
 
         self.is_running = False
@@ -326,7 +335,9 @@ class ProtocolExtensionsManager:
             self.protocols[protocol_type].configure(config)
             print(f"[{LogLevel.INFO}] Protocol configured: {protocol_type.value}")
 
-    async def create_connection(self, protocol_type: ProtocolType, **kwargs) -> Optional[str]:
+    async def create_connection(
+        self, protocol_type: ProtocolType, **kwargs
+    ) -> Optional[str]:
         """ایجاد اتصال با پروتکل مشخص"""
         if protocol_type not in self.protocols:
             return None
@@ -335,32 +346,33 @@ class ProtocolExtensionsManager:
 
         if protocol_type == ProtocolType.QUIC:
             return await manager.create_connection(
-                kwargs.get('host', 'localhost'),
-                kwargs.get('port', 443),
-                kwargs.get('server_name')
+                kwargs.get("host", "localhost"),
+                kwargs.get("port", 443),
+                kwargs.get("server_name"),
             )
         elif protocol_type == ProtocolType.HTTP3:
             return await manager.make_request(
-                kwargs.get('url', 'https://example.com'),
-                kwargs.get('method', 'GET'),
-                kwargs.get('headers')
+                kwargs.get("url", "https://example.com"),
+                kwargs.get("method", "GET"),
+                kwargs.get("headers"),
             )
         elif protocol_type == ProtocolType.WEBSOCKET:
             return await manager.connect(
-                kwargs.get('url', 'ws://localhost:8080'),
-                kwargs.get('protocols')
+                kwargs.get("url", "ws://localhost:8080"), kwargs.get("protocols")
             )
         elif protocol_type == ProtocolType.CUSTOM:
             return await manager.create_connection(
-                kwargs.get('protocol_name', ''),
-                kwargs.get('host', 'localhost'),
-                kwargs.get('port', 8080),
-                kwargs.get('params')
+                kwargs.get("protocol_name", ""),
+                kwargs.get("host", "localhost"),
+                kwargs.get("port", 8080),
+                kwargs.get("params"),
             )
 
         return None
 
-    def get_connection_metrics(self, protocol_type: ProtocolType, connection_id: str) -> Optional[ConnectionMetrics]:
+    def get_connection_metrics(
+        self, protocol_type: ProtocolType, connection_id: str
+    ) -> Optional[ConnectionMetrics]:
         """دریافت معیارهای اتصال"""
         if protocol_type not in self.protocols:
             return None
@@ -376,7 +388,8 @@ class ProtocolExtensionsManager:
         self.is_running = True
         self._stop_event.clear()
         self._monitoring_thread = threading.Thread(
-            target=self._monitor_protocols, daemon=True)
+            target=self._monitor_protocols, daemon=True
+        )
         self._monitoring_thread.start()
         print(f"[{LogLevel.INFO}] Protocol monitoring started")
 
@@ -399,10 +412,10 @@ class ProtocolExtensionsManager:
             try:
                 # بررسی وضعیت اتصالات
                 for protocol_type, manager in self.protocols.items():
-                    if hasattr(manager, 'connections'):
+                    if hasattr(manager, "connections"):
                         with manager._lock:
                             for conn_id, conn in list(manager.connections.items()):
-                                if time.time() - conn['created_at'] > 300:  # 5 دقیقه
+                                if time.time() - conn["created_at"] > 300:  # 5 دقیقه
                                     if protocol_type == ProtocolType.QUIC:
                                         manager.close_connection(conn_id)
                                     elif protocol_type == ProtocolType.WEBSOCKET:
@@ -419,16 +432,16 @@ class ProtocolExtensionsManager:
         status = {}
 
         for protocol_type, manager in self.protocols.items():
-            if hasattr(manager, 'connections'):
+            if hasattr(manager, "connections"):
                 with manager._lock:
                     status[protocol_type.value] = {
-                        'active_connections': len(manager.connections),
-                        'connections': list(manager.connections.keys())
+                        "active_connections": len(manager.connections),
+                        "connections": list(manager.connections.keys()),
                     }
             else:
                 status[protocol_type.value] = {
-                    'active_connections': 0,
-                    'connections': []
+                    "active_connections": 0,
+                    "connections": [],
                 }
 
         return status
@@ -439,7 +452,7 @@ class ProtocolExtensionsManager:
 
         # بستن تمام اتصالات
         for protocol_type, manager in self.protocols.items():
-            if hasattr(manager, 'connections'):
+            if hasattr(manager, "connections"):
                 with manager._lock:
                     for conn_id in list(manager.connections.keys()):
                         if protocol_type == ProtocolType.QUIC:

@@ -5,16 +5,33 @@ Traffic Management View
 
 from PySide6.QtWidgets import QInputDialog
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QTabWidget, QGroupBox, QGridLayout, QComboBox, QSpinBox,
-    QCheckBox, QLineEdit, QTableWidget, QTableWidgetItem,
-    QHeaderView, QMessageBox, QDialog, QDialogButtonBox,
-    QFormLayout
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QTabWidget,
+    QGroupBox,
+    QGridLayout,
+    QComboBox,
+    QSpinBox,
+    QCheckBox,
+    QLineEdit,
+    QTableWidget,
+    QTableWidgetItem,
+    QHeaderView,
+    QMessageBox,
+    QDialog,
+    QDialogButtonBox,
+    QFormLayout,
 )
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QPainter, QPen, QBrush, QColor, QFont
 from services.traffic_management import (
-    get_traffic_service, TrafficRule, TrafficPriority, LoadBalancingStrategy
+    get_traffic_service,
+    TrafficRule,
+    TrafficPriority,
+    LoadBalancingStrategy,
 )
 from constants import LogLevel
 import time
@@ -77,8 +94,7 @@ class TrafficRuleDialog(QDialog):
         layout.addLayout(form_layout)
 
         # دکمه‌ها
-        button_box = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
         layout.addWidget(button_box)
@@ -103,7 +119,7 @@ class TrafficRuleDialog(QDialog):
             source_pattern=self.source_input.text(),
             destination_pattern=self.destination_input.text(),
             bandwidth_limit=self.bandwidth_input.value(),
-            enabled=self.enabled_checkbox.isChecked()
+            enabled=self.enabled_checkbox.isChecked(),
         )
 
 
@@ -120,10 +136,7 @@ class TrafficChartWidget(QWidget):
 
     def add_data_point(self, value: float):
         """اضافه کردن نقطه داده"""
-        self.data_points.append({
-            'timestamp': time.time(),
-            'value': value
-        })
+        self.data_points.append({"timestamp": time.time(), "value": value})
 
     def update_chart(self):
         """به‌روزرسانی نمودار"""
@@ -141,7 +154,7 @@ class TrafficChartWidget(QWidget):
             return
 
         # محاسبه مقادیر
-        values = [p['value'] for p in self.data_points]
+        values = [p["value"] for p in self.data_points]
         if not values:
             return
 
@@ -159,16 +172,19 @@ class TrafficChartWidget(QWidget):
 
         points = []
         for i, point in enumerate(self.data_points):
-            x = margin + (i / (len(self.data_points) - 1)) * \
-                (width - 2 * margin)
-            y = height - margin - \
-                ((point['value'] - min_val) / (max_val - min_val)) * \
-                (height - 2 * margin)
+            x = margin + (i / (len(self.data_points) - 1)) * (width - 2 * margin)
+            y = (
+                height
+                - margin
+                - ((point["value"] - min_val) / (max_val - min_val))
+                * (height - 2 * margin)
+            )
             points.append((x, y))
 
         for i in range(len(points) - 1):
-            painter.drawLine(points[i][0], points[i][1],
-                             points[i+1][0], points[i+1][1])
+            painter.drawLine(
+                points[i][0], points[i][1], points[i + 1][0], points[i + 1][1]
+            )
 
         # رسم نقاط
         painter.setBrush(QBrush(QColor(59, 130, 246)))
@@ -216,13 +232,11 @@ def create_traffic_shaping_tab(main_window) -> QWidget:
     control_layout = QHBoxLayout()
 
     add_rule_button = QPushButton("Add Rule")
-    add_rule_button.clicked.connect(
-        lambda: add_traffic_rule(main_window, widget))
+    add_rule_button.clicked.connect(lambda: add_traffic_rule(main_window, widget))
     control_layout.addWidget(add_rule_button)
 
     remove_rule_button = QPushButton("Remove Rule")
-    remove_rule_button.clicked.connect(
-        lambda: remove_traffic_rule(main_window, widget))
+    remove_rule_button.clicked.connect(lambda: remove_traffic_rule(main_window, widget))
     control_layout.addLayout(control_layout)
 
     # جدول قوانین
@@ -230,9 +244,9 @@ def create_traffic_shaping_tab(main_window) -> QWidget:
     rules_layout = QVBoxLayout(rules_group)
 
     rules_table = QTableWidget(0, 6)
-    rules_table.setHorizontalHeaderLabels([
-        "Name", "Priority", "Source", "Destination", "Bandwidth", "Enabled"
-    ])
+    rules_table.setHorizontalHeaderLabels(
+        ["Name", "Priority", "Source", "Destination", "Bandwidth", "Enabled"]
+    )
     rules_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
     rules_layout.addWidget(rules_table)
 
@@ -264,8 +278,9 @@ def create_load_balancing_tab(main_window) -> QWidget:
 
     # دکمه اعمال
     apply_button = QPushButton("Apply Strategy")
-    apply_button.clicked.connect(lambda: apply_load_balancing_strategy(
-        main_window, strategy_combo.currentText()))
+    apply_button.clicked.connect(
+        lambda: apply_load_balancing_strategy(main_window, strategy_combo.currentText())
+    )
     config_layout.addWidget(apply_button, 0, 2)
 
     layout.addWidget(config_group)
@@ -275,9 +290,9 @@ def create_load_balancing_tab(main_window) -> QWidget:
     servers_layout = QVBoxLayout(servers_group)
 
     servers_table = QTableWidget(0, 5)
-    servers_table.setHorizontalHeaderLabels([
-        "Server ID", "Connections", "Requests", "Response Time", "Error Rate"
-    ])
+    servers_table.setHorizontalHeaderLabels(
+        ["Server ID", "Connections", "Requests", "Response Time", "Error Rate"]
+    )
     servers_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
     servers_layout.addWidget(servers_table)
 
@@ -286,17 +301,18 @@ def create_load_balancing_tab(main_window) -> QWidget:
 
     add_server_button = QPushButton("Add Server")
     add_server_button.clicked.connect(
-        lambda: add_server_to_balancer(main_window, widget))
+        lambda: add_server_to_balancer(main_window, widget)
+    )
     server_control_layout.addWidget(add_server_button)
 
     remove_server_button = QPushButton("Remove Server")
     remove_server_button.clicked.connect(
-        lambda: remove_server_from_balancer(main_window, widget))
+        lambda: remove_server_from_balancer(main_window, widget)
+    )
     server_control_layout.addWidget(remove_server_button)
 
     refresh_button = QPushButton("Refresh")
-    refresh_button.clicked.connect(
-        lambda: refresh_server_stats(main_window, widget))
+    refresh_button.clicked.connect(lambda: refresh_server_stats(main_window, widget))
     server_control_layout.addWidget(refresh_button)
 
     servers_layout.addLayout(server_control_layout)
@@ -355,8 +371,7 @@ def create_traffic_analytics_tab(main_window) -> QWidget:
 
     # تایمر به‌روزرسانی
     update_timer = QTimer()
-    update_timer.timeout.connect(
-        lambda: update_traffic_analytics(main_window, widget))
+    update_timer.timeout.connect(lambda: update_traffic_analytics(main_window, widget))
     update_timer.start(2000)  # هر 2 ثانیه
 
     # ذخیره رفرنس‌ها
@@ -368,6 +383,7 @@ def create_traffic_analytics_tab(main_window) -> QWidget:
     widget.update_timer = update_timer
 
     return widget
+
 
 # توابع کمکی
 
@@ -383,8 +399,7 @@ def add_traffic_rule(main_window, widget):
             refresh_traffic_rules(main_window, widget)
             print(f"[{LogLevel.INFO}] Traffic rule added: {rule.name}")
         except Exception as e:
-            QMessageBox.warning(main_window, "Error",
-                                f"Failed to add rule: {e}")
+            QMessageBox.warning(main_window, "Error", f"Failed to add rule: {e}")
 
 
 def remove_traffic_rule(main_window, widget):
@@ -392,15 +407,16 @@ def remove_traffic_rule(main_window, widget):
     table = widget.rules_table
     current_row = table.currentRow()
     if current_row < 0:
-        QMessageBox.warning(main_window, "Warning",
-                            "Please select a rule to remove")
+        QMessageBox.warning(main_window, "Warning", "Please select a rule to remove")
         return
 
     rule_name = table.item(current_row, 0).text()
 
     reply = QMessageBox.question(
-        main_window, "Confirm", f"Are you sure you want to remove rule '{rule_name}'?",
-        QMessageBox.Yes | QMessageBox.No
+        main_window,
+        "Confirm",
+        f"Are you sure you want to remove rule '{rule_name}'?",
+        QMessageBox.Yes | QMessageBox.No,
     )
 
     if reply == QMessageBox.Yes:
@@ -410,8 +426,7 @@ def remove_traffic_rule(main_window, widget):
             refresh_traffic_rules(main_window, widget)
             print(f"[{LogLevel.INFO}] Traffic rule removed: {rule_name}")
         except Exception as e:
-            QMessageBox.warning(main_window, "Error",
-                                f"Failed to remove rule: {e}")
+            QMessageBox.warning(main_window, "Error", f"Failed to remove rule: {e}")
 
 
 def refresh_traffic_rules(main_window, widget):
@@ -428,10 +443,8 @@ def refresh_traffic_rules(main_window, widget):
             table.setItem(i, 1, QTableWidgetItem(rule.priority.name))
             table.setItem(i, 2, QTableWidgetItem(rule.source_pattern))
             table.setItem(i, 3, QTableWidgetItem(rule.destination_pattern))
-            table.setItem(i, 4, QTableWidgetItem(
-                f"{rule.bandwidth_limit} KB/s"))
-            table.setItem(i, 5, QTableWidgetItem(
-                "Yes" if rule.enabled else "No"))
+            table.setItem(i, 4, QTableWidgetItem(f"{rule.bandwidth_limit} KB/s"))
+            table.setItem(i, 5, QTableWidgetItem("Yes" if rule.enabled else "No"))
 
     except Exception as e:
         print(f"[{LogLevel.ERROR}] Failed to refresh traffic rules: {e}")
@@ -445,14 +458,12 @@ def apply_load_balancing_strategy(main_window, strategy_name: str):
         service.set_load_balancing_strategy(strategy)
         print(f"[{LogLevel.INFO}] Load balancing strategy applied: {strategy_name}")
     except Exception as e:
-        QMessageBox.warning(main_window, "Error",
-                            f"Failed to apply strategy: {e}")
+        QMessageBox.warning(main_window, "Error", f"Failed to apply strategy: {e}")
 
 
 def add_server_to_balancer(main_window, widget):
     """اضافه کردن سرور به Load Balancer"""
-    server_id, ok = QInputDialog.getText(
-        main_window, "Add Server", "Enter Server ID:")
+    server_id, ok = QInputDialog.getText(main_window, "Add Server", "Enter Server ID:")
     if ok and server_id:
         try:
             service = get_traffic_service()
@@ -460,8 +471,7 @@ def add_server_to_balancer(main_window, widget):
             refresh_server_stats(main_window, widget)
             print(f"[{LogLevel.INFO}] Server added to load balancer: {server_id}")
         except Exception as e:
-            QMessageBox.warning(main_window, "Error",
-                                f"Failed to add server: {e}")
+            QMessageBox.warning(main_window, "Error", f"Failed to add server: {e}")
 
 
 def remove_server_from_balancer(main_window, widget):
@@ -469,15 +479,16 @@ def remove_server_from_balancer(main_window, widget):
     table = widget.servers_table
     current_row = table.currentRow()
     if current_row < 0:
-        QMessageBox.warning(main_window, "Warning",
-                            "Please select a server to remove")
+        QMessageBox.warning(main_window, "Warning", "Please select a server to remove")
         return
 
     server_id = table.item(current_row, 0).text()
 
     reply = QMessageBox.question(
-        main_window, "Confirm", f"Are you sure you want to remove server '{server_id}'?",
-        QMessageBox.Yes | QMessageBox.No
+        main_window,
+        "Confirm",
+        f"Are you sure you want to remove server '{server_id}'?",
+        QMessageBox.Yes | QMessageBox.No,
     )
 
     if reply == QMessageBox.Yes:
@@ -485,11 +496,9 @@ def remove_server_from_balancer(main_window, widget):
             service = get_traffic_service()
             service.remove_server_from_balancer(server_id)
             refresh_server_stats(main_window, widget)
-            print(
-                f"[{LogLevel.INFO}] Server removed from load balancer: {server_id}")
+            print(f"[{LogLevel.INFO}] Server removed from load balancer: {server_id}")
         except Exception as e:
-            QMessageBox.warning(main_window, "Error",
-                                f"Failed to remove server: {e}")
+            QMessageBox.warning(main_window, "Error", f"Failed to remove server: {e}")
 
 
 def refresh_server_stats(main_window, widget):
@@ -503,14 +512,12 @@ def refresh_server_stats(main_window, widget):
 
         for i, (server_id, server_stats) in enumerate(stats.items()):
             table.setItem(i, 0, QTableWidgetItem(server_id))
-            table.setItem(i, 1, QTableWidgetItem(
-                str(server_stats.active_connections)))
-            table.setItem(i, 2, QTableWidgetItem(
-                str(server_stats.total_requests)))
-            table.setItem(i, 3, QTableWidgetItem(
-                f"{server_stats.response_time:.1f} ms"))
-            table.setItem(i, 4, QTableWidgetItem(
-                f"{server_stats.error_rate:.2%}"))
+            table.setItem(i, 1, QTableWidgetItem(str(server_stats.active_connections)))
+            table.setItem(i, 2, QTableWidgetItem(str(server_stats.total_requests)))
+            table.setItem(
+                i, 3, QTableWidgetItem(f"{server_stats.response_time:.1f} ms")
+            )
+            table.setItem(i, 4, QTableWidgetItem(f"{server_stats.error_rate:.2%}"))
 
     except Exception as e:
         print(f"[{LogLevel.ERROR}] Failed to refresh server stats: {e}")
@@ -524,18 +531,19 @@ def update_traffic_analytics(main_window, widget):
 
         if analysis:
             # به‌روزرسانی نمودار
-            widget.chart_widget.add_data_point(
-                analysis.get('current_bandwidth', 0))
+            widget.chart_widget.add_data_point(analysis.get("current_bandwidth", 0))
 
             # به‌روزرسانی معیارها
             widget.bandwidth_value.setText(
-                f"{analysis.get('current_bandwidth', 0):.1f} MB/s")
-            widget.connections_value.setText(
-                str(analysis.get('total_samples', 0)))
+                f"{analysis.get('current_bandwidth', 0):.1f} MB/s"
+            )
+            widget.connections_value.setText(str(analysis.get("total_samples", 0)))
             widget.response_time_value.setText(
-                f"{analysis.get('average_response_time', 0):.1f} ms")
+                f"{analysis.get('average_response_time', 0):.1f} ms"
+            )
             widget.error_rate_value.setText(
-                f"{analysis.get('average_error_rate', 0):.2%}")
+                f"{analysis.get('average_error_rate', 0):.2%}"
+            )
 
     except Exception as e:
         print(f"[{LogLevel.ERROR}] Failed to update analytics: {e}")

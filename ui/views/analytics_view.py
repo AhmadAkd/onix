@@ -4,9 +4,18 @@ Provides comprehensive analytics, charts, and insights
 """
 
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QTabWidget, QGroupBox, QFrame, QSizePolicy,
-    QGridLayout, QProgressBar, QTextEdit
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QTabWidget,
+    QGroupBox,
+    QFrame,
+    QSizePolicy,
+    QGridLayout,
+    QProgressBar,
+    QTextEdit,
 )
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QPainter, QPen, QBrush, QColor, QFont
@@ -25,11 +34,11 @@ class ChartWidget(QWidget):
         self.title = title
         self.data = deque(maxlen=100)
         self.colors = {
-            'primary': QColor(59, 130, 246),
-            'secondary': QColor(16, 185, 129),
-            'warning': QColor(245, 158, 11),
-            'error': QColor(239, 68, 68),
-            'background': QColor(249, 250, 251)
+            "primary": QColor(59, 130, 246),
+            "secondary": QColor(16, 185, 129),
+            "warning": QColor(245, 158, 11),
+            "error": QColor(239, 68, 68),
+            "background": QColor(249, 250, 251),
         }
         self.setMinimumHeight(200)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
@@ -47,7 +56,7 @@ class ChartWidget(QWidget):
         painter.setRenderHint(QPainter.Antialiasing)
 
         # Draw background
-        painter.fillRect(self.rect(), self.colors['background'])
+        painter.fillRect(self.rect(), self.colors["background"])
 
         # Draw title
         if self.title:
@@ -69,7 +78,7 @@ class LineChart(ChartWidget):
 
     def __init__(self, parent=None, title: str = "", color: QColor = None):
         super().__init__(parent, title)
-        self.color = color or self.colors['primary']
+        self.color = color or self.colors["primary"]
         self.line_width = 2
 
     def draw_chart(self, painter: QPainter):
@@ -104,14 +113,17 @@ class LineChart(ChartWidget):
         points = []
         for i, (timestamp, value) in enumerate(self.data):
             x = chart_rect.left() + (i * chart_rect.width() // (len(self.data) - 1))
-            y = chart_rect.bottom() - ((value - min_val) / (max_val - min_val)) * \
-                chart_rect.height()
+            y = (
+                chart_rect.bottom()
+                - ((value - min_val) / (max_val - min_val)) * chart_rect.height()
+            )
             points.append((x, y))
 
         # Draw line
         for i in range(len(points) - 1):
-            painter.drawLine(points[i][0], points[i][1],
-                             points[i+1][0], points[i+1][1])
+            painter.drawLine(
+                points[i][0], points[i][1], points[i + 1][0], points[i + 1][1]
+            )
 
         # Draw data points
         painter.setBrush(QBrush(self.color))
@@ -124,7 +136,7 @@ class BarChart(ChartWidget):
 
     def __init__(self, parent=None, title: str = "", color: QColor = None):
         super().__init__(parent, title)
-        self.color = color or self.colors['primary']
+        self.color = color or self.colors["primary"]
         self.bar_width = 20
 
     def draw_chart(self, painter: QPainter):
@@ -147,8 +159,7 @@ class BarChart(ChartWidget):
         painter.setBrush(QBrush(self.color))
         painter.setPen(Qt.NoPen)
 
-        bar_width = min(self.bar_width, chart_rect.width() //
-                        len(self.data) - 2)
+        bar_width = min(self.bar_width, chart_rect.width() // len(self.data) - 2)
 
         for i, (timestamp, value) in enumerate(self.data):
             x = chart_rect.left() + (i * (chart_rect.width() // len(self.data)))
@@ -170,7 +181,7 @@ class PieChart(ChartWidget):
             QColor(245, 158, 11),
             QColor(239, 68, 68),
             QColor(147, 51, 234),
-            QColor(236, 72, 153)
+            QColor(236, 72, 153),
         ]
 
     def set_data(self, data: Dict[str, float]):
@@ -208,8 +219,14 @@ class PieChart(ChartWidget):
 
             painter.setBrush(QBrush(color))
             painter.setPen(QPen(QColor(255, 255, 255), 2))
-            painter.drawPie(center_x - radius, center_y - radius,
-                            radius * 2, radius * 2, start_angle * 16, span_angle * 16)
+            painter.drawPie(
+                center_x - radius,
+                center_y - radius,
+                radius * 2,
+                radius * 2,
+                start_angle * 16,
+                span_angle * 16,
+            )
 
             # Draw label
             angle_rad = math.radians(start_angle + span_angle / 2)
@@ -219,8 +236,7 @@ class PieChart(ChartWidget):
             painter.setPen(QPen(QColor(31, 41, 55), 2))
             font = QFont("Arial", 8)
             painter.setFont(font)
-            painter.drawText(label_x - 20, label_y,
-                             f"{label}\n{percentage:.1f}%")
+            painter.drawText(label_x - 20, label_y, f"{label}\n{percentage:.1f}%")
 
             start_angle += span_angle
 
@@ -228,8 +244,14 @@ class PieChart(ChartWidget):
 class MetricCard(QFrame):
     """Metric display card."""
 
-    def __init__(self, title: str, value: str, unit: str = "",
-                 trend: str = "neutral", parent=None):
+    def __init__(
+        self,
+        title: str,
+        value: str,
+        unit: str = "",
+        trend: str = "neutral",
+        parent=None,
+    ):
         super().__init__(parent)
         self.title = title
         self.value = value
@@ -277,15 +299,12 @@ class MetricCard(QFrame):
 
     def setup_style(self):
         """Setup metric card styling."""
-        trend_colors = {
-            "up": "#10b981",
-            "down": "#ef4444",
-            "neutral": "#6b7280"
-        }
+        trend_colors = {"up": "#10b981", "down": "#ef4444", "neutral": "#6b7280"}
 
         trend_color = trend_colors.get(self.trend, "#6b7280")
 
-        self.setStyleSheet(f"""
+        self.setStyleSheet(
+            f"""
             MetricCard {{
                 background-color: rgba(255, 255, 255, 0.9);
                 border: 1px solid rgba(0, 0, 0, 0.1);
@@ -311,7 +330,8 @@ class MetricCard(QFrame):
                 color: {trend_color};
                 font-weight: bold;
             }}
-        """)
+        """
+        )
 
     def update_value(self, value: str, trend: str = None):
         """Update metric value and trend."""
@@ -320,7 +340,7 @@ class MetricCard(QFrame):
 
         if trend is not None:
             self.trend = trend
-            if hasattr(self, 'trend_label'):
+            if hasattr(self, "trend_label"):
                 trend_text = "↗" if trend == "up" else "↘" if trend == "down" else "→"
                 self.trend_label.setText(trend_text)
 
@@ -343,8 +363,7 @@ def create_analytics_view(main_window) -> QWidget:
 
     # Refresh button
     refresh_button = QPushButton("Refresh")
-    refresh_button.clicked.connect(
-        lambda: refresh_analytics(main_window, widget))
+    refresh_button.clicked.connect(lambda: refresh_analytics(main_window, widget))
     header_layout.addWidget(refresh_button)
 
     layout.addLayout(header_layout)
@@ -372,8 +391,7 @@ def create_analytics_view(main_window) -> QWidget:
 
     # Setup refresh timer
     refresh_timer = QTimer()
-    refresh_timer.timeout.connect(
-        lambda: refresh_analytics(main_window, widget))
+    refresh_timer.timeout.connect(lambda: refresh_analytics(main_window, widget))
     refresh_timer.start(5000)  # Refresh every 5 seconds
 
     return widget
@@ -410,8 +428,7 @@ def create_overview_tab(main_window) -> QWidget:
     charts_layout = QHBoxLayout()
 
     # Speed chart
-    speed_chart = LineChart(title="Speed Over Time",
-                            color=QColor(59, 130, 246))
+    speed_chart = LineChart(title="Speed Over Time", color=QColor(59, 130, 246))
     charts_layout.addWidget(speed_chart)
 
     # Ping chart
@@ -422,13 +439,7 @@ def create_overview_tab(main_window) -> QWidget:
 
     # Server distribution pie chart
     pie_chart = PieChart(title="Server Distribution")
-    pie_data = {
-        "US East": 35,
-        "US West": 25,
-        "Europe": 20,
-        "Asia": 15,
-        "Other": 5
-    }
+    pie_data = {"US East": 35, "US West": 25, "Europe": 20, "Asia": 15, "Other": 5}
     pie_chart.set_data(pie_data)
     pie_chart.setMaximumHeight(300)
     layout.addWidget(pie_chart)
@@ -499,20 +510,22 @@ def create_ai_insights_tab(main_window) -> QWidget:
     recommendations = [
         "Switch to US East server for better performance",
         "Enable compression to reduce bandwidth usage",
-        "Consider upgrading to premium plan for faster speeds"
+        "Consider upgrading to premium plan for faster speeds",
     ]
 
     for i, rec in enumerate(recommendations):
         rec_label = QLabel(f"{i+1}. {rec}")
         rec_label.setWordWrap(True)
-        rec_label.setStyleSheet("""
+        rec_label.setStyleSheet(
+            """
             QLabel {
                 padding: 8px;
                 background-color: #f3f4f6;
                 border-radius: 4px;
                 margin: 2px;
             }
-        """)
+        """
+        )
         recommendations_layout.addWidget(rec_label)
 
     layout.addWidget(recommendations_group)
@@ -524,7 +537,8 @@ def create_ai_insights_tab(main_window) -> QWidget:
     analysis_text = QTextEdit()
     analysis_text.setReadOnly(True)
     analysis_text.setMaximumHeight(200)
-    analysis_text.setPlainText("""
+    analysis_text.setPlainText(
+        """
     AI Analysis Summary:
     
     • Traffic patterns show peak usage between 7-9 PM
@@ -532,7 +546,8 @@ def create_ai_insights_tab(main_window) -> QWidget:
     • Recommended to implement load balancing
     • Consider implementing predictive failover
     • Network stability is above average (94.2%)
-    """)
+    """
+    )
     analysis_layout.addWidget(analysis_text)
 
     layout.addWidget(analysis_group)
@@ -561,12 +576,7 @@ def create_traffic_analysis_tab(main_window) -> QWidget:
     geo_layout = QVBoxLayout(geo_group)
 
     geo_pie = PieChart(title="Traffic by Region")
-    geo_data = {
-        "North America": 45,
-        "Europe": 30,
-        "Asia": 20,
-        "Other": 5
-    }
+    geo_data = {"North America": 45, "Europe": 30, "Asia": 20, "Other": 5}
     geo_pie.set_data(geo_data)
     geo_pie.setMaximumHeight(250)
     geo_layout.addWidget(geo_pie)
@@ -580,16 +590,16 @@ def refresh_analytics(main_window, widget: QWidget):
     """Refresh analytics data."""
     try:
         # Update metrics if AI analyzer is available
-        if hasattr(main_window, 'ai_analyzer'):
+        if hasattr(main_window, "ai_analyzer"):
             summary = main_window.ai_analyzer.get_performance_summary()
 
             # Update metric cards
             for child in widget.findChildren(MetricCard):
                 if "Speed" in child.title:
-                    speed = summary.get('avg_download_speed', 0)
+                    speed = summary.get("avg_download_speed", 0)
                     child.update_value(f"{speed:.1f}")
                 elif "Ping" in child.title:
-                    ping = summary.get('avg_ping', 0)
+                    ping = summary.get("avg_ping", 0)
                     child.update_value(f"{ping:.0f}")
 
         # Update charts with sample data
@@ -597,14 +607,16 @@ def refresh_analytics(main_window, widget: QWidget):
             if isinstance(chart, LineChart):
                 # Add random data point
                 import random
+
                 value = random.uniform(10, 100)
                 chart.add_data_point(value)
             elif isinstance(chart, BarChart):
                 # Add random data point
                 import random
+
                 value = random.uniform(0, 50)
                 chart.add_data_point(value)
 
     except Exception as e:
-        if hasattr(main_window, 'log'):
+        if hasattr(main_window, "log"):
             main_window.log(f"Error refreshing analytics: {e}", LogLevel.ERROR)

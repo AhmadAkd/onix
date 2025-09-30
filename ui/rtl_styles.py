@@ -4,7 +4,6 @@ Provides comprehensive RTL support for Persian, Arabic, Hebrew, and Urdu
 """
 
 
-
 def get_rtl_stylesheet() -> str:
     """Get comprehensive RTL stylesheet."""
     return """
@@ -484,27 +483,24 @@ def get_rtl_stylesheet() -> str:
 
 def get_rtl_dark_stylesheet() -> str:
     """Get RTL stylesheet for dark mode."""
-    return get_rtl_stylesheet().replace(
-        "#d1d5db", "#475569"
-    ).replace(
-        "#e5e7eb", "#334155"
-    ).replace(
-        "#f9fafb", "#1e293b"
-    ).replace(
-        "#e0e7ff", "#1e3a8a"
-    ).replace(
-        "#6366f1", "#818cf8"
-    ).replace(
-        "#6b7280", "#94a3b8"
-    ).replace(
-        "#9ca3af", "#64748b"
+    return (
+        get_rtl_stylesheet()
+        .replace("#d1d5db", "#475569")
+        .replace("#e5e7eb", "#334155")
+        .replace("#f9fafb", "#1e293b")
+        .replace("#e0e7ff", "#1e3a8a")
+        .replace("#6366f1", "#818cf8")
+        .replace("#6b7280", "#94a3b8")
+        .replace("#9ca3af", "#64748b")
     )
 
 
 def apply_rtl_styles(app, is_dark_mode: bool = False) -> None:
     """Apply RTL styles to the application."""
     try:
-        rtl_stylesheet = get_rtl_dark_stylesheet() if is_dark_mode else get_rtl_stylesheet()
+        rtl_stylesheet = (
+            get_rtl_dark_stylesheet() if is_dark_mode else get_rtl_stylesheet()
+        )
         app.setStyleSheet(app.styleSheet() + rtl_stylesheet)
     except Exception as e:
         print(f"Error applying RTL styles: {e}")

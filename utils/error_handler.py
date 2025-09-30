@@ -23,9 +23,13 @@ class ErrorHandler:
         if self.log_callback:
             self.log_callback(message, level)
 
-    def handle_error(self, error: Exception, context: str = "",
-                     error_type: str = "general",
-                     critical: bool = False) -> bool:
+    def handle_error(
+        self,
+        error: Exception,
+        context: str = "",
+        error_type: str = "general",
+        critical: bool = False,
+    ) -> bool:
         """
         Handle an error with proper logging and counting.
 
@@ -51,7 +55,7 @@ class ErrorHandler:
                     self.log(
                         f"Too many {error_type} errors ({self._max_errors_per_type}), "
                         "suppressing further error messages",
-                        LogLevel.WARNING
+                        LogLevel.WARNING,
                     )
                 return False
 
@@ -91,9 +95,16 @@ class ErrorHandler:
         return self._error_counts.get(error_type, 0) > self._error_threshold
 
 
-def safe_execute(func: Callable, *args, error_handler: ErrorHandler = None,
-                 context: str = "", error_type: str = "function",
-                 critical: bool = False, default_return: Any = None, **kwargs):
+def safe_execute(
+    func: Callable,
+    *args,
+    error_handler: ErrorHandler = None,
+    context: str = "",
+    error_type: str = "function",
+    critical: bool = False,
+    default_return: Any = None,
+    **kwargs,
+):
     """
     Safely execute a function with error handling.
 
@@ -118,9 +129,13 @@ def safe_execute(func: Callable, *args, error_handler: ErrorHandler = None,
         return default_return
 
 
-def error_handler_decorator(error_handler: ErrorHandler = None,
-                            context: str = "", error_type: str = "decorated_function",
-                            critical: bool = False, default_return: Any = None):
+def error_handler_decorator(
+    error_handler: ErrorHandler = None,
+    context: str = "",
+    error_type: str = "decorated_function",
+    critical: bool = False,
+    default_return: Any = None,
+):
     """
     Decorator for automatic error handling.
 
@@ -131,19 +146,23 @@ def error_handler_decorator(error_handler: ErrorHandler = None,
         critical: Whether errors are critical
         default_return: Value to return on error
     """
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             return safe_execute(
-                func, *args,
+                func,
+                *args,
                 error_handler=error_handler,
                 context=context or f"Function {func.__name__}",
                 error_type=error_type,
                 critical=critical,
                 default_return=default_return,
-                **kwargs
+                **kwargs,
             )
+
         return wrapper
+
     return decorator
 
 
@@ -171,7 +190,9 @@ class NetworkErrorHandler(ErrorHandler):
             error_type = "connection"
             self._connection_errors += 1
 
-        context = f"Network operation: {operation}" if operation else "Network operation"
+        context = (
+            f"Network operation: {operation}" if operation else "Network operation"
+        )
         return self.handle_error(error, context, error_type, critical=False)
 
     def get_network_error_stats(self) -> Dict[str, int]:
@@ -180,7 +201,7 @@ class NetworkErrorHandler(ErrorHandler):
             "connection_errors": self._connection_errors,
             "timeout_errors": self._timeout_errors,
             "dns_errors": self._dns_errors,
-            "total_errors": sum(self._error_counts.values())
+            "total_errors": sum(self._error_counts.values()),
         }
 
 
@@ -192,8 +213,9 @@ class UIErrorHandler(ErrorHandler):
         self._ui_errors = 0
         self._rendering_errors = 0
 
-    def handle_ui_error(self, error: Exception, widget_name: str = "",
-                        operation: str = "") -> bool:
+    def handle_ui_error(
+        self, error: Exception, widget_name: str = "", operation: str = ""
+    ) -> bool:
         """Handle UI-specific errors."""
         error_type = "ui"
 
@@ -204,7 +226,11 @@ class UIErrorHandler(ErrorHandler):
         else:
             self._ui_errors += 1
 
-        context = f"UI {widget_name}: {operation}" if widget_name and operation else f"UI: {operation}"
+        context = (
+            f"UI {widget_name}: {operation}"
+            if widget_name and operation
+            else f"UI: {operation}"
+        )
         return self.handle_error(error, context, error_type, critical=False)
 
     def get_ui_error_stats(self) -> Dict[str, int]:
@@ -212,7 +238,7 @@ class UIErrorHandler(ErrorHandler):
         return {
             "ui_errors": self._ui_errors,
             "rendering_errors": self._rendering_errors,
-            "total_errors": sum(self._error_counts.values())
+            "total_errors": sum(self._error_counts.values()),
         }
 
 

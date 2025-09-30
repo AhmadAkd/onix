@@ -15,6 +15,7 @@ from constants import LogLevel
 @dataclass
 class PerformanceMetrics:
     """Performance metrics for AI analysis."""
+
     timestamp: float
     server_id: str
     ping: float
@@ -31,6 +32,7 @@ class PerformanceMetrics:
 @dataclass
 class OptimizationRecommendation:
     """AI-generated optimization recommendation."""
+
     recommendation_type: str
     priority: int  # 1-5, 5 being highest
     description: str
@@ -43,6 +45,7 @@ class OptimizationRecommendation:
 @dataclass
 class TrafficPattern:
     """Traffic pattern analysis result."""
+
     pattern_type: str
     confidence: float
     peak_hours: List[int]
@@ -55,8 +58,7 @@ class AIPerformanceAnalyzer:
     """AI-powered performance analyzer."""
 
     def __init__(self, log_callback: Optional[Callable[[str, LogLevel], None]] = None):
-        self.log = log_callback or (
-            lambda msg, level: print(f"[{level}] {msg}"))
+        self.log = log_callback or (lambda msg, level: print(f"[{level}] {msg}"))
         self.metrics_history: deque = deque(maxlen=1000)
         self.patterns: Dict[str, TrafficPattern] = {}
         self.recommendations: List[OptimizationRecommendation] = []
@@ -84,8 +86,7 @@ class AIPerformanceAnalyzer:
             if len(self.metrics_history) < 5:
                 return
 
-            recent_metrics = list(
-                self.metrics_history)[-20:]  # Last 20 metrics
+            recent_metrics = list(self.metrics_history)[-20:]  # Last 20 metrics
 
             # Detect anomalies
             anomalies = self._detect_anomalies(recent_metrics)
@@ -101,7 +102,9 @@ class AIPerformanceAnalyzer:
         except Exception as e:
             self.log(f"Error in real-time analysis: {e}", LogLevel.ERROR)
 
-    def _detect_anomalies(self, metrics: List[PerformanceMetrics]) -> List[Dict[str, Any]]:
+    def _detect_anomalies(
+        self, metrics: List[PerformanceMetrics]
+    ) -> List[Dict[str, Any]]:
         """Detect performance anomalies using statistical analysis."""
         try:
             anomalies = []
@@ -134,25 +137,30 @@ class AIPerformanceAnalyzer:
                 if ping_std > 0:
                     ping_z_score = abs((latest.ping - ping_mean) / ping_std)
                     if ping_z_score > self.anomaly_threshold:
-                        anomalies.append({
-                            'server_id': server_id,
-                            'metric': 'ping',
-                            'value': latest.ping,
-                            'z_score': ping_z_score,
-                            'severity': 'high' if ping_z_score > 3 else 'medium'
-                        })
+                        anomalies.append(
+                            {
+                                "server_id": server_id,
+                                "metric": "ping",
+                                "value": latest.ping,
+                                "z_score": ping_z_score,
+                                "severity": "high" if ping_z_score > 3 else "medium",
+                            }
+                        )
 
                 if speed_std > 0:
                     speed_z_score = abs(
-                        (latest.download_speed - speed_mean) / speed_std)
+                        (latest.download_speed - speed_mean) / speed_std
+                    )
                     if speed_z_score > self.anomaly_threshold:
-                        anomalies.append({
-                            'server_id': server_id,
-                            'metric': 'download_speed',
-                            'value': latest.download_speed,
-                            'z_score': speed_z_score,
-                            'severity': 'high' if speed_z_score > 3 else 'medium'
-                        })
+                        anomalies.append(
+                            {
+                                "server_id": server_id,
+                                "metric": "download_speed",
+                                "value": latest.download_speed,
+                                "z_score": speed_z_score,
+                                "severity": "high" if speed_z_score > 3 else "medium",
+                            }
+                        )
 
             return anomalies
 
@@ -164,9 +172,10 @@ class AIPerformanceAnalyzer:
         """Handle detected anomalies."""
         try:
             for anomaly in anomalies:
-                if anomaly['severity'] == 'high':
+                if anomaly["severity"] == "high":
                     self.log(
-                        f"High severity anomaly detected: {anomaly}", LogLevel.WARNING)
+                        f"High severity anomaly detected: {anomaly}", LogLevel.WARNING
+                    )
 
                     # Generate immediate recommendation
                     recommendation = OptimizationRecommendation(
@@ -176,11 +185,11 @@ class AIPerformanceAnalyzer:
                         expected_improvement=0.2,
                         confidence=0.8,
                         parameters={
-                            'server_id': anomaly['server_id'],
-                            'metric': anomaly['metric'],
-                            'z_score': anomaly['z_score']
+                            "server_id": anomaly["server_id"],
+                            "metric": anomaly["metric"],
+                            "z_score": anomaly["z_score"],
                         },
-                        timestamp=time.time()
+                        timestamp=time.time(),
                     )
                     self.recommendations.append(recommendation)
 
@@ -200,19 +209,20 @@ class AIPerformanceAnalyzer:
                 hour_counts[hour] += 1
 
             # Find peak and low usage hours
-            sorted_hours = sorted(hour_counts.items(),
-                                  key=lambda x: x[1], reverse=True)
+            sorted_hours = sorted(hour_counts.items(), key=lambda x: x[1], reverse=True)
             peak_hours = [h for h, c in sorted_hours[:3]]
             low_hours = [h for h, c in sorted_hours[-3:]]
 
             # Calculate anomaly score
             mean_usage = statistics.mean(hour_counts.values())
-            std_usage = statistics.stdev(
-                hour_counts.values()) if len(hour_counts) > 1 else 0
+            std_usage = (
+                statistics.stdev(hour_counts.values()) if len(hour_counts) > 1 else 0
+            )
             anomaly_score = 0
             if std_usage > 0:
                 anomaly_score = max(
-                    0, (max(hour_counts.values()) - mean_usage) / std_usage)
+                    0, (max(hour_counts.values()) - mean_usage) / std_usage
+                )
 
             # Update pattern
             pattern = TrafficPattern(
@@ -221,7 +231,7 @@ class AIPerformanceAnalyzer:
                 peak_hours=peak_hours,
                 low_usage_hours=low_hours,
                 seasonal_trends={},
-                anomaly_score=anomaly_score
+                anomaly_score=anomaly_score,
             )
 
             self.patterns["hourly_usage"] = pattern
@@ -238,7 +248,8 @@ class AIPerformanceAnalyzer:
             # Clear old recommendations
             current_time = time.time()
             self.recommendations = [
-                r for r in self.recommendations if current_time - r.timestamp < 3600]  # Keep for 1 hour
+                r for r in self.recommendations if current_time - r.timestamp < 3600
+            ]  # Keep for 1 hour
 
             # Analyze performance trends
             recent_pings = [m.ping for m in metrics[-10:]]
@@ -254,9 +265,11 @@ class AIPerformanceAnalyzer:
                         description="Ping latency is increasing. Consider switching servers or optimizing connection.",
                         expected_improvement=0.15,
                         confidence=0.6,
-                        parameters={'trend': ping_trend,
-                                    'current_ping': recent_pings[-1]},
-                        timestamp=current_time
+                        parameters={
+                            "trend": ping_trend,
+                            "current_ping": recent_pings[-1],
+                        },
+                        timestamp=current_time,
                     )
                     self.recommendations.append(recommendation)
 
@@ -270,19 +283,19 @@ class AIPerformanceAnalyzer:
                         description="Download speed is decreasing. Consider server load balancing or protocol optimization.",
                         expected_improvement=0.25,
                         confidence=0.7,
-                        parameters={'trend': speed_trend,
-                                    'current_speed': recent_speeds[-1]},
-                        timestamp=current_time
+                        parameters={
+                            "trend": speed_trend,
+                            "current_speed": recent_speeds[-1],
+                        },
+                        timestamp=current_time,
                     )
                     self.recommendations.append(recommendation)
 
             # Server load balancing recommendation
             server_performance = self._analyze_server_performance(metrics)
             if server_performance:
-                best_server = max(server_performance.items(),
-                                  key=lambda x: x[1])
-                worst_server = min(
-                    server_performance.items(), key=lambda x: x[1])
+                best_server = max(server_performance.items(), key=lambda x: x[1])
+                worst_server = min(server_performance.items(), key=lambda x: x[1])
 
                 # Significant performance difference
                 if best_server[1] - worst_server[1] > 0.3:
@@ -293,11 +306,11 @@ class AIPerformanceAnalyzer:
                         expected_improvement=0.2,
                         confidence=0.8,
                         parameters={
-                            'best_server': best_server[0],
-                            'worst_server': worst_server[0],
-                            'performance_diff': best_server[1] - worst_server[1]
+                            "best_server": best_server[0],
+                            "worst_server": worst_server[0],
+                            "performance_diff": best_server[1] - worst_server[1],
                         },
-                        timestamp=current_time
+                        timestamp=current_time,
                     )
                     self.recommendations.append(recommendation)
 
@@ -318,8 +331,7 @@ class AIPerformanceAnalyzer:
             x_mean = sum(x) / n
             y_mean = sum(y) / n
 
-            numerator = sum((x[i] - x_mean) * (y[i] - y_mean)
-                            for i in range(n))
+            numerator = sum((x[i] - x_mean) * (y[i] - y_mean) for i in range(n))
             denominator = sum((x[i] - x_mean) ** 2 for i in range(n))
 
             if denominator == 0:
@@ -331,7 +343,9 @@ class AIPerformanceAnalyzer:
         except Exception:
             return 0.0
 
-    def _analyze_server_performance(self, metrics: List[PerformanceMetrics]) -> Dict[str, float]:
+    def _analyze_server_performance(
+        self, metrics: List[PerformanceMetrics]
+    ) -> Dict[str, float]:
         """Analyze performance of different servers."""
         try:
             server_metrics = defaultdict(list)
@@ -345,26 +359,23 @@ class AIPerformanceAnalyzer:
 
                 # Calculate composite performance score
                 avg_ping = statistics.mean([m.ping for m in server_data])
-                avg_speed = statistics.mean(
-                    [m.download_speed for m in server_data])
-                avg_packet_loss = statistics.mean(
-                    [m.packet_loss for m in server_data])
+                avg_speed = statistics.mean([m.download_speed for m in server_data])
+                avg_packet_loss = statistics.mean([m.packet_loss for m in server_data])
 
                 # Normalize scores (higher is better)
                 ping_score = max(0, 1 - (avg_ping / 100))  # 100ms = 0 score
                 speed_score = min(1, avg_speed / 100)  # 100 Mbps = 1 score
-                packet_loss_score = max(
-                    0, 1 - (avg_packet_loss / 10))  # 10% = 0 score
+                packet_loss_score = max(0, 1 - (avg_packet_loss / 10))  # 10% = 0 score
 
-                composite_score = (ping_score * 0.4 +
-                                   speed_score * 0.4 + packet_loss_score * 0.2)
+                composite_score = (
+                    ping_score * 0.4 + speed_score * 0.4 + packet_loss_score * 0.2
+                )
                 server_scores[server_id] = composite_score
 
             return server_scores
 
         except Exception as e:
-            self.log(
-                f"Error analyzing server performance: {e}", LogLevel.ERROR)
+            self.log(f"Error analyzing server performance: {e}", LogLevel.ERROR)
             return {}
 
     def get_recommendations(self, limit: int = 10) -> List[OptimizationRecommendation]:
@@ -374,7 +385,7 @@ class AIPerformanceAnalyzer:
             sorted_recommendations = sorted(
                 self.recommendations,
                 key=lambda x: (x.priority, -x.timestamp),
-                reverse=True
+                reverse=True,
             )
             return sorted_recommendations[:limit]
 
@@ -392,19 +403,26 @@ class AIPerformanceAnalyzer:
             if not self.metrics_history:
                 return {}
 
-            recent_metrics = list(
-                self.metrics_history)[-50:]  # Last 50 metrics
+            recent_metrics = list(self.metrics_history)[-50:]  # Last 50 metrics
 
             summary = {
-                'total_metrics': len(self.metrics_history),
-                'recent_metrics': len(recent_metrics),
-                'avg_ping': statistics.mean([m.ping for m in recent_metrics]),
-                'avg_download_speed': statistics.mean([m.download_speed for m in recent_metrics]),
-                'avg_upload_speed': statistics.mean([m.upload_speed for m in recent_metrics]),
-                'avg_packet_loss': statistics.mean([m.packet_loss for m in recent_metrics]),
-                'active_recommendations': len(self.recommendations),
-                'traffic_patterns': len(self.patterns),
-                'anomaly_count': len([m for m in recent_metrics if m.connection_stability < 0.5])
+                "total_metrics": len(self.metrics_history),
+                "recent_metrics": len(recent_metrics),
+                "avg_ping": statistics.mean([m.ping for m in recent_metrics]),
+                "avg_download_speed": statistics.mean(
+                    [m.download_speed for m in recent_metrics]
+                ),
+                "avg_upload_speed": statistics.mean(
+                    [m.upload_speed for m in recent_metrics]
+                ),
+                "avg_packet_loss": statistics.mean(
+                    [m.packet_loss for m in recent_metrics]
+                ),
+                "active_recommendations": len(self.recommendations),
+                "traffic_patterns": len(self.patterns),
+                "anomaly_count": len(
+                    [m for m in recent_metrics if m.connection_stability < 0.5]
+                ),
             }
 
             return summary
@@ -420,7 +438,8 @@ class AIPerformanceAnalyzer:
 
         self._stop_analysis.clear()
         self._analysis_thread = threading.Thread(
-            target=self._analysis_loop, daemon=True)
+            target=self._analysis_loop, daemon=True
+        )
         self._analysis_thread.start()
 
         self.log("Started AI performance analysis", LogLevel.INFO)
@@ -478,7 +497,7 @@ class AIPerformanceAnalyzer:
                         peak_hours=[hour],
                         low_usage_hours=[],
                         seasonal_trends={},
-                        anomaly_score=0
+                        anomaly_score=0,
                     )
 
         except Exception as e:
@@ -489,8 +508,7 @@ class PredictiveFailover:
     """AI-powered predictive failover system."""
 
     def __init__(self, log_callback: Optional[Callable[[str, LogLevel], None]] = None):
-        self.log = log_callback or (
-            lambda msg, level: print(f"[{level}] {msg}"))
+        self.log = log_callback or (lambda msg, level: print(f"[{level}] {msg}"))
         self.failure_predictions: Dict[str, float] = {}
         self.server_health_scores: Dict[str, float] = {}
         self.failover_threshold = 0.7
@@ -501,20 +519,21 @@ class PredictiveFailover:
         try:
             # Calculate health score (0-1, higher is better)
             ping_score = max(0, 1 - (metrics.ping / 200))  # 200ms = 0 score
-            speed_score = min(1, metrics.download_speed /
-                              100)  # 100 Mbps = 1 score
+            speed_score = min(1, metrics.download_speed / 100)  # 100 Mbps = 1 score
             stability_score = metrics.connection_stability
-            packet_loss_score = max(
-                0, 1 - (metrics.packet_loss / 5))  # 5% = 0 score
+            packet_loss_score = max(0, 1 - (metrics.packet_loss / 5))  # 5% = 0 score
 
-            health_score = (ping_score * 0.3 + speed_score * 0.3 +
-                            stability_score * 0.2 + packet_loss_score * 0.2)
+            health_score = (
+                ping_score * 0.3
+                + speed_score * 0.3
+                + stability_score * 0.2
+                + packet_loss_score * 0.2
+            )
 
             # Apply exponential moving average
             if server_id in self.server_health_scores:
                 self.server_health_scores[server_id] = (
-                    0.7 *
-                    self.server_health_scores[server_id] + 0.3 * health_score
+                    0.7 * self.server_health_scores[server_id] + 0.3 * health_score
                 )
             else:
                 self.server_health_scores[server_id] = health_score
@@ -530,8 +549,7 @@ class PredictiveFailover:
         try:
             # Simple prediction based on health trend
             if server_id in self.server_health_scores:
-                health_trend = current_health - \
-                    self.server_health_scores[server_id]
+                health_trend = current_health - self.server_health_scores[server_id]
 
                 # If health is declining rapidly, increase failure probability
                 if health_trend < -0.1:
@@ -550,21 +568,23 @@ class PredictiveFailover:
         """Check if server should be failed over."""
         return self.failure_predictions.get(server_id, 0) > self.failover_threshold
 
-    def get_best_alternative(self, current_server_id: str, available_servers: List[str]) -> Optional[str]:
+    def get_best_alternative(
+        self, current_server_id: str, available_servers: List[str]
+    ) -> Optional[str]:
         """Get the best alternative server for failover."""
         try:
             if not available_servers:
                 return None
 
             # Filter out current server
-            alternatives = [
-                s for s in available_servers if s != current_server_id]
+            alternatives = [s for s in available_servers if s != current_server_id]
             if not alternatives:
                 return None
 
             # Find server with highest health score
             best_server = max(
-                alternatives, key=lambda s: self.server_health_scores.get(s, 0.5))
+                alternatives, key=lambda s: self.server_health_scores.get(s, 0.5)
+            )
 
             return best_server
 

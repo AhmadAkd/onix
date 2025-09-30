@@ -4,9 +4,19 @@ Provides UI for managing plugins and extensions
 """
 
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QListWidget, QListWidgetItem, QTextEdit, QGroupBox,
-    QSplitter, QFrame, QSizePolicy, QMessageBox
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QListWidget,
+    QListWidgetItem,
+    QTextEdit,
+    QGroupBox,
+    QSplitter,
+    QFrame,
+    QSizePolicy,
+    QMessageBox,
 )
 from PySide6.QtCore import Qt, Signal, QThread
 from services.plugin_system import PluginManager, PluginInfo
@@ -121,7 +131,8 @@ class PluginItemWidget(QFrame):
 
         if self.is_loaded:
             self.toggle_button = QPushButton(
-                "Disable" if self.plugin_info.enabled else "Enable")
+                "Disable" if self.plugin_info.enabled else "Enable"
+            )
             self.toggle_button.clicked.connect(self.toggle_plugin)
             button_layout.addWidget(self.toggle_button)
 
@@ -138,7 +149,8 @@ class PluginItemWidget(QFrame):
 
     def setup_style(self):
         """Setup the plugin item styling."""
-        self.setStyleSheet("""
+        self.setStyleSheet(
+            """
             PluginItemWidget {
                 background-color: rgba(255, 255, 255, 0.8);
                 border: 1px solid rgba(0, 0, 0, 0.1);
@@ -200,20 +212,23 @@ class PluginItemWidget(QFrame):
             QPushButton:pressed {
                 background-color: #1d4ed8;
             }
-        """)
+        """
+        )
 
     def toggle_plugin(self):
         """Toggle plugin enabled state."""
         self.plugin_toggle_requested.emit(
-            self.plugin_info.name, not self.plugin_info.enabled)
+            self.plugin_info.name, not self.plugin_info.enabled
+        )
 
     def remove_plugin(self):
         """Remove plugin."""
         reply = QMessageBox.question(
-            self, "Remove Plugin",
+            self,
+            "Remove Plugin",
             f"Are you sure you want to remove '{self.plugin_info.name}'?",
             QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
+            QMessageBox.No,
         )
         if reply == QMessageBox.Yes:
             self.plugin_remove_requested.emit(self.plugin_info.name)
@@ -241,8 +256,9 @@ def create_plugin_view(main_window) -> QWidget:
 
     # Refresh button
     refresh_button = QPushButton("Refresh")
-    refresh_button.clicked.connect(lambda: refresh_plugins(
-        main_window, plugin_list, available_list))
+    refresh_button.clicked.connect(
+        lambda: refresh_plugins(main_window, plugin_list, available_list)
+    )
     header_layout.addWidget(refresh_button)
 
     layout.addLayout(header_layout)
@@ -289,9 +305,11 @@ def create_plugin_view(main_window) -> QWidget:
 
     # Connect signals
     plugin_list.itemSelectionChanged.connect(
-        lambda: on_plugin_selected(plugin_list, details_text, main_window))
+        lambda: on_plugin_selected(plugin_list, details_text, main_window)
+    )
     available_list.itemSelectionChanged.connect(
-        lambda: on_available_selected(available_list, details_text))
+        lambda: on_available_selected(available_list, details_text)
+    )
 
     # Load initial plugins
     refresh_plugins(main_window, plugin_list, available_list)
@@ -312,9 +330,15 @@ def refresh_plugins(main_window, plugin_list: QListWidget, available_list: QList
             item = QListWidgetItem()
             widget = PluginItemWidget(plugin_info, is_loaded=True)
             widget.plugin_toggle_requested.connect(
-                lambda name, enabled: toggle_plugin(main_window, name, enabled, plugin_list, available_list))
+                lambda name, enabled: toggle_plugin(
+                    main_window, name, enabled, plugin_list, available_list
+                )
+            )
             widget.plugin_remove_requested.connect(
-                lambda name: remove_plugin(main_window, name, plugin_list, available_list))
+                lambda name: remove_plugin(
+                    main_window, name, plugin_list, available_list
+                )
+            )
 
             item.setSizeHint(widget.sizeHint())
             plugin_list.addItem(item)
@@ -324,16 +348,26 @@ def refresh_plugins(main_window, plugin_list: QListWidget, available_list: QList
         try:
             discovered_plugins = main_window.plugin_manager.discover_plugins()
             load_available_plugins(
-                discovered_plugins, available_list, loaded_plugins, main_window, plugin_list)
+                discovered_plugins,
+                available_list,
+                loaded_plugins,
+                main_window,
+                plugin_list,
+            )
         except Exception as e:
-            main_window.log(
-                f"Error discovering plugins: {e}", LogLevel.WARNING)
+            main_window.log(f"Error discovering plugins: {e}", LogLevel.WARNING)
 
     except Exception as e:
         main_window.log(f"Error refreshing plugins: {e}", LogLevel.ERROR)
 
 
-def load_available_plugins(discovered_plugins, available_list: QListWidget, loaded_plugins, main_window, plugin_list):
+def load_available_plugins(
+    discovered_plugins,
+    available_list: QListWidget,
+    loaded_plugins,
+    main_window,
+    plugin_list,
+):
     """Load available plugins into the list."""
     try:
         loaded_names = {p.name for p in loaded_plugins}
@@ -343,7 +377,10 @@ def load_available_plugins(discovered_plugins, available_list: QListWidget, load
                 item = QListWidgetItem()
                 widget = PluginItemWidget(plugin_info, is_loaded=False)
                 widget.plugin_toggle_requested.connect(
-                    lambda name, enabled: toggle_plugin(main_window, name, enabled, plugin_list, available_list))
+                    lambda name, enabled: toggle_plugin(
+                        main_window, name, enabled, plugin_list, available_list
+                    )
+                )
 
                 item.setSizeHint(widget.sizeHint())
                 available_list.addItem(item)
@@ -353,7 +390,13 @@ def load_available_plugins(discovered_plugins, available_list: QListWidget, load
         print(f"Error loading available plugins: {e}")
 
 
-def toggle_plugin(main_window, plugin_name: str, enabled: bool, plugin_list: QListWidget, available_list: QListWidget):
+def toggle_plugin(
+    main_window,
+    plugin_name: str,
+    enabled: bool,
+    plugin_list: QListWidget,
+    available_list: QListWidget,
+):
     """Toggle plugin enabled state."""
     try:
         if enabled:
@@ -363,18 +406,23 @@ def toggle_plugin(main_window, plugin_name: str, enabled: bool, plugin_list: QLi
 
         if success:
             main_window.log(
-                f"Plugin {plugin_name} {'enabled' if enabled else 'disabled'}", LogLevel.INFO)
+                f"Plugin {plugin_name} {'enabled' if enabled else 'disabled'}",
+                LogLevel.INFO,
+            )
             refresh_plugins(main_window, plugin_list, available_list)
         else:
             main_window.log(
-                f"Failed to {'enable' if enabled else 'disable'} plugin {plugin_name}", LogLevel.ERROR)
+                f"Failed to {'enable' if enabled else 'disable'} plugin {plugin_name}",
+                LogLevel.ERROR,
+            )
 
     except Exception as e:
-        main_window.log(
-            f"Error toggling plugin {plugin_name}: {e}", LogLevel.ERROR)
+        main_window.log(f"Error toggling plugin {plugin_name}: {e}", LogLevel.ERROR)
 
 
-def remove_plugin(main_window, plugin_name: str, plugin_list: QListWidget, available_list: QListWidget):
+def remove_plugin(
+    main_window, plugin_name: str, plugin_list: QListWidget, available_list: QListWidget
+):
     """Remove a plugin."""
     try:
         success = main_window.plugin_manager.unload_plugin(plugin_name)
@@ -382,15 +430,19 @@ def remove_plugin(main_window, plugin_name: str, plugin_list: QListWidget, avail
             main_window.log(f"Plugin {plugin_name} removed", LogLevel.INFO)
             refresh_plugins(main_window, plugin_list, available_list)
         else:
-            main_window.log(
-                f"Failed to remove plugin {plugin_name}", LogLevel.ERROR)
+            main_window.log(f"Failed to remove plugin {plugin_name}", LogLevel.ERROR)
 
     except Exception as e:
-        main_window.log(
-            f"Error removing plugin {plugin_name}: {e}", LogLevel.ERROR)
+        main_window.log(f"Error removing plugin {plugin_name}: {e}", LogLevel.ERROR)
 
 
-def load_plugin(main_window, plugin_name: str, enabled: bool, plugin_list: QListWidget, available_list: QListWidget):
+def load_plugin(
+    main_window,
+    plugin_name: str,
+    enabled: bool,
+    plugin_list: QListWidget,
+    available_list: QListWidget,
+):
     """Load a plugin."""
     try:
         # Find plugin path
@@ -409,12 +461,10 @@ def load_plugin(main_window, plugin_name: str, enabled: bool, plugin_list: QList
             main_window.log(f"Plugin {plugin_name} loaded", LogLevel.INFO)
             refresh_plugins(main_window, plugin_list, available_list)
         else:
-            main_window.log(
-                f"Failed to load plugin {plugin_name}", LogLevel.ERROR)
+            main_window.log(f"Failed to load plugin {plugin_name}", LogLevel.ERROR)
 
     except Exception as e:
-        main_window.log(
-            f"Error loading plugin {plugin_name}: {e}", LogLevel.ERROR)
+        main_window.log(f"Error loading plugin {plugin_name}: {e}", LogLevel.ERROR)
 
 
 def on_plugin_selected(plugin_list: QListWidget, details_text: QTextEdit, main_window):
@@ -425,7 +475,7 @@ def on_plugin_selected(plugin_list: QListWidget, details_text: QTextEdit, main_w
             return
 
         widget = plugin_list.itemWidget(current_item)
-        if not widget or not hasattr(widget, 'plugin_info'):
+        if not widget or not hasattr(widget, "plugin_info"):
             return
 
         plugin_info = widget.plugin_info
@@ -455,7 +505,7 @@ def on_available_selected(available_list: QListWidget, details_text: QTextEdit):
             return
 
         widget = available_list.itemWidget(current_item)
-        if not widget or not hasattr(widget, 'plugin_info'):
+        if not widget or not hasattr(widget, "plugin_info"):
             return
 
         plugin_info = widget.plugin_info

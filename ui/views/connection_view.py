@@ -31,22 +31,19 @@ def create_connection_view(main_window):
 
     main_window.group_dropdown = QComboBox()
     main_window.group_dropdown.setFixedWidth(140)
-    main_window.group_dropdown.setSizePolicy(
-        QSizePolicy.Fixed, QSizePolicy.Fixed)
+    main_window.group_dropdown.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
     # Sort combo removed - auto-sort by best ping
 
     main_window.search_field = QLineEdit()
     main_window.search_field.setPlaceholderText(main_window.tr("Search..."))
     main_window.search_field.setFixedWidth(180)
-    main_window.search_field.setSizePolicy(
-        QSizePolicy.Fixed, QSizePolicy.Fixed)
+    main_window.search_field.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
     main_window.manage_subs_button = QPushButton(
         QIcon(":/icons/list.svg"), main_window.tr("Subscriptions")
     )
     main_window.manage_subs_button.setFixedWidth(140)
-    main_window.manage_subs_button.setSizePolicy(
-        QSizePolicy.Fixed, QSizePolicy.Fixed)
+    main_window.manage_subs_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
     # Update button moved to subscriptions menu
 
@@ -57,8 +54,7 @@ def create_connection_view(main_window):
     main_window.health_check_tcp_button.setSizePolicy(
         QSizePolicy.Fixed, QSizePolicy.Fixed
     )
-    main_window.health_check_tcp_button.setToolTip(
-        main_window.tr("Test TCP Ping"))
+    main_window.health_check_tcp_button.setToolTip(main_window.tr("Test TCP Ping"))
     main_window.health_check_tcp_button.setCheckable(True)
 
     main_window.health_check_url_button = QPushButton(
@@ -68,8 +64,7 @@ def create_connection_view(main_window):
     main_window.health_check_url_button.setSizePolicy(
         QSizePolicy.Fixed, QSizePolicy.Fixed
     )
-    main_window.health_check_url_button.setToolTip(
-        main_window.tr("Test URL Ping"))
+    main_window.health_check_url_button.setToolTip(main_window.tr("Test URL Ping"))
     main_window.health_check_url_button.setCheckable(True)
 
     # Speed Test Button
@@ -77,8 +72,7 @@ def create_connection_view(main_window):
         QIcon(":/icons/zap.svg"), main_window.tr("Speed")
     )
     main_window.speed_test_button.setFixedWidth(60)
-    main_window.speed_test_button.setSizePolicy(
-        QSizePolicy.Fixed, QSizePolicy.Fixed)
+    main_window.speed_test_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
     main_window.speed_test_button.setToolTip(main_window.tr("Speed Test"))
     main_window.speed_test_button.setCheckable(True)
 
@@ -87,11 +81,12 @@ def create_connection_view(main_window):
         QIcon(":/icons/activity.svg"), main_window.tr("Smart Connect")
     )
     main_window.smart_connect_button.setFixedWidth(100)
-    main_window.smart_connect_button.setSizePolicy(
-        QSizePolicy.Fixed, QSizePolicy.Fixed)
+    main_window.smart_connect_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
     main_window.smart_connect_button.setToolTip(
-        main_window.tr("Connect to best server automatically"))
-    main_window.smart_connect_button.setStyleSheet("""
+        main_window.tr("Connect to best server automatically")
+    )
+    main_window.smart_connect_button.setStyleSheet(
+        """
         QPushButton {
             background-color: #10b981;
             color: white;
@@ -106,7 +101,8 @@ def create_connection_view(main_window):
         QPushButton:pressed {
             background-color: #047857;
         }
-    """)
+    """
+    )
 
     # Export button removed - now in more menu
 
@@ -154,8 +150,7 @@ def create_connection_view(main_window):
     )
     main_window.more_actions_button.setMinimumWidth(30)
     main_window.more_actions_button.setMaximumWidth(40)
-    main_window.more_actions_button.setSizePolicy(
-        QSizePolicy.Fixed, QSizePolicy.Fixed)
+    main_window.more_actions_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
     more_menu = QMenu(main_window)
 
     import_action = QAction(
@@ -177,8 +172,7 @@ def create_connection_view(main_window):
         main_window.tr("Import WireGuard from File"),
         main_window,
     )
-    import_wg_action.triggered.connect(
-        main_window.handle_import_wireguard_config)
+    import_wg_action.triggered.connect(main_window.handle_import_wireguard_config)
     more_menu.addAction(import_wg_action)
 
     more_menu.addSeparator()
@@ -189,8 +183,7 @@ def create_connection_view(main_window):
         main_window.tr("Update Subscriptions"),
         main_window,
     )
-    update_subs_action.triggered.connect(
-        main_window.handle_update_subscriptions)
+    update_subs_action.triggered.connect(main_window.handle_update_subscriptions)
     more_menu.addAction(update_subs_action)
 
     # Add export and manage chains to menu
@@ -211,8 +204,7 @@ def create_connection_view(main_window):
     copy_links_action = QAction(
         QIcon(":/icons/copy.svg"), main_window.tr("Copy Group Links"), main_window
     )
-    copy_links_action.triggered.connect(
-        main_window.copy_group_links_to_clipboard)
+    copy_links_action.triggered.connect(main_window.copy_group_links_to_clipboard)
     more_menu.addAction(copy_links_action)
 
     remove_duplicates_action = QAction(
@@ -220,8 +212,7 @@ def create_connection_view(main_window):
         main_window.tr("Remove Duplicates"),
         main_window,
     )
-    remove_duplicates_action.triggered.connect(
-        main_window.remove_duplicate_servers)
+    remove_duplicates_action.triggered.connect(main_window.remove_duplicate_servers)
     more_menu.addAction(remove_duplicates_action)
 
     delete_group_action = QAction(
@@ -253,8 +244,7 @@ def create_connection_view(main_window):
     left_layout.addWidget(top_bar)
 
     main_window.server_list_widget = QListWidget()
-    main_window.server_list_widget.setStyleSheet(
-        "QListWidget::item { padding: 5px; }")
+    main_window.server_list_widget.setStyleSheet("QListWidget::item { padding: 5px; }")
     main_window.server_list_widget.currentItemChanged.connect(
         main_window.on_server_selected
     )
@@ -282,8 +272,7 @@ def create_connection_view(main_window):
     main_window.group_dropdown.currentTextChanged.connect(
         main_window.update_server_list
     )
-    main_window.search_field.textChanged.connect(
-        main_window.update_server_list)
+    main_window.search_field.textChanged.connect(main_window.update_server_list)
     # Sort combo removed - auto-sort by best ping
     main_window.health_check_tcp_button.clicked.connect(
         main_window.toggle_health_check_tcp
@@ -291,8 +280,7 @@ def create_connection_view(main_window):
     main_window.health_check_url_button.clicked.connect(
         main_window.toggle_health_check_url
     )
-    main_window.speed_test_button.clicked.connect(
-        main_window.toggle_speed_test)
+    main_window.speed_test_button.clicked.connect(main_window.toggle_speed_test)
     main_window.manage_subs_button.clicked.connect(
         main_window.show_subscription_manager
     )

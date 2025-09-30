@@ -15,6 +15,7 @@ from constants import LogLevel
 @dataclass
 class ServerMetrics:
     """Server performance metrics."""
+
     ping: float = 0.0
     download_speed: float = 0.0
     upload_speed: float = 0.0
@@ -32,6 +33,7 @@ class ServerMetrics:
 @dataclass
 class SelectionCriteria:
     """Server selection criteria weights."""
+
     ping_weight: float = 0.3
     speed_weight: float = 0.25
     stability_weight: float = 0.2
@@ -43,8 +45,7 @@ class SmartServerSelector:
     """Intelligent server selection system."""
 
     def __init__(self, log_callback: Optional[Callable[[str, LogLevel], None]] = None):
-        self.log = log_callback or (
-            lambda msg, level: print(f"[{level}] {msg}"))
+        self.log = log_callback or (lambda msg, level: print(f"[{level}] {msg}"))
         self._server_metrics: Dict[str, ServerMetrics] = {}
         self._selection_history: deque = deque(maxlen=100)
         self._criteria = SelectionCriteria()
@@ -63,27 +64,26 @@ class SmartServerSelector:
             server_metrics = self._server_metrics[server_id]
 
             # Update basic metrics
-            if 'ping' in metrics:
-                server_metrics.ping = float(metrics['ping'])
-            if 'download_speed' in metrics:
-                server_metrics.download_speed = float(
-                    metrics['download_speed'])
-            if 'upload_speed' in metrics:
-                server_metrics.upload_speed = float(metrics['upload_speed'])
-            if 'packet_loss' in metrics:
-                server_metrics.packet_loss = float(metrics['packet_loss'])
-            if 'jitter' in metrics:
-                server_metrics.jitter = float(metrics['jitter'])
-            if 'uptime' in metrics:
-                server_metrics.uptime = float(metrics['uptime'])
-            if 'load_factor' in metrics:
-                server_metrics.load_factor = float(metrics['load_factor'])
-            if 'geographic_distance' in metrics:
+            if "ping" in metrics:
+                server_metrics.ping = float(metrics["ping"])
+            if "download_speed" in metrics:
+                server_metrics.download_speed = float(metrics["download_speed"])
+            if "upload_speed" in metrics:
+                server_metrics.upload_speed = float(metrics["upload_speed"])
+            if "packet_loss" in metrics:
+                server_metrics.packet_loss = float(metrics["packet_loss"])
+            if "jitter" in metrics:
+                server_metrics.jitter = float(metrics["jitter"])
+            if "uptime" in metrics:
+                server_metrics.uptime = float(metrics["uptime"])
+            if "load_factor" in metrics:
+                server_metrics.load_factor = float(metrics["load_factor"])
+            if "geographic_distance" in metrics:
                 server_metrics.geographic_distance = float(
-                    metrics['geographic_distance'])
-            if 'timezone_offset' in metrics:
-                server_metrics.timezone_offset = int(
-                    metrics['timezone_offset'])
+                    metrics["geographic_distance"]
+                )
+            if "timezone_offset" in metrics:
+                server_metrics.timezone_offset = int(metrics["timezone_offset"])
 
             # Update test statistics
             server_metrics.last_tested = time.time()
@@ -91,21 +91,28 @@ class SmartServerSelector:
 
             # Calculate success rate
             if server_metrics.test_count > 0:
-                successful_tests = server_metrics.test_count * \
-                    (server_metrics.success_rate / 100)
-                if metrics.get('success', True):
+                successful_tests = server_metrics.test_count * (
+                    server_metrics.success_rate / 100
+                )
+                if metrics.get("success", True):
                     successful_tests += 1
                 server_metrics.success_rate = (
-                    successful_tests / server_metrics.test_count) * 100
+                    successful_tests / server_metrics.test_count
+                ) * 100
 
             self.log(
-                f"Updated metrics for server {server_id}: ping={server_metrics.ping}ms, speed={server_metrics.download_speed}Mbps", LogLevel.DEBUG)
+                f"Updated metrics for server {server_id}: ping={server_metrics.ping}ms, speed={server_metrics.download_speed}Mbps",
+                LogLevel.DEBUG,
+            )
 
         except Exception as e:
             self.log(f"Error updating server metrics: {e}", LogLevel.ERROR)
 
-    def select_best_server(self, servers: List[Dict[str, Any]],
-                           user_preferences: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
+    def select_best_server(
+        self,
+        servers: List[Dict[str, Any]],
+        user_preferences: Optional[Dict[str, Any]] = None,
+    ) -> Optional[Dict[str, Any]]:
         """Select the best server based on intelligent criteria."""
         try:
             if not servers:
@@ -119,7 +126,7 @@ class SmartServerSelector:
             scored_servers = []
 
             for server in servers:
-                server_id = server.get('id', server.get('name', ''))
+                server_id = server.get("id", server.get("name", ""))
                 if not server_id:
                     continue
 
@@ -129,27 +136,27 @@ class SmartServerSelector:
                 # Calculate composite score
                 score = self._calculate_server_score(server, metrics)
 
-                scored_servers.append({
-                    'server': server,
-                    'score': score,
-                    'metrics': metrics
-                })
+                scored_servers.append(
+                    {"server": server, "score": score, "metrics": metrics}
+                )
 
             # Sort by score (higher is better)
-            scored_servers.sort(key=lambda x: x['score'], reverse=True)
+            scored_servers.sort(key=lambda x: x["score"], reverse=True)
 
             if not scored_servers:
                 return None
 
             # Select the best server
             best_server_data = scored_servers[0]
-            best_server = best_server_data['server']
+            best_server = best_server_data["server"]
 
             # Record selection for learning
-            self._record_selection(best_server, best_server_data['score'])
+            self._record_selection(best_server, best_server_data["score"])
 
             self.log(
-                f"Selected server: {best_server.get('name', 'Unknown')} (score: {best_server_data['score']:.2f})", LogLevel.INFO)
+                f"Selected server: {best_server.get('name', 'Unknown')} (score: {best_server_data['score']:.2f})",
+                LogLevel.INFO,
+            )
 
             return best_server
 
@@ -157,15 +164,16 @@ class SmartServerSelector:
             self.log(f"Error selecting best server: {e}", LogLevel.ERROR)
             return servers[0] if servers else None
 
-    def _calculate_server_score(self, server: Dict[str, Any], metrics: ServerMetrics) -> float:
+    def _calculate_server_score(
+        self, server: Dict[str, Any], metrics: ServerMetrics
+    ) -> float:
         """Calculate a composite score for a server."""
         try:
             score = 0.0
 
             # Ping score (lower is better)
             if metrics.ping > 0:
-                ping_score = max(0, 100 - (metrics.ping / 10)
-                                 )  # 100ms = 0 score
+                ping_score = max(0, 100 - (metrics.ping / 10))  # 100ms = 0 score
                 score += ping_score * self._criteria.ping_weight
 
             # Speed score (higher is better)
@@ -177,7 +185,9 @@ class SmartServerSelector:
             # Stability score (based on packet loss and jitter)
             stability_score = 100
             if metrics.packet_loss > 0:
-                stability_score -= metrics.packet_loss * 10  # 1% packet loss = -10 points
+                stability_score -= (
+                    metrics.packet_loss * 10
+                )  # 1% packet loss = -10 points
             if metrics.jitter > 0:
                 # High jitter penalty
                 stability_score -= min(50, metrics.jitter)
@@ -211,22 +221,22 @@ class SmartServerSelector:
         try:
             # Time-based preferences
             current_hour = time.localtime().tm_hour
-            if 'preferred_hours' in self._user_preferences:
-                preferred_hours = self._user_preferences['preferred_hours']
+            if "preferred_hours" in self._user_preferences:
+                preferred_hours = self._user_preferences["preferred_hours"]
                 if current_hour in preferred_hours:
                     score *= 1.1  # 10% bonus
 
             # Geographic preferences
-            if 'preferred_countries' in self._user_preferences:
-                preferred_countries = self._user_preferences['preferred_countries']
-                server_country = server.get('country', '').lower()
+            if "preferred_countries" in self._user_preferences:
+                preferred_countries = self._user_preferences["preferred_countries"]
+                server_country = server.get("country", "").lower()
                 if server_country in [c.lower() for c in preferred_countries]:
                     score *= 1.05  # 5% bonus
 
             # Protocol preferences
-            if 'preferred_protocols' in self._user_preferences:
-                preferred_protocols = self._user_preferences['preferred_protocols']
-                server_protocol = server.get('protocol', '').lower()
+            if "preferred_protocols" in self._user_preferences:
+                preferred_protocols = self._user_preferences["preferred_protocols"]
+                server_protocol = server.get("protocol", "").lower()
                 if server_protocol in [p.lower() for p in preferred_protocols]:
                     score *= 1.03  # 3% bonus
 
@@ -236,13 +246,15 @@ class SmartServerSelector:
             self.log(f"Error applying user preferences: {e}", LogLevel.WARNING)
             return score
 
-    def _apply_learning_adjustments(self, server: Dict[str, Any], score: float) -> float:
+    def _apply_learning_adjustments(
+        self, server: Dict[str, Any], score: float
+    ) -> float:
         """Apply machine learning adjustments to the score."""
         try:
             if not self._is_learning:
                 return score
 
-            server_id = server.get('id', server.get('name', ''))
+            server_id = server.get("id", server.get("name", ""))
             if not server_id:
                 return score
 
@@ -252,8 +264,9 @@ class SmartServerSelector:
                 return score
 
             # Calculate performance trend
-            recent_scores = [data['score']
-                             for data in historical_data[-10:]]  # Last 10 selections
+            recent_scores = [
+                data["score"] for data in historical_data[-10:]
+            ]  # Last 10 selections
             if len(recent_scores) >= 3:
                 trend = self._calculate_trend(recent_scores)
                 score += trend * 5  # Apply trend adjustment
@@ -265,8 +278,7 @@ class SmartServerSelector:
             return score
 
         except Exception as e:
-            self.log(
-                f"Error applying learning adjustments: {e}", LogLevel.WARNING)
+            self.log(f"Error applying learning adjustments: {e}", LogLevel.WARNING)
             return score
 
     def _calculate_trend(self, scores: List[float]) -> float:
@@ -284,8 +296,7 @@ class SmartServerSelector:
             x_mean = sum(x) / n
             y_mean = sum(y) / n
 
-            numerator = sum((x[i] - x_mean) * (y[i] - y_mean)
-                            for i in range(n))
+            numerator = sum((x[i] - x_mean) * (y[i] - y_mean) for i in range(n))
             denominator = sum((x[i] - x_mean) ** 2 for i in range(n))
 
             if denominator == 0:
@@ -305,11 +316,12 @@ class SmartServerSelector:
 
             # Calculate success rate
             successful_selections = sum(
-                1 for data in historical_data if data.get('success', True))
+                1 for data in historical_data if data.get("success", True)
+            )
             success_rate = successful_selections / len(historical_data)
 
             # Calculate consistency (low variance in scores)
-            scores = [data['score'] for data in historical_data]
+            scores = [data["score"] for data in historical_data]
             if len(scores) < 2:
                 return success_rate
 
@@ -328,15 +340,15 @@ class SmartServerSelector:
     def _record_selection(self, server: Dict[str, Any], score: float) -> None:
         """Record server selection for learning."""
         try:
-            server_id = server.get('id', server.get('name', ''))
+            server_id = server.get("id", server.get("name", ""))
             if not server_id:
                 return
 
             selection_data = {
-                'server_id': server_id,
-                'score': score,
-                'timestamp': time.time(),
-                'success': True  # Will be updated later based on actual performance
+                "server_id": server_id,
+                "score": score,
+                "timestamp": time.time(),
+                "success": True,  # Will be updated later based on actual performance
             }
 
             self._selection_history.append(selection_data)
@@ -349,24 +361,29 @@ class SmartServerSelector:
         except Exception as e:
             self.log(f"Error recording selection: {e}", LogLevel.WARNING)
 
-    def update_selection_result(self, server_id: str, success: bool, performance_metrics: Optional[Dict[str, Any]] = None) -> None:
+    def update_selection_result(
+        self,
+        server_id: str,
+        success: bool,
+        performance_metrics: Optional[Dict[str, Any]] = None,
+    ) -> None:
         """Update the result of a server selection for learning."""
         try:
             # Update the most recent selection
             if self._selection_history:
                 last_selection = self._selection_history[-1]
-                if last_selection['server_id'] == server_id:
-                    last_selection['success'] = success
+                if last_selection["server_id"] == server_id:
+                    last_selection["success"] = success
                     if performance_metrics:
-                        last_selection['performance'] = performance_metrics
+                        last_selection["performance"] = performance_metrics
 
             # Update learning data
             if server_id in self._learning_data:
                 for data in self._learning_data[server_id]:
-                    if data['timestamp'] == last_selection['timestamp']:
-                        data['success'] = success
+                    if data["timestamp"] == last_selection["timestamp"]:
+                        data["success"] = success
                         if performance_metrics:
-                            data['performance'] = performance_metrics
+                            data["performance"] = performance_metrics
                         break
 
         except Exception as e:
@@ -377,34 +394,38 @@ class SmartServerSelector:
         self._criteria = criteria
         self.log(f"Updated selection criteria: {criteria}", LogLevel.INFO)
 
-    def get_server_rankings(self, servers: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def get_server_rankings(
+        self, servers: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Get ranked list of servers with their scores."""
         try:
             ranked_servers = []
 
             for server in servers:
-                server_id = server.get('id', server.get('name', ''))
+                server_id = server.get("id", server.get("name", ""))
                 if not server_id:
                     continue
 
                 metrics = self._server_metrics.get(server_id, ServerMetrics())
                 score = self._calculate_server_score(server, metrics)
 
-                ranked_servers.append({
-                    'server': server,
-                    'score': score,
-                    'metrics': {
-                        'ping': metrics.ping,
-                        'download_speed': metrics.download_speed,
-                        'upload_speed': metrics.upload_speed,
-                        'packet_loss': metrics.packet_loss,
-                        'uptime': metrics.uptime,
-                        'success_rate': metrics.success_rate
+                ranked_servers.append(
+                    {
+                        "server": server,
+                        "score": score,
+                        "metrics": {
+                            "ping": metrics.ping,
+                            "download_speed": metrics.download_speed,
+                            "upload_speed": metrics.upload_speed,
+                            "packet_loss": metrics.packet_loss,
+                            "uptime": metrics.uptime,
+                            "success_rate": metrics.success_rate,
+                        },
                     }
-                })
+                )
 
             # Sort by score
-            ranked_servers.sort(key=lambda x: x['score'], reverse=True)
+            ranked_servers.sort(key=lambda x: x["score"], reverse=True)
 
             return ranked_servers
 
@@ -416,18 +437,18 @@ class SmartServerSelector:
         """Get performance analytics and insights."""
         try:
             analytics = {
-                'total_servers': len(self._server_metrics),
-                'total_selections': len(self._selection_history),
-                'learning_enabled': self._is_learning,
-                'criteria_weights': {
-                    'ping': self._criteria.ping_weight,
-                    'speed': self._criteria.speed_weight,
-                    'stability': self._criteria.stability_weight,
-                    'uptime': self._criteria.uptime_weight,
-                    'geographic': self._criteria.geographic_weight
+                "total_servers": len(self._server_metrics),
+                "total_selections": len(self._selection_history),
+                "learning_enabled": self._is_learning,
+                "criteria_weights": {
+                    "ping": self._criteria.ping_weight,
+                    "speed": self._criteria.speed_weight,
+                    "stability": self._criteria.stability_weight,
+                    "uptime": self._criteria.uptime_weight,
+                    "geographic": self._criteria.geographic_weight,
                 },
-                'top_performers': [],
-                'insights': []
+                "top_performers": [],
+                "insights": [],
             }
 
             # Get top performing servers
@@ -435,47 +456,49 @@ class SmartServerSelector:
                 server_scores = []
                 for server_id, metrics in self._server_metrics.items():
                     # Create a dummy server for scoring
-                    dummy_server = {'id': server_id, 'name': server_id}
+                    dummy_server = {"id": server_id, "name": server_id}
                     score = self._calculate_server_score(dummy_server, metrics)
                     server_scores.append((server_id, score, metrics))
 
                 # Sort by score and get top 5
                 server_scores.sort(key=lambda x: x[1], reverse=True)
-                analytics['top_performers'] = [
+                analytics["top_performers"] = [
                     {
-                        'server_id': server_id,
-                        'score': score,
-                        'ping': metrics.ping,
-                        'download_speed': metrics.download_speed,
-                        'uptime': metrics.uptime
+                        "server_id": server_id,
+                        "score": score,
+                        "ping": metrics.ping,
+                        "download_speed": metrics.download_speed,
+                        "uptime": metrics.uptime,
                     }
                     for server_id, score, metrics in server_scores[:5]
                 ]
 
             # Generate insights
             if self._selection_history:
-                recent_selections = list(
-                    self._selection_history)[-20:]  # Last 20 selections
-                success_rate = sum(1 for s in recent_selections if s.get(
-                    'success', True)) / len(recent_selections)
+                recent_selections = list(self._selection_history)[
+                    -20:
+                ]  # Last 20 selections
+                success_rate = sum(
+                    1 for s in recent_selections if s.get("success", True)
+                ) / len(recent_selections)
 
-                analytics['insights'].append(
-                    f"Recent success rate: {success_rate:.1%}")
+                analytics["insights"].append(f"Recent success rate: {success_rate:.1%}")
 
                 if success_rate < 0.8:
-                    analytics['insights'].append(
-                        "Consider adjusting selection criteria")
+                    analytics["insights"].append(
+                        "Consider adjusting selection criteria"
+                    )
 
                 if success_rate > 0.95:
-                    analytics['insights'].append(
-                        "Selection algorithm is performing excellently")
+                    analytics["insights"].append(
+                        "Selection algorithm is performing excellently"
+                    )
 
             return analytics
 
         except Exception as e:
-            self.log(
-                f"Error getting performance analytics: {e}", LogLevel.ERROR)
-            return {'error': str(e)}
+            self.log(f"Error getting performance analytics: {e}", LogLevel.ERROR)
+            return {"error": str(e)}
 
     def start_learning(self) -> None:
         """Start the learning process."""
@@ -486,7 +509,8 @@ class SmartServerSelector:
         self._stop_learning.clear()
 
         self._learning_thread = threading.Thread(
-            target=self._learning_loop, daemon=True)
+            target=self._learning_loop, daemon=True
+        )
         self._learning_thread.start()
 
         self.log("Started server selection learning", LogLevel.INFO)
@@ -529,24 +553,25 @@ class SmartServerSelector:
             # Analyze success patterns
             recent_selections = list(self._selection_history)[-50:]
             successful_selections = [
-                s for s in recent_selections if s.get('success', True)]
+                s for s in recent_selections if s.get("success", True)
+            ]
 
             if len(successful_selections) < 5:
                 return
 
             # Find patterns in successful selections
-            successful_scores = [s['score'] for s in successful_selections]
+            successful_scores = [s["score"] for s in successful_selections]
             avg_successful_score = statistics.mean(successful_scores)
 
             # Adjust criteria if needed
             if avg_successful_score < 70:
                 self.log(
-                    "Low success scores detected, adjusting criteria", LogLevel.WARNING)
+                    "Low success scores detected, adjusting criteria", LogLevel.WARNING
+                )
                 # Could implement automatic criteria adjustment here
 
         except Exception as e:
-            self.log(
-                f"Error analyzing selection patterns: {e}", LogLevel.WARNING)
+            self.log(f"Error analyzing selection patterns: {e}", LogLevel.WARNING)
 
     def _update_criteria_from_performance(self) -> None:
         """Update criteria based on performance data."""
@@ -556,8 +581,7 @@ class SmartServerSelector:
             pass
 
         except Exception as e:
-            self.log(
-                f"Error updating criteria from performance: {e}", LogLevel.WARNING)
+            self.log(f"Error updating criteria from performance: {e}", LogLevel.WARNING)
 
     def _cleanup_old_data(self) -> None:
         """Clean up old learning data."""
@@ -567,15 +591,16 @@ class SmartServerSelector:
 
             # Clean up selection history
             self._selection_history = deque(
-                [s for s in self._selection_history if s['timestamp'] > cutoff_time],
-                maxlen=100
+                [s for s in self._selection_history if s["timestamp"] > cutoff_time],
+                maxlen=100,
             )
 
             # Clean up learning data
             for server_id in list(self._learning_data.keys()):
                 self._learning_data[server_id] = [
-                    data for data in self._learning_data[server_id]
-                    if data['timestamp'] > cutoff_time
+                    data
+                    for data in self._learning_data[server_id]
+                    if data["timestamp"] > cutoff_time
                 ]
 
                 if not self._learning_data[server_id]:

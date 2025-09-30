@@ -122,32 +122,38 @@ class PySideUI(QMainWindow):
 
         # Initialize protocol extensions manager
         from services.protocol_extensions import get_protocol_manager
+
         self.protocol_manager = get_protocol_manager()
         self.protocol_manager.start_monitoring()
 
         # Initialize traffic management service
         from services.traffic_management import get_traffic_service
+
         self.traffic_service = get_traffic_service()
         self.traffic_service.start()
 
         # Initialize ML optimization service
         from services.ml_optimization import get_ml_service
+
         self.ml_service = get_ml_service()
         self.ml_service.start()
 
         # Initialize Zero-Trust security service
         from services.zero_trust_security import get_zero_trust_service
+
         self.zero_trust_service = get_zero_trust_service()
         self.zero_trust_service.start()
 
         # Initialize plugin manager
         self.plugin_manager = PluginManager(self.log)
-        self.plugin_manager.set_app_context({
-            'log_callback': self.log,
-            'server_manager': self.server_manager,
-            'singbox_manager': self.singbox_manager,
-            'main_window': self
-        })
+        self.plugin_manager.set_app_context(
+            {
+                "log_callback": self.log,
+                "server_manager": self.server_manager,
+                "singbox_manager": self.singbox_manager,
+                "main_window": self,
+            }
+        )
         self.plugin_manager.add_plugin_directory("plugins")
         self.plugin_manager.start_event_processing()
 
@@ -163,10 +169,8 @@ class PySideUI(QMainWindow):
         self.enterprise_manager.initialize_enterprise()
         self.security_config = SecurityConfig()
         # Connect signals to slots
-        self.signals.ping_result.connect(
-            self.on_ping_result, Qt.QueuedConnection)
-        self.signals.ping_started.connect(
-            self.on_ping_started, Qt.QueuedConnection)
+        self.signals.ping_result.connect(self.on_ping_result, Qt.QueuedConnection)
+        self.signals.ping_started.connect(self.on_ping_started, Qt.QueuedConnection)
         self.signals.health_check_progress.connect(
             self.on_health_check_progress, Qt.QueuedConnection
         )
@@ -182,8 +186,7 @@ class PySideUI(QMainWindow):
         self.signals.save_requested.connect(self._request_save_settings)
         # Connect message box signals
         self.signals.show_info_message.connect(self.show_info_message_box)
-        self.signals.show_warning_message.connect(
-            self.show_warning_message_box)
+        self.signals.show_warning_message.connect(self.show_warning_message_box)
         self.signals.show_error_message.connect(self.show_error_message_box)
         self.signals.ask_yes_no_question.connect(self.handle_ask_yes_no)
         self.signals.schedule_task_signal.connect(self._handle_schedule_task)
@@ -206,9 +209,8 @@ class PySideUI(QMainWindow):
         self.nav_rail.setCurrentRow(0)
 
         # Connect smart connect button
-        if hasattr(self, 'smart_connect_button'):
-            self.smart_connect_button.clicked.connect(
-                self.handle_smart_connect)
+        if hasattr(self, "smart_connect_button"):
+            self.smart_connect_button.clicked.connect(self.handle_smart_connect)
 
         # Apply initial theme
         self.apply_theme(self.settings.get("appearance_mode", "System"))
@@ -222,7 +224,9 @@ class PySideUI(QMainWindow):
             if self.settings.get("language") in rtl_languages:
                 app.setLayoutDirection(Qt.RightToLeft)
                 # Apply RTL-specific styling to the entire application
-                app.setStyleSheet(app.styleSheet() + """
+                app.setStyleSheet(
+                    app.styleSheet()
+                    + """
                     QWidget {
                         
                     }
@@ -250,11 +254,14 @@ class PySideUI(QMainWindow):
                     QTableWidget {
                         
                     }
-                """)
+                """
+                )
             else:
                 app.setLayoutDirection(Qt.LeftToRight)
                 # Apply LTR-specific styling to the entire application
-                app.setStyleSheet(app.styleSheet() + """
+                app.setStyleSheet(
+                    app.styleSheet()
+                    + """
                     QWidget {
                         
                     }
@@ -282,7 +289,8 @@ class PySideUI(QMainWindow):
                     QTableWidget {
                         
                     }
-                """)
+                """
+                )
 
         # Setup System Tray Icon
         self.create_tray_icon()
@@ -310,8 +318,7 @@ class PySideUI(QMainWindow):
         self.nav_rail.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
 
         content_container = QWidget()
-        content_container.setSizePolicy(
-            QSizePolicy.Expanding, QSizePolicy.Expanding)
+        content_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         content_layout = QVBoxLayout(content_container)
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
@@ -433,8 +440,7 @@ class PySideUI(QMainWindow):
             font-weight: 500;
         """
         )
-        self.down_speed_label.setMinimumWidth(
-            80)  # Minimum width for responsiveness
+        self.down_speed_label.setMinimumWidth(80)  # Minimum width for responsiveness
 
         self.up_speed_label = QLabel("↑ 0 KB/s")
         self.up_speed_label.setStyleSheet(
@@ -477,8 +483,7 @@ class PySideUI(QMainWindow):
             }
         """
         )
-        self.start_stop_button.setMaximumWidth(
-            120)  # Maximum width for responsiveness
+        self.start_stop_button.setMaximumWidth(120)  # Maximum width for responsiveness
         self.start_stop_button.clicked.connect(self.start_stop_toggle)
 
         # Add sections to main layout with responsive behavior
@@ -523,30 +528,37 @@ class PySideUI(QMainWindow):
 
         # Add performance view
         from ui.views.performance_view import create_performance_view
+
         self.stacked_widget.addWidget(create_performance_view(self))
 
         # Add analytics view
         from ui.views.analytics_view import create_analytics_view
+
         self.stacked_widget.addWidget(create_analytics_view(self))
 
         # Add plugin view
         from ui.views.plugin_view import create_plugin_view
+
         self.stacked_widget.addWidget(create_plugin_view(self))
 
         # Add protocol view
         from ui.views.protocol_view import create_protocol_view
+
         self.stacked_widget.addWidget(create_protocol_view(self))
 
         # Add traffic view
         from ui.views.traffic_view import create_traffic_view
+
         self.stacked_widget.addWidget(create_traffic_view(self))
 
         # Add ML view
         from ui.views.ml_view import create_ml_view
+
         self.stacked_widget.addWidget(create_ml_view(self))
 
         # Add Zero-Trust view
         from ui.views.zero_trust_view import create_zero_trust_view
+
         self.stacked_widget.addWidget(create_zero_trust_view(self))
 
         self.stacked_widget.addWidget(create_settings_view(self))
@@ -595,8 +607,7 @@ This action cannot be undone."""
                 )
             except OSError as e:
                 self.log(
-                    self.tr("Failed to delete log file: {}").format(
-                        e), LogLevel.ERROR
+                    self.tr("Failed to delete log file: {}").format(e), LogLevel.ERROR
                 )
 
     def _validate_and_save_setting(
@@ -738,6 +749,7 @@ This action cannot be undone."""
 
                 # Create a new layout
                 from PySide6.QtWidgets import QHBoxLayout
+
                 new_layout = QHBoxLayout(central_widget)
                 new_layout.setContentsMargins(0, 0, 0, 0)
                 new_layout.setSpacing(0)
@@ -776,6 +788,7 @@ This action cannot be undone."""
         except Exception as e:
             print(f"Layout recreation error: {e}")
             import traceback
+
             traceback.print_exc()
 
     def on_core_change(self, core_name):
@@ -815,16 +828,13 @@ This action cannot be undone."""
         # Health Check Settings
         if hasattr(self, "health_check_interval_combo"):
             interval_text = self.health_check_interval_combo.currentText()
-            self.settings["health_check_interval"] = int(
-                interval_text.split()[0])
+            self.settings["health_check_interval"] = int(interval_text.split()[0])
         if hasattr(self, "health_check_ema_combo"):
             ema_text = self.health_check_ema_combo.currentText()
-            self.settings["health_check_ema_alpha"] = float(
-                ema_text.split()[0])
+            self.settings["health_check_ema_alpha"] = float(ema_text.split()[0])
         if hasattr(self, "health_check_backoff_combo"):
             backoff_text = self.health_check_backoff_combo.currentText()
-            self.settings["health_check_backoff_base"] = int(
-                backoff_text.split()[0])
+            self.settings["health_check_backoff_base"] = int(backoff_text.split()[0])
         if hasattr(self, "health_check_auto_start"):
             self.settings["health_check_auto_start"] = (
                 self.health_check_auto_start.isChecked()
@@ -861,7 +871,9 @@ This action cannot be undone."""
             if self.settings.get("language") in rtl_languages:
                 app.setLayoutDirection(Qt.RightToLeft)
                 # Apply RTL-specific styling to the entire application
-                app.setStyleSheet(app.styleSheet() + """
+                app.setStyleSheet(
+                    app.styleSheet()
+                    + """
                     QWidget {
                         
                     }
@@ -889,11 +901,14 @@ This action cannot be undone."""
                     QTableWidget {
                         
                     }
-                """)
+                """
+                )
             else:
                 app.setLayoutDirection(Qt.LeftToRight)
                 # Apply LTR-specific styling to the entire application
-                app.setStyleSheet(app.styleSheet() + """
+                app.setStyleSheet(
+                    app.styleSheet()
+                    + """
                     QWidget {
                         
                     }
@@ -921,7 +936,8 @@ This action cannot be undone."""
                     QTableWidget {
                         
                     }
-                """)
+                """
+                )
 
         # Validate and save numeric/range settings
         if not self._validate_and_save_setting(
@@ -1002,8 +1018,7 @@ This action cannot be undone."""
                 self.connection_timeout_entry.text()
             )
         if hasattr(self, "retry_attempts_entry"):
-            self.settings["retry_attempts"] = int(
-                self.retry_attempts_entry.text())
+            self.settings["retry_attempts"] = int(self.retry_attempts_entry.text())
         if hasattr(self, "keep_alive_checkbox"):
             self.settings["keep_alive"] = self.keep_alive_checkbox.isChecked()
 
@@ -1013,8 +1028,7 @@ This action cannot be undone."""
                 self.connection_pool_size_entry.text()
             )
         if hasattr(self, "thread_pool_size_entry"):
-            self.settings["thread_pool_size"] = int(
-                self.thread_pool_size_entry.text())
+            self.settings["thread_pool_size"] = int(self.thread_pool_size_entry.text())
         if hasattr(self, "buffer_size_entry"):
             self.settings["buffer_size"] = int(self.buffer_size_entry.text())
         if hasattr(self, "bandwidth_limit_checkbox"):
@@ -1143,7 +1157,9 @@ This action cannot be undone."""
             if self.settings.get("language") in rtl_languages:
                 app.setLayoutDirection(Qt.RightToLeft)
                 # Apply RTL-specific styling to the entire application
-                app.setStyleSheet(app.styleSheet() + """
+                app.setStyleSheet(
+                    app.styleSheet()
+                    + """
                     QWidget {
                         
                     }
@@ -1171,11 +1187,14 @@ This action cannot be undone."""
                     QTableWidget {
                         
                     }
-                """)
+                """
+                )
             else:
                 app.setLayoutDirection(Qt.LeftToRight)
                 # Apply LTR-specific styling to the entire application
-                app.setStyleSheet(app.styleSheet() + """
+                app.setStyleSheet(
+                    app.styleSheet()
+                    + """
                     QWidget {
                         
                     }
@@ -1203,7 +1222,8 @@ This action cannot be undone."""
                     QTableWidget {
                         
                     }
-                """)
+                """
+                )
 
     def recreate_layout_for_language(self, lang_code):
         """Recreate the main layout based on language direction."""
@@ -1394,8 +1414,7 @@ This action cannot be undone."""
                 QMessageBox.information(
                     self,
                     self.tr("Export Successful"),
-                    self.tr("Profile successfully exported to:\n{}").format(
-                        file_path),
+                    self.tr("Profile successfully exported to:\n{}").format(file_path),
                 )
 
     def _run_update_check(self):
@@ -1496,12 +1515,11 @@ This action cannot be undone."""
             for group_name, servers in self.server_manager.server_groups.items():
                 for server in servers:
                     server_copy = server.copy()
-                    server_copy['group'] = group_name
+                    server_copy["group"] = group_name
                     all_servers.append(server_copy)
 
             if not all_servers:
-                self.log("No servers available for smart selection",
-                         LogLevel.WARNING)
+                self.log("No servers available for smart selection", LogLevel.WARNING)
                 return
 
             # Use smart selector to find best server
@@ -1513,30 +1531,34 @@ This action cannot be undone."""
 
             # Update server metrics based on current ping results
             for server in all_servers:
-                server_id = server.get('id', server.get('name', ''))
-                if hasattr(self.server_manager, 'ping_results') and server_id in self.server_manager.ping_results:
+                server_id = server.get("id", server.get("name", ""))
+                if (
+                    hasattr(self.server_manager, "ping_results")
+                    and server_id in self.server_manager.ping_results
+                ):
                     ping_result = self.server_manager.ping_results[server_id]
                     metrics = {
-                        'ping': ping_result.get('ping', 0),
-                        'success': ping_result.get('success', False)
+                        "ping": ping_result.get("ping", 0),
+                        "success": ping_result.get("success", False),
                     }
-                    self.smart_selector.update_server_metrics(
-                        server_id, metrics)
+                    self.smart_selector.update_server_metrics(server_id, metrics)
 
             # Connect to the best server
             self.log(
-                f"Connecting to best server: {best_server.get('name', 'Unknown')}", LogLevel.INFO)
+                f"Connecting to best server: {best_server.get('name', 'Unknown')}",
+                LogLevel.INFO,
+            )
 
             # Find the server in the UI and select it
             for i in range(self.server_list.count()):
                 item = self.server_list.item(i)
-                if item and hasattr(item, 'server_data'):
+                if item and hasattr(item, "server_data"):
                     if item.server_data == best_server:
                         self.server_list.setCurrentItem(item)
                         break
 
             # Trigger connection
-            if hasattr(self, 'connect_button') and self.connect_button.isEnabled():
+            if hasattr(self, "connect_button") and self.connect_button.isEnabled():
                 self.connect_button.click()
 
             # Update selection result after a delay
@@ -1544,13 +1566,16 @@ This action cannot be undone."""
 
             def update_result():
                 import time
+
                 time.sleep(5)  # Wait 5 seconds
                 # Check if connection was successful
-                success = self.singbox_manager.is_running if hasattr(
-                    self.singbox_manager, 'is_running') else False
+                success = (
+                    self.singbox_manager.is_running
+                    if hasattr(self.singbox_manager, "is_running")
+                    else False
+                )
                 self.smart_selector.update_selection_result(
-                    best_server.get('id', best_server.get('name', '')),
-                    success
+                    best_server.get("id", best_server.get("name", "")), success
                 )
 
             threading.Thread(target=update_result, daemon=True).start()
@@ -1588,8 +1613,7 @@ This action cannot be undone."""
                 link = decoded_objects[0].data.decode("utf-8")
                 self.server_manager.add_manual_server(link)
             else:
-                self.log(self.tr("No QR code found on the screen."),
-                         LogLevel.WARNING)
+                self.log(self.tr("No QR code found on the screen."), LogLevel.WARNING)
         finally:
             # Ensure the window is shown again and the button is re-enabled
             QTimer.singleShot(0, self.show_window)
@@ -1620,8 +1644,7 @@ This action cannot be undone."""
 
         if not visible_servers:
             self.log(
-                self.tr(
-                    "Could not retrieve server data from the list."), LogLevel.ERROR
+                self.tr("Could not retrieve server data from the list."), LogLevel.ERROR
             )
             return
 
@@ -1637,8 +1660,7 @@ This action cannot be undone."""
             QMessageBox.information(
                 self,
                 self.tr("Copy Successful"),
-                self.tr("Copied {} server link(s) to clipboard.").format(
-                    len(links)),
+                self.tr("Copied {} server link(s) to clipboard.").format(len(links)),
             )
         else:
             QMessageBox.warning(
@@ -1691,8 +1713,7 @@ This action cannot be undone."""
             # User is in a subscription group, update just this one
             if sub_to_update.get("enabled", True):
                 subs_to_process = [sub_to_update]
-                self.log(
-                    f"Updating current subscription group: {current_group}...")
+                self.log(f"Updating current subscription group: {current_group}...")
             else:
                 self.log(
                     f"Subscription '{current_group}' is disabled. Please enable it in the Subscription Manager.",
@@ -1702,13 +1723,11 @@ This action cannot be undone."""
         else:
             # User is not in a subscription group, or group name doesn't match.
             # Fallback to original behavior: update all enabled subs.
-            subs_to_process = [
-                sub for sub in all_subs if sub.get("enabled", True)]
+            subs_to_process = [sub for sub in all_subs if sub.get("enabled", True)]
             self.log("Updating all enabled subscriptions...")
 
         if not subs_to_process:
-            self.log(self.tr("No enabled subscriptions to update."),
-                     LogLevel.WARNING)
+            self.log(self.tr("No enabled subscriptions to update."), LogLevel.WARNING)
             return
 
         # Use the new subscription manager
@@ -1752,8 +1771,7 @@ This action cannot be undone."""
         self.routing_table.setRowCount(len(rules))
 
         for row_index, rule in enumerate(rules):
-            self.routing_table.setItem(
-                row_index, 0, QTableWidgetItem(rule.get("type")))
+            self.routing_table.setItem(row_index, 0, QTableWidgetItem(rule.get("type")))
             self.routing_table.setItem(
                 row_index, 1, QTableWidgetItem(rule.get("value"))
             )
@@ -1776,8 +1794,7 @@ This action cannot be undone."""
 
             delete_button = QPushButton("Delete")
             delete_button.setStyleSheet("background-color: #F44336;")
-            delete_button.clicked.connect(
-                lambda _, r=row_index: self.delete_rule(r))
+            delete_button.clicked.connect(lambda _, r=row_index: self.delete_rule(r))
 
             actions_layout.addWidget(edit_button)
             actions_layout.addWidget(delete_button)
@@ -1807,13 +1824,11 @@ This action cannot be undone."""
             if rule_to_edit is not None and index is not None:
                 # Editing existing rule
                 rules[index] = new_rule_data
-                self.log(self.tr("Rule updated: {}").format(
-                    new_rule_data["value"]))
+                self.log(self.tr("Rule updated: {}").format(new_rule_data["value"]))
             else:
                 # Adding new rule
                 rules.append(new_rule_data)
-                self.log(self.tr("Rule added: {}").format(
-                    new_rule_data["value"]))
+                self.log(self.tr("Rule added: {}").format(new_rule_data["value"]))
 
             self.settings["custom_routing_rules"] = rules
             self.save_settings()
@@ -1832,8 +1847,7 @@ This action cannot be undone."""
             )
             if reply == QMessageBox.Yes:
                 deleted_rule = rules.pop(index)
-                self.log(self.tr("Rule deleted: {}").format(
-                    deleted_rule["value"]))
+                self.log(self.tr("Rule deleted: {}").format(deleted_rule["value"]))
                 self.save_settings()
                 self.update_routing_table()
 
@@ -1844,15 +1858,12 @@ This action cannot be undone."""
             current_group = self.group_dropdown.currentText()
             if not current_group:
                 self.health_check_tcp_button.setChecked(False)
-                self.log("No group selected for TCP health checking",
-                         LogLevel.WARNING)
+                self.log("No group selected for TCP health checking", LogLevel.WARNING)
                 return
 
             self.server_manager.start_health_check(current_group, ["tcp"])
-            self.health_check_tcp_button.setText(
-                self.tr("Stop TCP Health Check"))
-            self.health_check_tcp_button.setStyleSheet(
-                "background-color: #F44336;")
+            self.health_check_tcp_button.setText(self.tr("Stop TCP Health Check"))
+            self.health_check_tcp_button.setStyleSheet("background-color: #F44336;")
             self.health_check_progress.setVisible(True)
             self.health_check_progress.setValue(0)
             self.log(
@@ -1873,15 +1884,12 @@ This action cannot be undone."""
             current_group = self.group_dropdown.currentText()
             if not current_group:
                 self.health_check_url_button.setChecked(False)
-                self.log("No group selected for URL health checking",
-                         LogLevel.WARNING)
+                self.log("No group selected for URL health checking", LogLevel.WARNING)
                 return
 
             self.server_manager.start_health_check(current_group, ["url"])
-            self.health_check_url_button.setText(
-                self.tr("Stop URL Health Check"))
-            self.health_check_url_button.setStyleSheet(
-                "background-color: #F44336;")
+            self.health_check_url_button.setText(self.tr("Stop URL Health Check"))
+            self.health_check_url_button.setStyleSheet("background-color: #F44336;")
             self.health_check_progress.setVisible(True)
             self.health_check_progress.setValue(0)
             self.log(
@@ -1959,8 +1967,7 @@ This action cannot be undone."""
                 server_id = server.get("id")
                 if server_id:
                     health_stats[server_id] = (
-                        self.server_manager._health_checker.get_server_stats(
-                            server_id)
+                        self.server_manager._health_checker.get_server_stats(server_id)
                     )
 
         dialog = ExportDialog(self, servers, health_stats)
@@ -1971,8 +1978,7 @@ This action cannot be undone."""
         if hasattr(self, "health_check_progress"):
             percentage = int((current / total) * 100) if total > 0 else 0
             self.health_check_progress.setValue(percentage)
-            self.health_check_progress.setFormat(
-                f"{current}/{total} ({percentage}%)")
+            self.health_check_progress.setFormat(f"{current}/{total} ({percentage}%)")
 
     def start_stop_toggle(self):
         if self.singbox_manager.is_running:
@@ -1981,18 +1987,15 @@ This action cannot be undone."""
             # Reset health check button states
             if hasattr(self, "health_check_tcp_button"):
                 self.health_check_tcp_button.setChecked(False)
-                self.health_check_tcp_button.setText(
-                    self.tr("Health Check TCP"))
+                self.health_check_tcp_button.setText(self.tr("Health Check TCP"))
                 self.health_check_tcp_button.setStyleSheet("")
             if hasattr(self, "health_check_url_button"):
                 self.health_check_url_button.setChecked(False)
-                self.health_check_url_button.setText(
-                    self.tr("Health Check URL"))
+                self.health_check_url_button.setText(self.tr("Health Check URL"))
                 self.health_check_url_button.setStyleSheet("")
             if hasattr(self, "health_check_progress"):
                 self.health_check_progress.setVisible(False)
-            threading.Thread(target=self.singbox_manager.stop,
-                             daemon=True).start()
+            threading.Thread(target=self.singbox_manager.stop, daemon=True).start()
         else:
             if self.selected_config:
                 # The start method already runs in a background thread.
@@ -2004,8 +2007,7 @@ This action cannot be undone."""
     def handle_server_action(self, action, server_data):
         if action == "ping_url":
             self.log(
-                self.tr("Latency testing server: {}").format(
-                    server_data.get("name"))
+                self.tr("Latency testing server: {}").format(server_data.get("name"))
             )
             threading.Thread(
                 target=self.server_manager.test_all_urls,
@@ -2014,8 +2016,7 @@ This action cannot be undone."""
             ).start()
         elif action == "ping_tcp":
             self.log(
-                self.tr("Latency testing server: {}").format(
-                    server_data.get("name"))
+                self.tr("Latency testing server: {}").format(server_data.get("name"))
             )
             threading.Thread(
                 target=self.server_manager.test_all_tcp,
@@ -2041,8 +2042,7 @@ This action cannot be undone."""
             dialog = ServerEditDialog(self, server_config=server_data)
             if dialog.exec() == QDialog.Accepted:
                 updated_config = dialog.get_updated_config()
-                self.server_manager.edit_server_config(
-                    server_data, updated_config)
+                self.server_manager.edit_server_config(server_data, updated_config)
                 self.update_server_list()
         elif action == "copy_link":
             server_link = self.server_manager.get_server_link(server_data)
@@ -2064,8 +2064,7 @@ This action cannot be undone."""
         elif action == "qr_code":
             server_link = self.server_manager.get_server_link(server_data)
             if server_link:
-                dialog = QRCodeDialog(
-                    server_link, server_data.get("name"), self)
+                dialog = QRCodeDialog(server_link, server_data.get("name"), self)
                 dialog.exec()
             else:
                 QMessageBox.warning(
@@ -2105,8 +2104,7 @@ This action cannot be undone."""
         menu = QMenu()
 
         # Standard "Copy" action for selected text
-        copy_action = menu.addAction(
-            QIcon(":/icons/copy.svg"), self.tr("Copy"))
+        copy_action = menu.addAction(QIcon(":/icons/copy.svg"), self.tr("Copy"))
         copy_action.triggered.connect(self.log_view.copy)
         # Disable if no text is selected
         copy_action.setEnabled(self.log_view.textCursor().hasSelection())
@@ -2162,8 +2160,7 @@ This action cannot be undone."""
 
             if level_enabled:
                 # Use HTML to set the color of the appended text
-                self.log_view.append(
-                    f'<span style="color:{color};">{message}</span>')
+                self.log_view.append(f'<span style="color:{color};">{message}</span>')
 
         self.all_logs.append((message, level))
 
@@ -2185,8 +2182,7 @@ This action cannot be undone."""
                 color = self.log_level_colors.get(
                     level, self.log_level_colors[LogLevel.INFO]
                 )
-                self.log_view.append(
-                    f'<span style="color:{color};">{message}</span>')
+                self.log_view.append(f'<span style="color:{color};">{message}</span>')
 
     def _get_available_groups(self):
         """Returns a list of available groups, including a special one for chains."""
@@ -2221,8 +2217,7 @@ This action cannot be undone."""
             # Chains don't need sorting
         else:
             self.current_view_mode = "servers"
-            items_to_display = self.server_manager.get_servers_by_group(
-                selected_group)
+            items_to_display = self.server_manager.get_servers_by_group(selected_group)
 
         # --- Manual Sorting ---
         if self.current_view_mode == "servers":
@@ -2256,8 +2251,7 @@ This action cannot be undone."""
         if card:
             self.selected_config = card.server_data
             self.log(
-                self.tr("Selected server: {}").format(
-                    self.selected_config.get("name"))
+                self.tr("Selected server: {}").format(self.selected_config.get("name"))
             )
             # self._update_details_panel(self.selected_config)
 
@@ -2426,8 +2420,7 @@ This action cannot be undone."""
                 QMessageBox.information(
                     self,
                     self.tr("Duplicates Removed"),
-                    self.tr("Removed {} duplicate server(s).").format(
-                        removed_count),
+                    self.tr("Removed {} duplicate server(s).").format(removed_count),
                 )
             else:
                 QMessageBox.information(
@@ -2738,23 +2731,23 @@ This action cannot be undone."""
             self.server_manager.force_save_settings()
 
         # Cleanup plugin manager
-        if hasattr(self, 'plugin_manager'):
+        if hasattr(self, "plugin_manager"):
             self.plugin_manager.cleanup_all()
 
         # Cleanup protocol manager
-        if hasattr(self, 'protocol_manager'):
+        if hasattr(self, "protocol_manager"):
             self.protocol_manager.cleanup()
 
         # Cleanup traffic service
-        if hasattr(self, 'traffic_service'):
+        if hasattr(self, "traffic_service"):
             self.traffic_service.cleanup()
 
         # Cleanup ML service
-        if hasattr(self, 'ml_service'):
+        if hasattr(self, "ml_service"):
             self.ml_service.cleanup()
 
         # Cleanup Zero-Trust service
-        if hasattr(self, 'zero_trust_service'):
+        if hasattr(self, "zero_trust_service"):
             self.zero_trust_service.cleanup()
 
         self.save_window_geometry()
@@ -2790,8 +2783,7 @@ This action cannot be undone."""
         geometry_b64 = self.settings.get("window_geometry")
         if geometry_b64:
             # Convert base64 string back to QByteArray
-            self.restoreGeometry(QByteArray.fromBase64(
-                geometry_b64.encode("ascii")))
+            self.restoreGeometry(QByteArray.fromBase64(geometry_b64.encode("ascii")))
 
         if self.settings.get("window_maximized", False):
             self.showMaximized()

@@ -14,6 +14,7 @@ from constants import LogLevel
 
 class UserRole(Enum):
     """User roles in the system."""
+
     SUPER_ADMIN = "super_admin"
     ADMIN = "admin"
     MANAGER = "manager"
@@ -23,6 +24,7 @@ class UserRole(Enum):
 
 class Permission(Enum):
     """System permissions."""
+
     # Server management
     MANAGE_SERVERS = "manage_servers"
     VIEW_SERVERS = "view_servers"
@@ -52,6 +54,7 @@ class Permission(Enum):
 @dataclass
 class User:
     """User entity."""
+
     id: str
     username: str
     email: str
@@ -66,6 +69,7 @@ class User:
 @dataclass
 class Tenant:
     """Tenant entity for multi-tenancy."""
+
     id: str
     name: str
     domain: str
@@ -79,6 +83,7 @@ class Tenant:
 @dataclass
 class AuditLog:
     """Audit log entry."""
+
     id: str
     user_id: str
     tenant_id: str
@@ -94,38 +99,46 @@ class RoleBasedAccessControl:
     """Role-Based Access Control system."""
 
     def __init__(self, log_callback: Optional[Callable[[str, LogLevel], None]] = None):
-        self.log = log_callback or (
-            lambda msg, level: print(f"[{level}] {msg}"))
+        self.log = log_callback or (lambda msg, level: print(f"[{level}] {msg}"))
         self.users: Dict[str, User] = {}
         self.roles_permissions: Dict[UserRole, Set[Permission]] = {
             UserRole.SUPER_ADMIN: set(Permission),
             UserRole.ADMIN: {
-                Permission.MANAGE_SERVERS, Permission.VIEW_SERVERS, Permission.CONNECT_SERVERS,
-                Permission.MANAGE_USERS, Permission.VIEW_USERS,
-                Permission.VIEW_ANALYTICS, Permission.EXPORT_ANALYTICS,
-                Permission.MANAGE_SETTINGS, Permission.VIEW_SETTINGS,
-                Permission.MANAGE_PLUGINS, Permission.INSTALL_PLUGINS,
-                Permission.MANAGE_SECURITY, Permission.VIEW_SECURITY_LOGS
+                Permission.MANAGE_SERVERS,
+                Permission.VIEW_SERVERS,
+                Permission.CONNECT_SERVERS,
+                Permission.MANAGE_USERS,
+                Permission.VIEW_USERS,
+                Permission.VIEW_ANALYTICS,
+                Permission.EXPORT_ANALYTICS,
+                Permission.MANAGE_SETTINGS,
+                Permission.VIEW_SETTINGS,
+                Permission.MANAGE_PLUGINS,
+                Permission.INSTALL_PLUGINS,
+                Permission.MANAGE_SECURITY,
+                Permission.VIEW_SECURITY_LOGS,
             },
             UserRole.MANAGER: {
-                Permission.VIEW_SERVERS, Permission.CONNECT_SERVERS,
+                Permission.VIEW_SERVERS,
+                Permission.CONNECT_SERVERS,
                 Permission.VIEW_USERS,
-                Permission.VIEW_ANALYTICS, Permission.EXPORT_ANALYTICS,
+                Permission.VIEW_ANALYTICS,
+                Permission.EXPORT_ANALYTICS,
                 Permission.VIEW_SETTINGS,
-                Permission.VIEW_SECURITY_LOGS
+                Permission.VIEW_SECURITY_LOGS,
             },
             UserRole.USER: {
-                Permission.VIEW_SERVERS, Permission.CONNECT_SERVERS,
-                Permission.VIEW_ANALYTICS
+                Permission.VIEW_SERVERS,
+                Permission.CONNECT_SERVERS,
+                Permission.VIEW_ANALYTICS,
             },
-            UserRole.GUEST: {
-                Permission.VIEW_SERVERS
-            }
+            UserRole.GUEST: {Permission.VIEW_SERVERS},
         }
         self._lock = threading.Lock()
 
-    def create_user(self, username: str, email: str, role: UserRole,
-                    tenant_id: str = "default") -> Optional[User]:
+    def create_user(
+        self, username: str, email: str, role: UserRole, tenant_id: str = "default"
+    ) -> Optional[User]:
         """Create a new user."""
         try:
             with self._lock:
@@ -139,12 +152,13 @@ class RoleBasedAccessControl:
                     role=role,
                     permissions=permissions,
                     created_at=time.time(),
-                    tenant_id=tenant_id
+                    tenant_id=tenant_id,
                 )
 
                 self.users[user_id] = user
                 self.log(
-                    f"Created user: {username} with role {role.value}", LogLevel.INFO)
+                    f"Created user: {username} with role {role.value}", LogLevel.INFO
+                )
                 return user
 
         except Exception as e:
@@ -174,7 +188,9 @@ class RoleBasedAccessControl:
                 user.permissions = self.roles_permissions.get(new_role, set())
 
                 self.log(
-                    f"Updated user {user.username} role to {new_role.value}", LogLevel.INFO)
+                    f"Updated user {user.username} role to {new_role.value}",
+                    LogLevel.INFO,
+                )
                 return True
 
         except Exception as e:
@@ -215,7 +231,8 @@ class RoleBasedAccessControl:
 
                 self.users[user_id].is_active = False
                 self.log(
-                    f"Deactivated user: {self.users[user_id].username}", LogLevel.INFO)
+                    f"Deactivated user: {self.users[user_id].username}", LogLevel.INFO
+                )
                 return True
 
         except Exception as e:
@@ -227,8 +244,7 @@ class MultiTenantManager:
     """Multi-tenant management system."""
 
     def __init__(self, log_callback: Optional[Callable[[str, LogLevel], None]] = None):
-        self.log = log_callback or (
-            lambda msg, level: print(f"[{level}] {msg}"))
+        self.log = log_callback or (lambda msg, level: print(f"[{level}] {msg}"))
         self.tenants: Dict[str, Tenant] = {}
         self.tenant_resources: Dict[str, Dict[str, Any]] = {}
         self._lock = threading.Lock()
@@ -244,17 +260,19 @@ class MultiTenantManager:
             domain="localhost",
             max_users=1000,
             max_servers=100,
-            features={"all"}
+            features={"all"},
         )
         self.tenants["default"] = default_tenant
-        self.tenant_resources["default"] = {
-            "servers": [],
-            "users": [],
-            "settings": {}
-        }
+        self.tenant_resources["default"] = {"servers": [], "users": [], "settings": {}}
 
-    def create_tenant(self, name: str, domain: str, max_users: int = 100,
-                      max_servers: int = 50, features: Set[str] = None) -> Optional[Tenant]:
+    def create_tenant(
+        self,
+        name: str,
+        domain: str,
+        max_users: int = 100,
+        max_servers: int = 50,
+        features: Set[str] = None,
+    ) -> Optional[Tenant]:
         """Create a new tenant."""
         try:
             with self._lock:
@@ -266,14 +284,14 @@ class MultiTenantManager:
                     max_users=max_users,
                     max_servers=max_servers,
                     features=features or {"basic"},
-                    created_at=time.time()
+                    created_at=time.time(),
                 )
 
                 self.tenants[tenant_id] = tenant
                 self.tenant_resources[tenant_id] = {
                     "servers": [],
                     "users": [],
-                    "settings": {}
+                    "settings": {},
                 }
 
                 self.log(f"Created tenant: {name} ({domain})", LogLevel.INFO)
@@ -294,7 +312,9 @@ class MultiTenantManager:
                 return tenant
         return None
 
-    def add_resource_to_tenant(self, tenant_id: str, resource_type: str, resource_id: str) -> bool:
+    def add_resource_to_tenant(
+        self, tenant_id: str, resource_type: str, resource_id: str
+    ) -> bool:
         """Add resource to tenant."""
         try:
             with self._lock:
@@ -305,8 +325,7 @@ class MultiTenantManager:
                     self.tenant_resources[tenant_id][resource_type] = []
 
                 if resource_id not in self.tenant_resources[tenant_id][resource_type]:
-                    self.tenant_resources[tenant_id][resource_type].append(
-                        resource_id)
+                    self.tenant_resources[tenant_id][resource_type].append(resource_id)
 
                 return True
 
@@ -314,7 +333,9 @@ class MultiTenantManager:
             self.log(f"Error adding resource to tenant: {e}", LogLevel.ERROR)
             return False
 
-    def get_tenant_resources(self, tenant_id: str, resource_type: str = None) -> Dict[str, Any]:
+    def get_tenant_resources(
+        self, tenant_id: str, resource_type: str = None
+    ) -> Dict[str, Any]:
         """Get tenant resources."""
         try:
             resources = self.tenant_resources.get(tenant_id, {})
@@ -352,15 +373,21 @@ class AuditLogger:
     """Audit logging system."""
 
     def __init__(self, log_callback: Optional[Callable[[str, LogLevel], None]] = None):
-        self.log = log_callback or (
-            lambda msg, level: print(f"[{level}] {msg}"))
+        self.log = log_callback or (lambda msg, level: print(f"[{level}] {msg}"))
         self.audit_logs: List[AuditLog] = []
         self._lock = threading.Lock()
         self.max_logs = 10000  # Keep last 10k logs
 
-    def log_action(self, user_id: str, tenant_id: str, action: str,
-                   resource: str, details: Dict[str, Any] = None,
-                   ip_address: str = "", user_agent: str = "") -> str:
+    def log_action(
+        self,
+        user_id: str,
+        tenant_id: str,
+        action: str,
+        resource: str,
+        details: Dict[str, Any] = None,
+        ip_address: str = "",
+        user_agent: str = "",
+    ) -> str:
         """Log an action."""
         try:
             with self._lock:
@@ -374,25 +401,31 @@ class AuditLogger:
                     details=details or {},
                     timestamp=time.time(),
                     ip_address=ip_address,
-                    user_agent=user_agent
+                    user_agent=user_agent,
                 )
 
                 self.audit_logs.append(audit_log)
 
                 # Keep only recent logs
                 if len(self.audit_logs) > self.max_logs:
-                    self.audit_logs = self.audit_logs[-self.max_logs:]
+                    self.audit_logs = self.audit_logs[-self.max_logs :]
 
                 self.log(
-                    f"Audit log: {action} on {resource} by {user_id}", LogLevel.INFO)
+                    f"Audit log: {action} on {resource} by {user_id}", LogLevel.INFO
+                )
                 return log_id
 
         except Exception as e:
             self.log(f"Error logging action: {e}", LogLevel.ERROR)
             return ""
 
-    def get_audit_logs(self, user_id: str = None, tenant_id: str = None,
-                       action: str = None, limit: int = 100) -> List[AuditLog]:
+    def get_audit_logs(
+        self,
+        user_id: str = None,
+        tenant_id: str = None,
+        action: str = None,
+        limit: int = 100,
+    ) -> List[AuditLog]:
         """Get audit logs with optional filters."""
         try:
             with self._lock:
@@ -415,7 +448,9 @@ class AuditLogger:
             self.log(f"Error getting audit logs: {e}", LogLevel.ERROR)
             return []
 
-    def export_audit_logs(self, start_time: float = None, end_time: float = None) -> List[Dict[str, Any]]:
+    def export_audit_logs(
+        self, start_time: float = None, end_time: float = None
+    ) -> List[Dict[str, Any]]:
         """Export audit logs for compliance."""
         try:
             with self._lock:
@@ -430,17 +465,19 @@ class AuditLogger:
                 # Convert to dictionaries for export
                 export_data = []
                 for log in logs:
-                    export_data.append({
-                        "id": log.id,
-                        "user_id": log.user_id,
-                        "tenant_id": log.tenant_id,
-                        "action": log.action,
-                        "resource": log.resource,
-                        "details": log.details,
-                        "timestamp": log.timestamp,
-                        "ip_address": log.ip_address,
-                        "user_agent": log.user_agent
-                    })
+                    export_data.append(
+                        {
+                            "id": log.id,
+                            "user_id": log.user_id,
+                            "tenant_id": log.tenant_id,
+                            "action": log.action,
+                            "resource": log.resource,
+                            "details": log.details,
+                            "timestamp": log.timestamp,
+                            "ip_address": log.ip_address,
+                            "user_agent": log.user_agent,
+                        }
+                    )
 
                 return export_data
 
@@ -452,12 +489,17 @@ class AuditLogger:
 class ComplianceReporter:
     """Compliance reporting system."""
 
-    def __init__(self, audit_logger: AuditLogger, log_callback: Optional[Callable[[str, LogLevel], None]] = None):
-        self.log = log_callback or (
-            lambda msg, level: print(f"[{level}] {msg}"))
+    def __init__(
+        self,
+        audit_logger: AuditLogger,
+        log_callback: Optional[Callable[[str, LogLevel], None]] = None,
+    ):
+        self.log = log_callback or (lambda msg, level: print(f"[{level}] {msg}"))
         self.audit_logger = audit_logger
 
-    def generate_security_report(self, tenant_id: str, days: int = 30) -> Dict[str, Any]:
+    def generate_security_report(
+        self, tenant_id: str, days: int = 30
+    ) -> Dict[str, Any]:
         """Generate security compliance report."""
         try:
             end_time = time.time()
@@ -465,30 +507,30 @@ class ComplianceReporter:
 
             logs = self.audit_logger.get_audit_logs(tenant_id=tenant_id)
             filtered_logs = [
-                log for log in logs if start_time <= log.timestamp <= end_time]
+                log for log in logs if start_time <= log.timestamp <= end_time
+            ]
 
             # Analyze security events
             security_events = [
-                log for log in filtered_logs if "security" in log.action.lower()]
+                log for log in filtered_logs if "security" in log.action.lower()
+            ]
             failed_logins = [
-                log for log in filtered_logs if log.action == "login_failed"]
+                log for log in filtered_logs if log.action == "login_failed"
+            ]
             admin_actions = [
-                log for log in filtered_logs if "admin" in log.action.lower()]
+                log for log in filtered_logs if "admin" in log.action.lower()
+            ]
 
             report = {
-                "period": {
-                    "start": start_time,
-                    "end": end_time,
-                    "days": days
-                },
+                "period": {"start": start_time, "end": end_time, "days": days},
                 "summary": {
                     "total_events": len(filtered_logs),
                     "security_events": len(security_events),
                     "failed_logins": len(failed_logins),
-                    "admin_actions": len(admin_actions)
+                    "admin_actions": len(admin_actions),
                 },
                 "compliance_score": self._calculate_compliance_score(filtered_logs),
-                "recommendations": self._generate_recommendations(filtered_logs)
+                "recommendations": self._generate_recommendations(filtered_logs),
             }
 
             return report
@@ -507,18 +549,17 @@ class ComplianceReporter:
             score = 100.0
 
             # Deduct points for security issues
-            security_issues = [
-                log for log in logs if "security" in log.action.lower()]
+            security_issues = [log for log in logs if "security" in log.action.lower()]
             score -= len(security_issues) * 2
 
             # Deduct points for failed logins
-            failed_logins = [
-                log for log in logs if log.action == "login_failed"]
+            failed_logins = [log for log in logs if log.action == "login_failed"]
             score -= len(failed_logins) * 0.5
 
             # Deduct points for suspicious activities
             suspicious = [
-                log for log in logs if "suspicious" in log.details.get("reason", "")]
+                log for log in logs if "suspicious" in log.details.get("reason", "")
+            ]
             score -= len(suspicious) * 5
 
             return max(0.0, min(100.0, score))
@@ -532,25 +573,25 @@ class ComplianceReporter:
 
         try:
             # Check for failed logins
-            failed_logins = [
-                log for log in logs if log.action == "login_failed"]
+            failed_logins = [log for log in logs if log.action == "login_failed"]
             if len(failed_logins) > 10:
                 recommendations.append(
-                    "High number of failed login attempts detected. Consider implementing account lockout policy.")
+                    "High number of failed login attempts detected. Consider implementing account lockout policy."
+                )
 
             # Check for admin actions
-            admin_actions = [
-                log for log in logs if "admin" in log.action.lower()]
+            admin_actions = [log for log in logs if "admin" in log.action.lower()]
             if len(admin_actions) > 50:
                 recommendations.append(
-                    "High number of admin actions. Consider implementing additional approval workflows.")
+                    "High number of admin actions. Consider implementing additional approval workflows."
+                )
 
             # Check for security events
-            security_events = [
-                log for log in logs if "security" in log.action.lower()]
+            security_events = [log for log in logs if "security" in log.action.lower()]
             if len(security_events) > 5:
                 recommendations.append(
-                    "Multiple security events detected. Review security policies and user training.")
+                    "Multiple security events detected. Review security policies and user training."
+                )
 
             return recommendations
 
@@ -563,22 +604,18 @@ class EnterpriseManager:
     """Main enterprise features manager."""
 
     def __init__(self, log_callback: Optional[Callable[[str, LogLevel], None]] = None):
-        self.log = log_callback or (
-            lambda msg, level: print(f"[{level}] {msg}"))
+        self.log = log_callback or (lambda msg, level: print(f"[{level}] {msg}"))
         self.rbac = RoleBasedAccessControl(log_callback)
         self.tenant_manager = MultiTenantManager(log_callback)
         self.audit_logger = AuditLogger(log_callback)
-        self.compliance_reporter = ComplianceReporter(
-            self.audit_logger, log_callback)
+        self.compliance_reporter = ComplianceReporter(self.audit_logger, log_callback)
 
     def initialize_enterprise(self) -> bool:
         """Initialize enterprise features."""
         try:
             # Create default admin user
             admin_user = self.rbac.create_user(
-                username="admin",
-                email="admin@onix.local",
-                role=UserRole.SUPER_ADMIN
+                username="admin", email="admin@onix.local", role=UserRole.SUPER_ADMIN
             )
 
             if admin_user:
@@ -587,24 +624,29 @@ class EnterpriseManager:
                     tenant_id="default",
                     action="system_initialized",
                     resource="enterprise_features",
-                    details={"admin_created": True}
+                    details={"admin_created": True},
                 )
 
             self.log("Enterprise features initialized", LogLevel.INFO)
             return True
 
         except Exception as e:
-            self.log(
-                f"Error initializing enterprise features: {e}", LogLevel.ERROR)
+            self.log(f"Error initializing enterprise features: {e}", LogLevel.ERROR)
             return False
 
     def check_access(self, user_id: str, permission: Permission) -> bool:
         """Check if user has access to a resource."""
         return self.rbac.has_permission(user_id, permission)
 
-    def log_user_action(self, user_id: str, action: str, resource: str,
-                        details: Dict[str, Any] = None, ip_address: str = "",
-                        user_agent: str = "") -> str:
+    def log_user_action(
+        self,
+        user_id: str,
+        action: str,
+        resource: str,
+        details: Dict[str, Any] = None,
+        ip_address: str = "",
+        user_agent: str = "",
+    ) -> str:
         """Log a user action."""
         user = self.rbac.get_user(user_id)
         tenant_id = user.tenant_id if user else "default"
@@ -616,7 +658,7 @@ class EnterpriseManager:
             resource=resource,
             details=details,
             ip_address=ip_address,
-            user_agent=user_agent
+            user_agent=user_agent,
         )
 
     def get_enterprise_summary(self) -> Dict[str, Any]:
@@ -628,19 +670,27 @@ class EnterpriseManager:
                     "active": len([u for u in self.rbac.users.values() if u.is_active]),
                     "by_role": {
                         role.value: len(
-                            [u for u in self.rbac.users.values() if u.role == role])
+                            [u for u in self.rbac.users.values() if u.role == role]
+                        )
                         for role in UserRole
-                    }
+                    },
                 },
                 "tenants": {
                     "total": len(self.tenant_manager.tenants),
-                    "active": len([t for t in self.tenant_manager.tenants.values() if t.is_active])
+                    "active": len(
+                        [t for t in self.tenant_manager.tenants.values() if t.is_active]
+                    ),
                 },
                 "audit_logs": {
                     "total": len(self.audit_logger.audit_logs),
-                    "recent": len([log for log in self.audit_logger.audit_logs
-                                   if time.time() - log.timestamp < 3600])  # Last hour
-                }
+                    "recent": len(
+                        [
+                            log
+                            for log in self.audit_logger.audit_logs
+                            if time.time() - log.timestamp < 3600
+                        ]
+                    ),  # Last hour
+                },
             }
 
         except Exception as e:

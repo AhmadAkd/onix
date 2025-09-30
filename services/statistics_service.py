@@ -64,8 +64,7 @@ class RealTimeStatisticsService:
             return True
 
         except Exception as e:
-            self.log(
-                f"Failed to start statistics monitoring: {e}", LogLevel.ERROR)
+            self.log(f"Failed to start statistics monitoring: {e}", LogLevel.ERROR)
             return False
 
     def stop_monitoring(self):
@@ -132,8 +131,7 @@ class RealTimeStatisticsService:
                 # Calculate speeds
                 if time_delta > 0:
                     upload_speed = (current_upload - last_upload) / time_delta
-                    download_speed = (current_download -
-                                      last_download) / time_delta
+                    download_speed = (current_download - last_download) / time_delta
                 else:
                     upload_speed = 0
                     download_speed = 0
@@ -172,8 +170,7 @@ class RealTimeStatisticsService:
                     try:
                         self._callback(self._statistics)
                     except Exception as callback_error:
-                        self.log(
-                            f"Callback error: {callback_error}", LogLevel.WARNING)
+                        self.log(f"Callback error: {callback_error}", LogLevel.WARNING)
 
                 # Periodic cleanup to prevent memory leaks
                 self._cleanup_counter += 1

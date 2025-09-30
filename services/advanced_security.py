@@ -17,6 +17,7 @@ from constants import LogLevel
 
 class SecurityLevel(Enum):
     """Security levels for different features."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -26,6 +27,7 @@ class SecurityLevel(Enum):
 @dataclass
 class SecurityConfig:
     """Security configuration settings."""
+
     kill_switch_enabled: bool = True
     dns_leak_protection: bool = True
     ipv6_leak_protection: bool = True
@@ -45,8 +47,7 @@ class KillSwitchManager:
     """Advanced Kill Switch implementation."""
 
     def __init__(self, log_callback: Optional[Callable[[str, LogLevel], None]] = None):
-        self.log = log_callback or (
-            lambda msg, level: print(f"[{level}] {msg}"))
+        self.log = log_callback or (lambda msg, level: print(f"[{level}] {msg}"))
         self._is_active = False
         self._monitor_thread = None
         self._stop_event = threading.Event()
@@ -77,7 +78,7 @@ class KillSwitchManager:
             self._monitor_thread = threading.Thread(
                 target=self._monitor_connection,
                 args=(proxy_address, proxy_port),
-                daemon=True
+                daemon=True,
             )
             self._monitor_thread.start()
 
@@ -134,7 +135,9 @@ class KillSwitchManager:
             # Get current DNS servers
             result = subprocess.run(
                 ["netsh", "interface", "show", "interface"],
-                capture_output=True, text=True, timeout=10
+                capture_output=True,
+                text=True,
+                timeout=10,
             )
 
             if result.returncode == 0:
@@ -148,8 +151,7 @@ class KillSwitchManager:
         try:
             # Get current DNS servers
             result = subprocess.run(
-                ["scutil", "--dns"],
-                capture_output=True, text=True, timeout=10
+                ["scutil", "--dns"], capture_output=True, text=True, timeout=10
             )
 
             if result.returncode == 0:
@@ -191,42 +193,48 @@ class KillSwitchManager:
 
             # Remove existing rule if it exists
             subprocess.run(
-                ["netsh", "advfirewall", "firewall",
-                    "delete", "rule", f"name={rule_name}"],
-                capture_output=True, timeout=5
+                [
+                    "netsh",
+                    "advfirewall",
+                    "firewall",
+                    "delete",
+                    "rule",
+                    f"name={rule_name}",
+                ],
+                capture_output=True,
+                timeout=5,
             )
 
             # Add new rule to block all outbound except proxy
             cmd = [
-                "netsh", "advfirewall", "firewall", "add", "rule",
+                "netsh",
+                "advfirewall",
+                "firewall",
+                "add",
+                "rule",
                 f"name={rule_name}",
                 "dir=out",
                 "action=block",
                 "remoteip=any",
                 "localport=any",
                 "remoteport=any",
-                "protocol=any"
+                "protocol=any",
             ]
 
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=10)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
 
             if result.returncode == 0:
                 self._firewall_rules.append(rule_name)
                 self.log("Windows firewall rules set", LogLevel.DEBUG)
 
         except Exception as e:
-            self.log(
-                f"Error setting up Windows firewall: {e}", LogLevel.WARNING)
+            self.log(f"Error setting up Windows firewall: {e}", LogLevel.WARNING)
 
     def _setup_macos_firewall(self, proxy_address: str, proxy_port: int):
         """Set up macOS firewall rules."""
         try:
             # Enable firewall if not already enabled
-            subprocess.run(
-                ["sudo", "pfctl", "-e"],
-                capture_output=True, timeout=5
-            )
+            subprocess.run(["sudo", "pfctl", "-e"], capture_output=True, timeout=5)
 
             # Create pfctl rules (simplified)
             self.log("macOS firewall rules would be set here", LogLevel.DEBUG)
@@ -250,9 +258,16 @@ class KillSwitchManager:
             if platform.system() == "Windows":
                 for rule_name in self._firewall_rules:
                     subprocess.run(
-                        ["netsh", "advfirewall", "firewall",
-                            "delete", "rule", f"name={rule_name}"],
-                        capture_output=True, timeout=5
+                        [
+                            "netsh",
+                            "advfirewall",
+                            "firewall",
+                            "delete",
+                            "rule",
+                            f"name={rule_name}",
+                        ],
+                        capture_output=True,
+                        timeout=5,
                     )
 
             self._firewall_rules.clear()
@@ -279,7 +294,8 @@ class KillSwitchManager:
                 # Check if proxy is still working
                 if not self._is_proxy_working(proxy_address, proxy_port):
                     self.log(
-                        "Proxy connection lost! Blocking all traffic", LogLevel.ERROR)
+                        "Proxy connection lost! Blocking all traffic", LogLevel.ERROR
+                    )
                     self._block_all_traffic()
                 else:
                     self._unblock_traffic()
@@ -287,8 +303,7 @@ class KillSwitchManager:
                 time.sleep(2)  # Check every 2 seconds
 
             except Exception as e:
-                self.log(
-                    f"Error in connection monitoring: {e}", LogLevel.ERROR)
+                self.log(f"Error in connection monitoring: {e}", LogLevel.ERROR)
                 time.sleep(5)
 
     def _is_proxy_working(self, proxy_address: str, proxy_port: int) -> bool:
@@ -328,8 +343,7 @@ class DNSLeakProtection:
     """DNS Leak Protection implementation."""
 
     def __init__(self, log_callback: Optional[Callable[[str, LogLevel], None]] = None):
-        self.log = log_callback or (
-            lambda msg, level: print(f"[{level}] {msg}"))
+        self.log = log_callback or (lambda msg, level: print(f"[{level}] {msg}"))
         self._is_active = False
         self._custom_dns_servers = ["1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"]
         self._original_dns = []
@@ -338,8 +352,7 @@ class DNSLeakProtection:
         """Activate DNS leak protection."""
         try:
             if self._is_active:
-                self.log("DNS leak protection is already active",
-                         LogLevel.WARNING)
+                self.log("DNS leak protection is already active", LogLevel.WARNING)
                 return False
 
             if dns_servers:
@@ -358,8 +371,7 @@ class DNSLeakProtection:
             return True
 
         except Exception as e:
-            self.log(
-                f"Failed to activate DNS leak protection: {e}", LogLevel.ERROR)
+            self.log(f"Failed to activate DNS leak protection: {e}", LogLevel.ERROR)
             return False
 
     def deactivate(self) -> bool:
@@ -378,8 +390,7 @@ class DNSLeakProtection:
             return True
 
         except Exception as e:
-            self.log(
-                f"Error deactivating DNS leak protection: {e}", LogLevel.ERROR)
+            self.log(f"Error deactivating DNS leak protection: {e}", LogLevel.ERROR)
             return False
 
     def test_dns_leak(self) -> Dict[str, Any]:
@@ -395,13 +406,14 @@ class DNSLeakProtection:
             }
 
             # Analyze results
-            leaks_detected = any(result.get("leak", False)
-                                 for result in test_results.values())
+            leaks_detected = any(
+                result.get("leak", False) for result in test_results.values()
+            )
 
             result = {
                 "leak_detected": leaks_detected,
                 "test_results": test_results,
-                "timestamp": time.time()
+                "timestamp": time.time(),
             }
 
             if leaks_detected:
@@ -421,7 +433,9 @@ class DNSLeakProtection:
             if platform.system() == "Windows":
                 result = subprocess.run(
                     ["netsh", "interface", "show", "dns"],
-                    capture_output=True, text=True, timeout=10
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
                 )
                 if result.returncode == 0:
                     self._original_dns = result.stdout
@@ -436,9 +450,17 @@ class DNSLeakProtection:
                 # Set DNS for all network adapters
                 for dns_server in self._custom_dns_servers:
                     subprocess.run(
-                        ["netsh", "interface", "ip", "set", "dns",
-                            "name=*", f"static={dns_server}"],
-                        capture_output=True, timeout=10
+                        [
+                            "netsh",
+                            "interface",
+                            "ip",
+                            "set",
+                            "dns",
+                            "name=*",
+                            f"static={dns_server}",
+                        ],
+                        capture_output=True,
+                        timeout=10,
                     )
 
         except Exception as e:
@@ -451,7 +473,8 @@ class DNSLeakProtection:
                 # Restore automatic DNS
                 subprocess.run(
                     ["netsh", "interface", "ip", "set", "dns", "name=*", "dhcp"],
-                    capture_output=True, timeout=10
+                    capture_output=True,
+                    timeout=10,
                 )
 
         except Exception as e:
@@ -463,19 +486,19 @@ class DNSLeakProtection:
             import requests
 
             response = requests.get(
-                "https://www.dnsleaktest.com/api/v1/dnsleak", timeout=10)
+                "https://www.dnsleaktest.com/api/v1/dnsleak", timeout=10
+            )
             if response.status_code == 200:
                 data = response.json()
                 return {
                     "leak": data.get("leak", False),
                     "ip": data.get("ip", ""),
                     "country": data.get("country", ""),
-                    "asn": data.get("asn", "")
+                    "asn": data.get("asn", ""),
                 }
 
         except Exception as e:
-            self.log(
-                f"Error testing with dnsleaktest.com: {e}", LogLevel.WARNING)
+            self.log(f"Error testing with dnsleaktest.com: {e}", LogLevel.WARNING)
 
         return {"leak": True, "error": "Test failed"}
 
@@ -491,7 +514,7 @@ class DNSLeakProtection:
                     "leak": False,  # Would need more analysis
                     "ip": data.get("ip", ""),
                     "country": data.get("country_name", ""),
-                    "isp": data.get("isp", "")
+                    "isp": data.get("isp", ""),
                 }
 
         except Exception as e:
@@ -504,14 +527,13 @@ class DNSLeakProtection:
         try:
             import requests
 
-            response = requests.get(
-                "https://dnsleak.com/api/v1/dnsleak", timeout=10)
+            response = requests.get("https://dnsleak.com/api/v1/dnsleak", timeout=10)
             if response.status_code == 200:
                 data = response.json()
                 return {
                     "leak": data.get("leak", False),
                     "ip": data.get("ip", ""),
-                    "country": data.get("country", "")
+                    "country": data.get("country", ""),
                 }
 
         except Exception as e:
@@ -524,8 +546,7 @@ class WebRTCLeakProtection:
     """WebRTC Leak Protection implementation."""
 
     def __init__(self, log_callback: Optional[Callable[[str, LogLevel], None]] = None):
-        self.log = log_callback or (
-            lambda msg, level: print(f"[{level}] {msg}"))
+        self.log = log_callback or (lambda msg, level: print(f"[{level}] {msg}"))
         self._is_active = False
 
     def activate(self) -> bool:
@@ -536,8 +557,7 @@ class WebRTCLeakProtection:
             return True
 
         except Exception as e:
-            self.log(
-                f"Error activating WebRTC protection: {e}", LogLevel.ERROR)
+            self.log(f"Error activating WebRTC protection: {e}", LogLevel.ERROR)
             return False
 
     def deactivate(self) -> bool:
@@ -548,8 +568,7 @@ class WebRTCLeakProtection:
             return True
 
         except Exception as e:
-            self.log(
-                f"Error deactivating WebRTC protection: {e}", LogLevel.ERROR)
+            self.log(f"Error deactivating WebRTC protection: {e}", LogLevel.ERROR)
             return False
 
 
@@ -557,8 +576,7 @@ class AdvancedSecuritySuite:
     """Main security suite coordinator."""
 
     def __init__(self, log_callback: Optional[Callable[[str, LogLevel], None]] = None):
-        self.log = log_callback or (
-            lambda msg, level: print(f"[{level}] {msg}"))
+        self.log = log_callback or (lambda msg, level: print(f"[{level}] {msg}"))
         self.config = SecurityConfig()
 
         # Initialize security components
@@ -597,8 +615,7 @@ class AdvancedSecuritySuite:
                 self._start_monitoring()
                 self.log("Advanced security suite activated", LogLevel.SUCCESS)
             else:
-                self.log("Some security features failed to activate",
-                         LogLevel.WARNING)
+                self.log("Some security features failed to activate", LogLevel.WARNING)
 
             return success
 
@@ -639,8 +656,7 @@ class AdvancedSecuritySuite:
             self._monitor_thread.start()
 
         except Exception as e:
-            self.log(
-                f"Error starting security monitoring: {e}", LogLevel.ERROR)
+            self.log(f"Error starting security monitoring: {e}", LogLevel.ERROR)
 
     def _monitor_security(self):
         """Monitor security status."""
@@ -650,8 +666,7 @@ class AdvancedSecuritySuite:
                 if self.config.dns_leak_protection:
                     leak_result = self.dns_protection.test_dns_leak()
                     if leak_result.get("leak_detected", False):
-                        self.log(
-                            "DNS leak detected during monitoring!", LogLevel.ERROR)
+                        self.log("DNS leak detected during monitoring!", LogLevel.ERROR)
                         if self.config.auto_disconnect_on_leak:
                             self._handle_security_breach()
 
@@ -665,7 +680,9 @@ class AdvancedSecuritySuite:
         """Handle security breach."""
         try:
             self.log(
-                "Security breach detected! Taking protective measures...", LogLevel.ERROR)
+                "Security breach detected! Taking protective measures...",
+                LogLevel.ERROR,
+            )
 
             # Could implement automatic disconnection here
             # For now, just log the event
@@ -684,8 +701,8 @@ class AdvancedSecuritySuite:
                 "kill_switch_enabled": self.config.kill_switch_enabled,
                 "dns_leak_protection": self.config.dns_leak_protection,
                 "webrtc_leak_protection": self.config.webrtc_leak_protection,
-                "security_level": self.config.security_level.value
-            }
+                "security_level": self.config.security_level.value,
+            },
         }
 
     def update_config(self, new_config: SecurityConfig):
@@ -700,7 +717,7 @@ class AdvancedSecuritySuite:
 
             results = {
                 "dns_leak_test": self.dns_protection.test_dns_leak(),
-                "timestamp": time.time()
+                "timestamp": time.time(),
             }
 
             return results
