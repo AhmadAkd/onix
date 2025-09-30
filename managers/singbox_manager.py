@@ -43,21 +43,20 @@ class SingboxManager(CoreManager):
             "Connecting...", "yellow"
         )
 
-        thread = threading.Thread(
-            target=self._run_and_log, args=(config,), daemon=True)
+        thread = threading.Thread(target=self._run_and_log, args=(config,), daemon=True)
         thread.start()
 
         # Schedule connection check and store the timer reference
         self.connection_check_timer = threading.Timer(
-            CONNECTION_CHECK_DELAY / 1000.0, self.check_connection)
+            CONNECTION_CHECK_DELAY / 1000.0, self.check_connection
+        )
         self.connection_check_timer.start()
 
     def _run_and_log(self, config):
         config_filename = None
         log_file = None
         try:
-            full_config = config_generator.generate_config_json(
-                config, self.settings)
+            full_config = config_generator.generate_config_json(config, self.settings)
             with tempfile.NamedTemporaryFile(
                 mode="w", delete=False, suffix=".json", encoding="utf-8"
             ) as f:
@@ -133,7 +132,9 @@ class SingboxManager(CoreManager):
                     os.remove(config_filename)
                 except OSError as e:
                     self.log(
-                        f"Warning: Could not remove temp config file {config_filename}: {e}", LogLevel.WARNING)
+                        f"Warning: Could not remove temp config file {config_filename}: {e}",
+                        LogLevel.WARNING,
+                    )
 
     def stop(self):
         if not self.is_running and not self.process:
@@ -170,19 +171,18 @@ class SingboxManager(CoreManager):
 
         result = network_tester.url_test(PROXY_SERVER_ADDRESS)
         if result != -1:
-            self.log(
-                f"Connection successful! Latency: {result} ms.", LogLevel.SUCCESS)
+            self.log(f"Connection successful! Latency: {result} ms.", LogLevel.SUCCESS)
             system_proxy.set_system_proxy(True, self.settings, self.log)
             self.callbacks.get("on_connect", lambda r: None)(result)
 
-            ip_thread = threading.Thread(
-                target=self._fetch_ip_and_update, daemon=True)
+            ip_thread = threading.Thread(target=self._fetch_ip_and_update, daemon=True)
             ip_thread.start()
 
             self._start_stats_polling()
         else:
             self.log(
-                "Error: Connection test failed. Check server config.", LogLevel.ERROR)
+                "Error: Connection test failed. Check server config.", LogLevel.ERROR
+            )
             self.callbacks.get("on_status_change", lambda s, c: None)(
                 "Connection Failed", "red"
             )
@@ -197,8 +197,7 @@ class SingboxManager(CoreManager):
             return
 
         self.stop_stats_thread.clear()
-        self.stats_thread = threading.Thread(
-            target=self._poll_stats, daemon=True)
+        self.stats_thread = threading.Thread(target=self._poll_stats, daemon=True)
         self.stats_thread.start()
 
     def _poll_stats(self):
@@ -208,8 +207,7 @@ class SingboxManager(CoreManager):
 
         while not self.stop_stats_thread.is_set():
             try:
-                response = requests.get(
-                    f"http://127.0.0.1:{STATS_API_PORT}/stats")
+                response = requests.get(f"http://127.0.0.1:{STATS_API_PORT}/stats")
                 stats = response.json()
                 current_uplink = stats.get("uplink_total", 0)
                 current_downlink = stats.get("downlink_total", 0)
@@ -218,10 +216,10 @@ class SingboxManager(CoreManager):
                 time_delta = current_time - last_time
                 if time_delta > 0:
                     up_speed = (current_uplink - last_uplink) / time_delta
-                    down_speed = (current_downlink -
-                                  last_downlink) / time_delta
+                    down_speed = (current_downlink - last_downlink) / time_delta
                     self.callbacks.get("on_speed_update", lambda u, d: None)(
-                        up_speed, down_speed)
+                        up_speed, down_speed
+                    )
 
                 last_uplink = current_uplink
                 last_downlink = current_downlink

@@ -29,7 +29,9 @@ def direct_tcp(host: str, port: int, timeout: int = None) -> int:
         return -1
 
 
-def proxy_tcp_connect(proxy_address: str, host: str, port: int, timeout: int = None) -> int:
+def proxy_tcp_connect(
+    proxy_address: str, host: str, port: int, timeout: int = None
+) -> int:
     if timeout is None:
         timeout = TEST_ENDPOINTS["tcp"]["timeout"]
 
@@ -64,8 +66,7 @@ def url_latency_via_proxy(
     if retries is None:
         retries = TEST_RETRY_COUNT
 
-    proxies = {"http": f"http://{proxy_address}",
-               "https": f"http://{proxy_address}"}
+    proxies = {"http": f"http://{proxy_address}", "https": f"http://{proxy_address}"}
     attempt = 0
     best = -1
     while attempt <= retries and not _should_stop(is_cancelled):

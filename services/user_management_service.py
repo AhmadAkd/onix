@@ -15,8 +15,13 @@ from constants import LogLevel
 class UserProfile:
     """Represents a user profile."""
 
-    def __init__(self, username: str, password_hash: str = None,
-                 is_admin: bool = False, settings: Dict[str, Any] = None):
+    def __init__(
+        self,
+        username: str,
+        password_hash: str = None,
+        is_admin: bool = False,
+        settings: Dict[str, Any] = None,
+    ):
         self.username = username
         self.password_hash = password_hash
         self.is_admin = is_admin
@@ -34,17 +39,17 @@ class UserProfile:
             "settings": self.settings,
             "created_at": self.created_at.isoformat(),
             "last_login": self.last_login.isoformat() if self.last_login else None,
-            "login_count": self.login_count
+            "login_count": self.login_count,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'UserProfile':
+    def from_dict(cls, data: Dict[str, Any]) -> "UserProfile":
         """Create profile from dictionary."""
         profile = cls(
             username=data["username"],
             password_hash=data.get("password_hash"),
             is_admin=data.get("is_admin", False),
-            settings=data.get("settings", {})
+            settings=data.get("settings", {}),
         )
 
         if data.get("created_at"):
@@ -72,8 +77,7 @@ class UserManagementService:
         try:
             with self._lock:
                 if username in self._users:
-                    self.log(f"User {username} already exists",
-                             LogLevel.WARNING)
+                    self.log(f"User {username} already exists", LogLevel.WARNING)
                     return False
 
                 password_hash = self._hash_password(password)
@@ -103,8 +107,7 @@ class UserManagementService:
                     profile.login_count += 1
                     self._current_user = profile
                     self._save_users()
-                    self.log(f"User {username} authenticated",
-                             LogLevel.SUCCESS)
+                    self.log(f"User {username} authenticated", LogLevel.SUCCESS)
                     return True
 
                 return False
@@ -116,8 +119,7 @@ class UserManagementService:
     def logout_user(self):
         """Logout current user."""
         if self._current_user:
-            self.log(
-                f"User {self._current_user.username} logged out", LogLevel.INFO)
+            self.log(f"User {self._current_user.username} logged out", LogLevel.INFO)
             self._current_user = None
 
     def get_current_user(self) -> Optional[UserProfile]:
@@ -194,7 +196,7 @@ class UserManagementService:
         """Load users from file."""
         try:
             if os.path.exists(self._users_file):
-                with open(self._users_file, 'r', encoding='utf-8') as f:
+                with open(self._users_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
 
                 for username, user_data in data.items():
@@ -212,9 +214,10 @@ class UserManagementService:
     def _save_users(self):
         """Save users to file."""
         try:
-            data = {username: profile.to_dict()
-                    for username, profile in self._users.items()}
-            with open(self._users_file, 'w', encoding='utf-8') as f:
+            data = {
+                username: profile.to_dict() for username, profile in self._users.items()
+            }
+            with open(self._users_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
 
         except Exception as e:
@@ -224,8 +227,14 @@ class UserManagementService:
 class ConfigurationTemplate:
     """Represents a configuration template."""
 
-    def __init__(self, name: str, description: str, config: Dict[str, Any],
-                 category: str = "general", tags: List[str] = None):
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        config: Dict[str, Any],
+        category: str = "general",
+        tags: List[str] = None,
+    ):
         self.name = name
         self.description = description
         self.config = config
@@ -243,18 +252,18 @@ class ConfigurationTemplate:
             "category": self.category,
             "tags": self.tags,
             "created_at": self.created_at.isoformat(),
-            "usage_count": self.usage_count
+            "usage_count": self.usage_count,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'ConfigurationTemplate':
+    def from_dict(cls, data: Dict[str, Any]) -> "ConfigurationTemplate":
         """Create template from dictionary."""
         template = cls(
             name=data["name"],
             description=data["description"],
             config=data["config"],
             category=data.get("category", "general"),
-            tags=data.get("tags", [])
+            tags=data.get("tags", []),
         )
 
         if data.get("created_at"):
@@ -274,16 +283,21 @@ class ConfigurationTemplateManager:
         self._load_templates()
         self._create_default_templates()
 
-    def create_template(self, name: str, description: str, config: Dict[str, Any],
-                        category: str = "general", tags: List[str] = None) -> bool:
+    def create_template(
+        self,
+        name: str,
+        description: str,
+        config: Dict[str, Any],
+        category: str = "general",
+        tags: List[str] = None,
+    ) -> bool:
         """Create a new configuration template."""
         try:
             if name in self._templates:
                 self.log(f"Template {name} already exists", LogLevel.WARNING)
                 return False
 
-            template = ConfigurationTemplate(
-                name, description, config, category, tags)
+            template = ConfigurationTemplate(name, description, config, category, tags)
             self._templates[name] = template
             self._save_templates()
 
@@ -313,9 +327,11 @@ class ConfigurationTemplateManager:
         results = []
 
         for template in self._templates.values():
-            if (query_lower in template.name.lower() or
-                query_lower in template.description.lower() or
-                    any(query_lower in tag.lower() for tag in template.tags)):
+            if (
+                query_lower in template.name.lower()
+                or query_lower in template.description.lower()
+                or any(query_lower in tag.lower() for tag in template.tags)
+            ):
                 results.append(template)
 
         return sorted(results, key=lambda t: t.usage_count, reverse=True)
@@ -348,15 +364,15 @@ class ConfigurationTemplateManager:
         """Load templates from file."""
         try:
             if os.path.exists(self._templates_file):
-                with open(self._templates_file, 'r', encoding='utf-8') as f:
+                with open(self._templates_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
 
                 for name, template_data in data.items():
                     self._templates[name] = ConfigurationTemplate.from_dict(
-                        template_data)
+                        template_data
+                    )
 
-                self.log(
-                    f"Loaded {len(self._templates)} templates", LogLevel.INFO)
+                self.log(f"Loaded {len(self._templates)} templates", LogLevel.INFO)
 
         except Exception as e:
             self.log(f"Failed to load templates: {e}", LogLevel.ERROR)
@@ -364,9 +380,10 @@ class ConfigurationTemplateManager:
     def _save_templates(self):
         """Save templates to file."""
         try:
-            data = {name: template.to_dict()
-                    for name, template in self._templates.items()}
-            with open(self._templates_file, 'w', encoding='utf-8') as f:
+            data = {
+                name: template.to_dict() for name, template in self._templates.items()
+            }
+            with open(self._templates_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
 
         except Exception as e:
@@ -391,8 +408,8 @@ class ConfigurationTemplateManager:
                         "buffer_size": 16384,
                         "compression_enabled": True,
                         "tcp_fast_open": True,
-                        "congestion_control": "BBR"
-                    }
+                        "congestion_control": "BBR",
+                    },
                 },
                 {
                     "name": "Maximum Security",
@@ -410,8 +427,8 @@ class ConfigurationTemplateManager:
                         "retry_attempts": 2,
                         "disable_telemetry": True,
                         "disable_crash_reports": True,
-                        "disable_usage_stats": True
-                    }
+                        "disable_usage_stats": True,
+                    },
                 },
                 {
                     "name": "Balanced",
@@ -430,9 +447,9 @@ class ConfigurationTemplateManager:
                         "retry_attempts": 3,
                         "connection_pool_size": 10,
                         "thread_pool_size": 5,
-                        "buffer_size": 8192
-                    }
-                }
+                        "buffer_size": 8192,
+                    },
+                },
             ]
 
             for template_data in default_templates:
@@ -441,5 +458,5 @@ class ConfigurationTemplateManager:
                     template_data["description"],
                     template_data["config"],
                     template_data["category"],
-                    template_data["tags"]
+                    template_data["tags"],
                 )

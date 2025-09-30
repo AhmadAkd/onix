@@ -1,6 +1,6 @@
 THEMES = {
     "blue": {
-        "primary": "#6366f1",        # Modern Indigo
+        "primary": "#6366f1",  # Modern Indigo
         "primary_hover": "#4f46e5",
         "primary_light": "#818cf8",
         "primary_light_hover": "#6366f1",
@@ -8,7 +8,7 @@ THEMES = {
         "primary_dark": "#4338ca",
     },
     "green": {
-        "primary": "#10b981",        # Modern Emerald
+        "primary": "#10b981",  # Modern Emerald
         "primary_hover": "#059669",
         "primary_light": "#34d399",
         "primary_light_hover": "#10b981",
@@ -16,7 +16,7 @@ THEMES = {
         "primary_dark": "#047857",
     },
     "purple": {
-        "primary": "#8b5cf6",        # Modern Violet
+        "primary": "#8b5cf6",  # Modern Violet
         "primary_hover": "#7c3aed",
         "primary_light": "#a78bfa",
         "primary_light_hover": "#8b5cf6",
@@ -24,13 +24,13 @@ THEMES = {
         "primary_dark": "#6d28d9",
     },
     "rose": {
-        "primary": "#f43f5e",        # Modern Rose
+        "primary": "#f43f5e",  # Modern Rose
         "primary_hover": "#e11d48",
         "primary_light": "#fb7185",
         "primary_light_hover": "#f43f5e",
         "selected_bg": "#ffe4e6",
         "primary_dark": "#be123c",
-    }
+    },
 }
 
 # --- Stylesheets ---
@@ -369,11 +369,11 @@ QRadioButton::indicator:checked {{
     border-color: {primary};
 }}
 """.format(
-        primary=theme['primary'],
-        primary_hover=theme['primary_hover'],
-        primary_light=theme['primary_light'],
-        primary_dark=theme['primary_dark'],
-        selected_bg=theme['selected_bg']
+        primary=theme["primary"],
+        primary_hover=theme["primary_hover"],
+        primary_light=theme["primary_light"],
+        primary_dark=theme["primary_dark"],
+        selected_bg=theme["selected_bg"],
     )
 
 
@@ -715,9 +715,9 @@ QRadioButton::indicator:checked {{
     border-color: {primary};
 }}
 """.format(
-        primary=theme['primary'],
-        primary_hover=theme['primary_hover'],
-        primary_light=theme['primary_light'],
-        primary_dark=theme['primary_dark'],
-        selected_bg=theme['selected_bg']
+        primary=theme["primary"],
+        primary_hover=theme["primary_hover"],
+        primary_light=theme["primary_light"],
+        primary_dark=theme["primary_dark"],
+        selected_bg=theme["selected_bg"],
     )

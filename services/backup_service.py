@@ -33,8 +33,7 @@ class BackupService:
 
         if enabled:
             self._start_auto_backup()
-            self.log(
-                f"Auto-backup enabled (interval: {interval}s)", LogLevel.SUCCESS)
+            self.log(f"Auto-backup enabled (interval: {interval}s)", LogLevel.SUCCESS)
         else:
             self._stop_auto_backup()
             self.log("Auto-backup disabled", LogLevel.INFO)
@@ -51,7 +50,7 @@ class BackupService:
 
             backup_path = os.path.join(self._backup_dir, f"{name}.zip")
 
-            with zipfile.ZipFile(backup_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            with zipfile.ZipFile(backup_path, "w", zipfile.ZIP_DEFLATED) as zipf:
                 # Backup settings
                 if os.path.exists("settings.json"):
                     zipf.write("settings.json", "settings.json")
@@ -83,14 +82,13 @@ class BackupService:
                     "name": name,
                     "created_at": datetime.now().isoformat(),
                     "version": "1.0.0",
-                    "files": []
+                    "files": [],
                 }
 
                 for file_info in zipf.infolist():
                     metadata["files"].append(file_info.filename)
 
-                zipf.writestr("backup_metadata.json",
-                              json.dumps(metadata, indent=2))
+                zipf.writestr("backup_metadata.json", json.dumps(metadata, indent=2))
 
             self.log(f"Backup created: {name}", LogLevel.SUCCESS)
             self._cleanup_old_backups()
@@ -104,15 +102,14 @@ class BackupService:
         """Restore from a backup."""
         try:
             if not os.path.exists(backup_path):
-                self.log(
-                    f"Backup file not found: {backup_path}", LogLevel.ERROR)
+                self.log(f"Backup file not found: {backup_path}", LogLevel.ERROR)
                 return False
 
             # Create restore directory
             restore_dir = f"restore_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
             os.makedirs(restore_dir, exist_ok=True)
 
-            with zipfile.ZipFile(backup_path, 'r') as zipf:
+            with zipfile.ZipFile(backup_path, "r") as zipf:
                 # Extract all files
                 zipf.extractall(restore_dir)
 
@@ -125,7 +122,7 @@ class BackupService:
                     ("servers.json", "servers.json"),
                     ("users.json", "users.json"),
                     ("templates.json", "templates.json"),
-                    ("cache.db", "cache.db")
+                    ("cache.db", "cache.db"),
                 ]
 
                 for src, dst in files_to_restore:
@@ -137,10 +134,7 @@ class BackupService:
                 logs_dir = os.path.join(restore_dir, "logs")
                 if os.path.exists(logs_dir):
                     for log_file in os.listdir(logs_dir):
-                        shutil.copy2(
-                            os.path.join(logs_dir, log_file),
-                            log_file
-                        )
+                        shutil.copy2(os.path.join(logs_dir, log_file), log_file)
 
             # Cleanup restore directory
             shutil.rmtree(restore_dir)
@@ -158,7 +152,7 @@ class BackupService:
 
         try:
             for filename in os.listdir(self._backup_dir):
-                if filename.endswith('.zip'):
+                if filename.endswith(".zip"):
                     backup_path = os.path.join(self._backup_dir, filename)
                     stat = os.stat(backup_path)
 
@@ -167,15 +161,16 @@ class BackupService:
                         "path": backup_path,
                         "size": stat.st_size,
                         "created_at": datetime.fromtimestamp(stat.st_ctime),
-                        "modified_at": datetime.fromtimestamp(stat.st_mtime)
+                        "modified_at": datetime.fromtimestamp(stat.st_mtime),
                     }
 
                     # Try to read metadata
                     try:
-                        with zipfile.ZipFile(backup_path, 'r') as zipf:
+                        with zipfile.ZipFile(backup_path, "r") as zipf:
                             if "backup_metadata.json" in zipf.namelist():
-                                metadata_str = zipf.read(
-                                    "backup_metadata.json").decode('utf-8')
+                                metadata_str = zipf.read("backup_metadata.json").decode(
+                                    "utf-8"
+                                )
                                 metadata = json.loads(metadata_str)
                                 backup_info.update(metadata)
                     except Exception:
@@ -215,8 +210,7 @@ class BackupService:
 
         self._stop_event.clear()
         self._backup_thread = threading.Thread(
-            target=self._auto_backup_loop,
-            daemon=True
+            target=self._auto_backup_loop, daemon=True
         )
         self._backup_thread.start()
 
@@ -244,7 +238,7 @@ class BackupService:
             if len(backups) > self._max_backups:
                 # Sort by creation time and remove oldest
                 backups.sort(key=lambda x: x["created_at"])
-                backups_to_remove = backups[:-self._max_backups]
+                backups_to_remove = backups[: -self._max_backups]
 
                 for backup in backups_to_remove:
                     self.delete_backup(backup["name"])
@@ -300,7 +294,9 @@ class AdvancedConfigurationManager:
         """Get validation rules."""
         return self._validation_rules.copy()
 
-    def _validate_value(self, key: str, value: Any, schema: Dict[str, Any]) -> Optional[str]:
+    def _validate_value(
+        self, key: str, value: Any, schema: Dict[str, Any]
+    ) -> Optional[str]:
         """Validate a single value against its schema."""
         try:
             # Type validation
@@ -321,6 +317,7 @@ class AdvancedConfigurationManager:
             # Pattern validation
             if "pattern" in schema:
                 import re
+
                 if not re.match(schema["pattern"], str(value)):
                     return f"{key}: value {value} does not match pattern {schema['pattern']}"
 
@@ -334,71 +331,29 @@ class AdvancedConfigurationManager:
         return {
             "connection_mode": {
                 "type": str,
-                "enum": ["Rule-Based", "Global", "Direct"]
+                "enum": ["Rule-Based", "Global", "Direct"],
             },
             "dns_servers": {
                 "type": str,
-                "pattern": r"^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(,\s*)?)+$"
+                "pattern": r"^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(,\s*)?)+$",
             },
-            "bypass_domains": {
-                "type": str
-            },
+            "bypass_domains": {"type": str},
             "bypass_ips": {
                 "type": str,
-                "pattern": r"^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(/\d{1,2})?(,\s*)?)+$"
+                "pattern": r"^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(/\d{1,2})?(,\s*)?)+$",
             },
-            "tun_enabled": {
-                "type": bool
-            },
-            "mux_enabled": {
-                "type": bool
-            },
-            "mux_protocol": {
-                "type": str,
-                "enum": ["smux", "yamux"]
-            },
-            "mux_max_streams": {
-                "type": int,
-                "min": 1,
-                "max": 100
-            },
-            "tls_fragment_enabled": {
-                "type": bool
-            },
-            "tls_fragment_size": {
-                "type": str,
-                "pattern": r"^\d+-\d+$"
-            },
-            "connection_timeout": {
-                "type": int,
-                "min": 5,
-                "max": 300
-            },
-            "retry_attempts": {
-                "type": int,
-                "min": 0,
-                "max": 10
-            },
-            "connection_pool_size": {
-                "type": int,
-                "min": 1,
-                "max": 100
-            },
-            "thread_pool_size": {
-                "type": int,
-                "min": 1,
-                "max": 50
-            },
-            "buffer_size": {
-                "type": int,
-                "min": 1024,
-                "max": 65536
-            },
-            "statistics_interval": {
-                "type": int,
-                "min": 1,
-                "max": 60
-            }
+            "tun_enabled": {"type": bool},
+            "mux_enabled": {"type": bool},
+            "mux_protocol": {"type": str, "enum": ["smux", "yamux"]},
+            "mux_max_streams": {"type": int, "min": 1, "max": 100},
+            "tls_fragment_enabled": {"type": bool},
+            "tls_fragment_size": {"type": str, "pattern": r"^\d+-\d+$"},
+            "connection_timeout": {"type": int, "min": 5, "max": 300},
+            "retry_attempts": {"type": int, "min": 0, "max": 10},
+            "connection_pool_size": {"type": int, "min": 1, "max": 100},
+            "thread_pool_size": {"type": int, "min": 1, "max": 50},
+            "buffer_size": {"type": int, "min": 1024, "max": 65536},
+            "statistics_interval": {"type": int, "min": 1, "max": 60},
         }
 
     def _load_validation_rules(self) -> List[Callable]:
@@ -410,25 +365,24 @@ class AdvancedConfigurationManager:
                 if config.get("mux_enabled") and not config.get("mux_protocol")
                 else None
             ),
-
             # Rule: If TLS fragment is enabled, fragment size must be specified
             lambda config: (
                 "tls_fragment_size must be specified when TLS fragment is enabled"
-                if config.get("tls_fragment_enabled") and not config.get("tls_fragment_size")
+                if config.get("tls_fragment_enabled")
+                and not config.get("tls_fragment_size")
                 else None
             ),
-
             # Rule: Connection timeout should be reasonable
             lambda config: (
                 "connection_timeout should be at least 10 seconds for stability"
                 if config.get("connection_timeout", 30) < 10
                 else None
             ),
-
             # Rule: Buffer size should be power of 2
             lambda config: (
                 "buffer_size should be a power of 2 for optimal performance"
-                if config.get("buffer_size") and not (config["buffer_size"] & (config["buffer_size"] - 1)) == 0
+                if config.get("buffer_size")
+                and not (config["buffer_size"] & (config["buffer_size"] - 1)) == 0
                 else None
-            )
+            ),
         ]

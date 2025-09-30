@@ -1,4 +1,3 @@
-
 import os
 import sys
 import time
@@ -7,6 +6,7 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QTranslator, QLocale
 from ui.main_window import PySideUI
 from managers.server_manager import ServerManager
+
 # Import specific core managers
 from managers.singbox_manager import SingboxManager
 from managers.xray_manager import XrayManager
@@ -22,8 +22,9 @@ def main():
 
     # --- Language/Translator Setup ---
     # Default to system language if not set
-    language = settings.get("language", QLocale.system().name().split('_')[
-                            0])  # Default to system language
+    language = settings.get(
+        "language", QLocale.system().name().split("_")[0]
+    )  # Default to system language
     # Save the determined language back to settings
     settings["language"] = language
 
@@ -54,9 +55,13 @@ def main():
         "log": pyside_ui.log,
         "on_servers_loaded": pyside_ui.on_servers_loaded,
         "on_servers_updated": pyside_ui.on_servers_updated,
-        "on_ping_result": lambda config, ping, test_type: pyside_ui.signals.ping_result.emit(config, ping, test_type),
+        "on_ping_result": lambda config, ping, test_type: pyside_ui.signals.ping_result.emit(
+            config, ping, test_type
+        ),
         "on_ping_started": lambda config: pyside_ui.signals.ping_started.emit(config),
-        "on_health_check_progress": lambda current, total: pyside_ui.signals.health_check_progress.emit(current, total),
+        "on_health_check_progress": lambda current, total: pyside_ui.signals.health_check_progress.emit(
+            current, total
+        ),
         "on_update_start": pyside_ui.signals.update_started.emit,
         "on_update_finish": pyside_ui.signals.update_finished.emit,
         "on_update_progress": lambda sub_name: pyside_ui.log(f"Updating {sub_name}..."),
@@ -90,7 +95,7 @@ def main():
             time.sleep(0.2)  # Give it a moment to stop
         pyside_ui.tray_icon.hide()  # Hide tray icon before restart
         # Re-execute the application
-        os.execv(sys.executable, ['python'] + sys.argv)
+        os.execv(sys.executable, ["python"] + sys.argv)
     else:
         sys.exit(exit_code)
 

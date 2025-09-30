@@ -22,7 +22,9 @@ def _wait_for_port(host, port, timeout=WAIT_FOR_PROXY_TIMEOUT):
     start = time.time()
     while time.time() - start < timeout:
         try:
-            with socket.create_connection((host, port), timeout=WAIT_FOR_PROXY_INTERVAL):
+            with socket.create_connection(
+                (host, port), timeout=WAIT_FOR_PROXY_INTERVAL
+            ):
                 return True
         except OSError:
             time.sleep(WAIT_FOR_PROXY_INTERVAL)
@@ -56,24 +58,28 @@ class TestCoreManager:
 
             # Build test config with HTTP inbounds per server
             test_config = self.config_generator.generate_test_config(
-                servers, self.settings)
+                servers, self.settings
+            )
 
-            with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json", encoding="utf-8") as f:
+            with tempfile.NamedTemporaryFile(
+                mode="w", delete=False, suffix=".json", encoding="utf-8"
+            ) as f:
                 json.dump(test_config, f, indent=2)
                 self.temp_config_file = f.name
 
-            os_key = "windows" if sys.platform.startswith(
-                "win") else sys.platform.lower()
+            os_key = (
+                "windows" if sys.platform.startswith("win") else sys.platform.lower()
+            )
             if self.active_core == "sing-box":
-                executable_name = SINGBOX_EXECUTABLE_NAMES.get(
-                    os_key, "sing-box")
+                executable_name = SINGBOX_EXECUTABLE_NAMES.get(os_key, "sing-box")
             else:
                 executable_name = XRAY_EXECUTABLE_NAMES.get(os_key, "xray")
             executable_path = utils.get_resource_path(executable_name)
 
             command = [executable_path, "run", "-c", self.temp_config_file]
-            creationflags = subprocess.CREATE_NO_WINDOW if sys.platform.startswith(
-                "win") else 0
+            creationflags = (
+                subprocess.CREATE_NO_WINDOW if sys.platform.startswith("win") else 0
+            )
             self.process = subprocess.Popen(
                 command,
                 stdout=subprocess.PIPE,
@@ -93,17 +99,18 @@ class TestCoreManager:
                     except subprocess.TimeoutExpired:
                         out, err = "", ""
                     msg = (
-                        err or out or f"Core exited with code {self.process.returncode}").strip()
-                    self.log(
-                        f"Test core failed to start: {msg}", LogLevel.ERROR)
+                        err or out or f"Core exited with code {self.process.returncode}"
+                    ).strip()
+                    self.log(f"Test core failed to start: {msg}", LogLevel.ERROR)
                 else:
-                    self.log("Test core did not become ready in time.",
-                             LogLevel.ERROR)
+                    self.log("Test core did not become ready in time.", LogLevel.ERROR)
                 self.stop()
                 return False
 
             self.log(
-                f"Test core started with {self.active_core} for {len(servers)} servers.", LogLevel.DEBUG)
+                f"Test core started with {self.active_core} for {len(servers)} servers.",
+                LogLevel.DEBUG,
+            )
             return True
         except Exception as e:
             self.log(f"Error starting test core: {e}", LogLevel.ERROR)

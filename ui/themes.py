@@ -67,24 +67,11 @@ class ThemeManager(QObject):
                     "background": "#ffffff",
                     "surface": "#f8f9fa",
                     "text": "#212529",
-                    "text_secondary": "#6c757d"
+                    "text_secondary": "#6c757d",
                 },
-                "fonts": {
-                    "family": "Segoe UI",
-                    "size": 12,
-                    "weight": "normal"
-                },
-                "spacing": {
-                    "small": 4,
-                    "medium": 8,
-                    "large": 16,
-                    "xlarge": 24
-                },
-                "borders": {
-                    "radius": 4,
-                    "width": 1,
-                    "color": "#dee2e6"
-                }
+                "fonts": {"family": "Segoe UI", "size": 12, "weight": "normal"},
+                "spacing": {"small": 4, "medium": 8, "large": 16, "xlarge": 24},
+                "borders": {"radius": 4, "width": 1, "color": "#dee2e6"},
             },
             "dark": {
                 "name": "Dark",
@@ -100,24 +87,11 @@ class ThemeManager(QObject):
                     "background": "#1e1e1e",
                     "surface": "#2d2d2d",
                     "text": "#ffffff",
-                    "text_secondary": "#b3b3b3"
+                    "text_secondary": "#b3b3b3",
                 },
-                "fonts": {
-                    "family": "Segoe UI",
-                    "size": 12,
-                    "weight": "normal"
-                },
-                "spacing": {
-                    "small": 4,
-                    "medium": 8,
-                    "large": 16,
-                    "xlarge": 24
-                },
-                "borders": {
-                    "radius": 4,
-                    "width": 1,
-                    "color": "#495057"
-                }
+                "fonts": {"family": "Segoe UI", "size": 12, "weight": "normal"},
+                "spacing": {"small": 4, "medium": 8, "large": 16, "xlarge": 24},
+                "borders": {"radius": 4, "width": 1, "color": "#495057"},
             },
             "neon": {
                 "name": "Neon",
@@ -133,24 +107,11 @@ class ThemeManager(QObject):
                     "background": "#000000",
                     "surface": "#111111",
                     "text": "#00ff00",
-                    "text_secondary": "#00aa00"
+                    "text_secondary": "#00aa00",
                 },
-                "fonts": {
-                    "family": "Consolas",
-                    "size": 12,
-                    "weight": "bold"
-                },
-                "spacing": {
-                    "small": 4,
-                    "medium": 8,
-                    "large": 16,
-                    "xlarge": 24
-                },
-                "borders": {
-                    "radius": 0,
-                    "width": 2,
-                    "color": "#00ff00"
-                }
+                "fonts": {"family": "Consolas", "size": 12, "weight": "bold"},
+                "spacing": {"small": 4, "medium": 8, "large": 16, "xlarge": 24},
+                "borders": {"radius": 0, "width": 2, "color": "#00ff00"},
             },
             "ocean": {
                 "name": "Ocean",
@@ -166,24 +127,11 @@ class ThemeManager(QObject):
                     "background": "#f0f8ff",
                     "surface": "#e6f3ff",
                     "text": "#1e3a8a",
-                    "text_secondary": "#4a90e2"
+                    "text_secondary": "#4a90e2",
                 },
-                "fonts": {
-                    "family": "Segoe UI",
-                    "size": 12,
-                    "weight": "normal"
-                },
-                "spacing": {
-                    "small": 4,
-                    "medium": 8,
-                    "large": 16,
-                    "xlarge": 24
-                },
-                "borders": {
-                    "radius": 8,
-                    "width": 1,
-                    "color": "#4a90e2"
-                }
+                "fonts": {"family": "Segoe UI", "size": 12, "weight": "normal"},
+                "spacing": {"small": 4, "medium": 8, "large": 16, "xlarge": 24},
+                "borders": {"radius": 8, "width": 1, "color": "#4a90e2"},
             },
             "sunset": {
                 "name": "Sunset",
@@ -199,24 +147,11 @@ class ThemeManager(QObject):
                     "background": "#fff5f5",
                     "surface": "#ffe8e8",
                     "text": "#2f3542",
-                    "text_secondary": "#ff6b35"
+                    "text_secondary": "#ff6b35",
                 },
-                "fonts": {
-                    "family": "Segoe UI",
-                    "size": 12,
-                    "weight": "normal"
-                },
-                "spacing": {
-                    "small": 4,
-                    "medium": 8,
-                    "large": 16,
-                    "xlarge": 24
-                },
-                "borders": {
-                    "radius": 6,
-                    "width": 1,
-                    "color": "#ff6b35"
-                }
+                "fonts": {"family": "Segoe UI", "size": 12, "weight": "normal"},
+                "spacing": {"small": 4, "medium": 8, "large": 16, "xlarge": 24},
+                "borders": {"radius": 6, "width": 1, "color": "#ff6b35"},
             },
             "forest": {
                 "name": "Forest",
@@ -232,24 +167,11 @@ class ThemeManager(QObject):
                     "background": "#f0fff0",
                     "surface": "#e6ffe6",
                     "text": "#1a1a1a",
-                    "text_secondary": "#2d5016"
+                    "text_secondary": "#2d5016",
                 },
-                "fonts": {
-                    "family": "Segoe UI",
-                    "size": 12,
-                    "weight": "normal"
-                },
-                "spacing": {
-                    "small": 4,
-                    "medium": 8,
-                    "large": 16,
-                    "xlarge": 24
-                },
-                "borders": {
-                    "radius": 4,
-                    "width": 1,
-                    "color": "#4a7c59"
-                }
+                "fonts": {"family": "Segoe UI", "size": 12, "weight": "normal"},
+                "spacing": {"small": 4, "medium": 8, "large": 16, "xlarge": 24},
+                "borders": {"radius": 4, "width": 1, "color": "#4a7c59"},
             },
             "midnight": {
                 "name": "Midnight",
@@ -265,25 +187,12 @@ class ThemeManager(QObject):
                     "background": "#0f172a",
                     "surface": "#1e293b",
                     "text": "#f8fafc",
-                    "text_secondary": "#94a3b8"
+                    "text_secondary": "#94a3b8",
                 },
-                "fonts": {
-                    "family": "Segoe UI",
-                    "size": 12,
-                    "weight": "normal"
-                },
-                "spacing": {
-                    "small": 4,
-                    "medium": 8,
-                    "large": 16,
-                    "xlarge": 24
-                },
-                "borders": {
-                    "radius": 6,
-                    "width": 1,
-                    "color": "#334155"
-                }
-            }
+                "fonts": {"family": "Segoe UI", "size": 12, "weight": "normal"},
+                "spacing": {"small": 4, "medium": 8, "large": 16, "xlarge": 24},
+                "borders": {"radius": 6, "width": 1, "color": "#334155"},
+            },
         }
 
 

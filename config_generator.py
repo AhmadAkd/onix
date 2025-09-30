@@ -23,7 +23,8 @@ def generate_config_json(server_config, settings):
     else:
         # It's a single server configuration
         single_outbound = _build_outbound_config(
-            server_config, settings, is_final_outbound=True)
+            server_config, settings, is_final_outbound=True
+        )
         outbounds.append(single_outbound)
 
     return {
@@ -33,10 +34,7 @@ def generate_config_json(server_config, settings):
         },
         "experimental": {
             "cache_file": {"enabled": True, "path": "cache.db", "store_fakeip": True},
-            "stats": {
-                "listen": PROXY_HOST,
-                "listen_port": STATS_API_PORT
-            }
+            "stats": {"listen": PROXY_HOST, "listen_port": STATS_API_PORT},
         },
         "dns": dns_config,
         "inbounds": [
@@ -82,11 +80,8 @@ def _build_dns_config(settings):
     dns_servers = []
     if user_dns_list:
         dns_servers.append({"tag": "dns-out", "address": user_dns_list[0]})
-        dns_direct_address = (
-            user_dns_list[1] if len(user_dns_list) > 1 else "8.8.8.8"
-        )
-        dns_servers.append(
-            {"tag": "dns_direct", "address": dns_direct_address})
+        dns_direct_address = user_dns_list[1] if len(user_dns_list) > 1 else "8.8.8.8"
+        dns_servers.append({"tag": "dns_direct", "address": dns_direct_address})
     else:
         dns_servers.extend(
             [
@@ -105,8 +100,7 @@ def _build_dns_config(settings):
 
     dns_rules = []
     if non_geosite_bypass_domains:
-        dns_rules.append(
-            {"domain": non_geosite_bypass_domains, "server": "dns_direct"})
+        dns_rules.append({"domain": non_geosite_bypass_domains, "server": "dns_direct"})
 
     return {
         "servers": dns_servers,
@@ -123,16 +117,13 @@ def _build_route_config(settings):
     ]
 
     bypass_ips_str = settings.get("bypass_ips")
-    bypass_ips_list = [i.strip()
-                       for i in bypass_ips_str.split(",") if i.strip()]
+    bypass_ips_list = [i.strip() for i in bypass_ips_str.split(",") if i.strip()]
 
     route_rules = []
     rule_sets = []
 
     # Add a rule to route DNS queries to the dns-out outbound
-    route_rules.append(
-        {"protocol": ["dns"], "outbound": "dns"}
-    )
+    route_rules.append({"protocol": ["dns"], "outbound": "dns"})
 
     # Add custom rules from settings
     custom_routing_rules = settings.get("custom_routing_rules", [])
@@ -145,19 +136,16 @@ def _build_route_config(settings):
             outbound_tag = "proxy-out" if rule_action == "proxy" else rule_action
 
             if rule_type == "domain":
-                route_rules.append(
-                    {"domain": rule_value, "outbound": outbound_tag})
+                route_rules.append({"domain": rule_value, "outbound": outbound_tag})
             elif rule_type == "ip":
-                route_rules.append(
-                    {"ip_cidr": rule_value, "outbound": outbound_tag})
+                route_rules.append({"ip_cidr": rule_value, "outbound": outbound_tag})
             elif rule_type == "process":
                 route_rules.append(
                     {"process_name": rule_value, "outbound": outbound_tag}
                 )
             elif rule_type == "geosite":
                 rule_set_tag = f"geosite-{rule_value}"
-                route_rules.append(
-                    {"rule_set": rule_set_tag, "outbound": outbound_tag})
+                route_rules.append({"rule_set": rule_set_tag, "outbound": outbound_tag})
                 # Add rule_set definition if not already present
                 if not any(rs.get("tag") == rule_set_tag for rs in rule_sets):
                     url = GEOSITE_RULE_SET_URL.format(code=rule_value)
@@ -174,8 +162,7 @@ def _build_route_config(settings):
                     )
             elif rule_type == "geoip":
                 rule_set_tag = f"geoip-{rule_value}"
-                route_rules.append(
-                    {"rule_set": rule_set_tag, "outbound": outbound_tag})
+                route_rules.append({"rule_set": rule_set_tag, "outbound": outbound_tag})
                 # Add rule_set definition if not already present
                 if not any(rs.get("tag") == rule_set_tag for rs in rule_sets):
                     url = GEOIP_RULE_SET_URL.format(code=rule_value)
@@ -233,8 +220,7 @@ def _build_route_config(settings):
 
     if geosite_domains:
         geosite_rule_set_tags = [f"geosite-{code}" for code in geosite_domains]
-        route_rules.append(
-            {"rule_set": geosite_rule_set_tags, "outbound": "direct"})
+        route_rules.append({"rule_set": geosite_rule_set_tags, "outbound": "direct"})
         for code in geosite_domains:
             url = GEOSITE_RULE_SET_URL.format(code=code)
             if code == "ir" or code == "tld-ir":
@@ -255,7 +241,9 @@ def _build_route_config(settings):
     return {"rules": route_rules, "rule_set": rule_sets, "final": "proxy-out"}
 
 
-def _build_outbound_config(server_config, settings, is_final_outbound=False, next_outbound_tag=None):
+def _build_outbound_config(
+    server_config, settings, is_final_outbound=False, next_outbound_tag=None
+):
     protocol = server_config.get("protocol")
     sni_value = server_config.get("sni") or server_config.get("server")
 
@@ -276,8 +264,7 @@ def _build_outbound_config(server_config, settings, is_final_outbound=False, nex
                 "alpn": ["h2", "http/1.1"],
             }
             if fingerprint := server_config.get("fp"):
-                tls_config["utls"] = {
-                    "enabled": True, "fingerprint": fingerprint}
+                tls_config["utls"] = {"enabled": True, "fingerprint": fingerprint}
             if settings.get("tls_fragment_enabled"):
                 try:
                     size_str = settings.get("tls_fragment_size", "10-100")
@@ -413,27 +400,34 @@ def _build_outbound_config(server_config, settings, is_final_outbound=False, nex
         outbound.pop("server", None)
         outbound.pop("server_port", None)
 
-        outbound.update({
-            "local_address": [server_config.get("local_address")],
-            "private_key": server_config.get("private_key"),
-            "mtu": 1420,  # A common MTU for WireGuard
-            "peers": [
-                {
-                    "server": server_config.get("server"),
-                    "server_port": server_config.get("port"),
-                    "public_key": server_config.get("public_key"),
-                    "preshared_key": server_config.get("preshared_key"),
-                    "allowed_ips": [ip.strip() for ip in server_config.get("allowed_ips", "").split(",")],
-                }
-            ]
-        })
+        outbound.update(
+            {
+                "local_address": [server_config.get("local_address")],
+                "private_key": server_config.get("private_key"),
+                "mtu": 1420,  # A common MTU for WireGuard
+                "peers": [
+                    {
+                        "server": server_config.get("server"),
+                        "server_port": server_config.get("port"),
+                        "public_key": server_config.get("public_key"),
+                        "preshared_key": server_config.get("preshared_key"),
+                        "allowed_ips": [
+                            ip.strip()
+                            for ip in server_config.get("allowed_ips", "").split(",")
+                        ],
+                    }
+                ],
+            }
+        )
 
     elif protocol == "ssh":
-        outbound.update({
-            "user": server_config.get("user"),
-            "password": server_config.get("password"),
-            # You can add more options like private_key if needed
-        })
+        outbound.update(
+            {
+                "user": server_config.get("user"),
+                "password": server_config.get("password"),
+                # You can add more options like private_key if needed
+            }
+        )
         # SSH does not typically use multiplexing in this context
 
     return outbound
@@ -449,8 +443,8 @@ def _build_chained_outbounds(chain_config, settings):
         return []
 
     for i, server_config in enumerate(nodes):
-        is_first_node = (i == 0)
-        is_last_node = (i == num_nodes - 1)
+        is_first_node = i == 0
+        is_last_node = i == num_nodes - 1
 
         # The first node in the chain gets the 'proxy-out' tag
         tag = "proxy-out" if is_first_node else f"chain-node-{i}"
@@ -462,7 +456,11 @@ def _build_chained_outbounds(chain_config, settings):
 
         # Build the individual outbound config
         outbound_node = _build_outbound_config(
-            server_config, settings, is_final_outbound=is_last_node, next_outbound_tag=next_outbound_tag)
+            server_config,
+            settings,
+            is_final_outbound=is_last_node,
+            next_outbound_tag=next_outbound_tag,
+        )
 
         # Set the tag for the current node
         outbound_node["tag"] = tag

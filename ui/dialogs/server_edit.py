@@ -26,8 +26,7 @@ class ServerEditDialog(QDialog):
         # Common fields
         self.add_form_row(form_layout, self.tr("Name"), "name")
         self.add_form_row(form_layout, self.tr("Server"), "server")
-        self.add_form_row(form_layout, self.tr(
-            "Port"), "port", is_numeric=True)
+        self.add_form_row(form_layout, self.tr("Port"), "port", is_numeric=True)
 
         protocol = self.config.get("protocol")
 
@@ -46,19 +45,15 @@ class ServerEditDialog(QDialog):
             self.add_form_row(form_layout, self.tr("WS Path"), "ws_path")
 
         if protocol == "wireguard":
-            self.add_form_row(form_layout, self.tr(
-                "Private Key"), "private_key")
+            self.add_form_row(form_layout, self.tr("Private Key"), "private_key")
             self.add_form_row(form_layout, self.tr("Public Key"), "public_key")
-            self.add_form_row(form_layout, self.tr(
-                "Preshared Key"), "preshared_key")
-            self.add_form_row(form_layout, self.tr(
-                "Local Address"), "local_address")
+            self.add_form_row(form_layout, self.tr("Preshared Key"), "preshared_key")
+            self.add_form_row(form_layout, self.tr("Local Address"), "local_address")
 
         main_layout.addLayout(form_layout)
 
         # Buttons
-        button_box = QDialogButtonBox(
-            QDialogButtonBox.Save | QDialogButtonBox.Cancel)
+        button_box = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
         button_box.accepted.connect(self.on_save)
         button_box.rejected.connect(self.reject)
         main_layout.addWidget(button_box)

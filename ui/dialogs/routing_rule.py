@@ -13,8 +13,7 @@ class RoutingRuleDialog(QDialog):
     def __init__(self, parent=None, rule=None):
         super().__init__(parent)
         self.rule = rule
-        self.setWindowTitle(self.tr("Edit Rule")
-                            if rule else self.tr("Add Rule"))
+        self.setWindowTitle(self.tr("Edit Rule") if rule else self.tr("Add Rule"))
         self.setMinimumWidth(400)
         self.setMaximumWidth(600)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
@@ -22,13 +21,11 @@ class RoutingRuleDialog(QDialog):
         self.layout = QFormLayout(self)
 
         self.type_combo = QComboBox()
-        self.type_combo.addItems(
-            ["domain", "ip", "process", "geosite", "geoip"])
+        self.type_combo.addItems(["domain", "ip", "process", "geosite", "geoip"])
         self.layout.addRow(self.tr("Type:"), self.type_combo)
 
         self.value_edit = QLineEdit()
-        self.value_edit.setPlaceholderText(
-            self.tr("e.g., example.com or 8.8.8.8"))
+        self.value_edit.setPlaceholderText(self.tr("e.g., example.com or 8.8.8.8"))
         self.layout.addRow(self.tr("Value:"), self.value_edit)
 
         self.action_combo = QComboBox()
@@ -57,5 +54,5 @@ class RoutingRuleDialog(QDialog):
         return {
             "type": self.type_combo.currentText(),
             "value": self.value_edit.text().strip(),
-            "action": self.action_combo.currentText()
+            "action": self.action_combo.currentText(),
         }

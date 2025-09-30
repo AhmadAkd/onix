@@ -21,8 +21,9 @@ class SubscriptionEditDialog(QDialog):
     def __init__(self, parent=None, sub=None):
         super().__init__(parent)
         self.sub = sub
-        self.setWindowTitle(self.tr("Edit Subscription")
-                            if sub else self.tr("Add Subscription"))
+        self.setWindowTitle(
+            self.tr("Edit Subscription") if sub else self.tr("Add Subscription")
+        )
         self.setMinimumWidth(450)
 
         layout = QFormLayout(self)
@@ -38,7 +39,8 @@ class SubscriptionEditDialog(QDialog):
         layout.addRow(self.tr("URL:"), self.url_edit)
 
         self.button_box = QDialogButtonBox(
-            QDialogButtonBox.Save | QDialogButtonBox.Cancel)
+            QDialogButtonBox.Save | QDialogButtonBox.Cancel
+        )
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
         layout.addRow(self.button_box)
@@ -51,7 +53,7 @@ class SubscriptionEditDialog(QDialog):
         return {
             "name": name,
             "url": url,
-            "enabled": self.sub.get("enabled", True) if self.sub else True
+            "enabled": self.sub.get("enabled", True) if self.sub else True,
         }
 
 
@@ -69,9 +71,9 @@ class SubscriptionManagerDialog(QDialog):
 
         # Update All button at the top
         update_all_layout = QHBoxLayout()
-        self.update_all_button = QPushButton(
-            self.tr("Update All Subscriptions"))
-        self.update_all_button.setStyleSheet("""
+        self.update_all_button = QPushButton(self.tr("Update All Subscriptions"))
+        self.update_all_button.setStyleSheet(
+            """
             QPushButton {
                 background-color: #6366f1;
                 color: white;
@@ -87,7 +89,8 @@ class SubscriptionManagerDialog(QDialog):
             QPushButton:pressed {
                 background-color: #4f46e5;
             }
-        """)
+        """
+        )
         self.update_all_button.clicked.connect(self.update_all_subscriptions)
         update_all_layout.addWidget(self.update_all_button)
         update_all_layout.addStretch()
@@ -122,9 +125,11 @@ class SubscriptionManagerDialog(QDialog):
             checkbox = QCheckBox("")
             checkbox.setChecked(sub.get("enabled", True))
             checkbox.stateChanged.connect(
-                lambda state, index=i: self.toggle_subscription(index, state))
+                lambda state, index=i: self.toggle_subscription(index, state)
+            )
             # Make checkbox bigger and more visible
-            checkbox.setStyleSheet("""
+            checkbox.setStyleSheet(
+                """
                 QCheckBox::indicator {
                     width: 20px;
                     height: 20px;
@@ -140,14 +145,16 @@ class SubscriptionManagerDialog(QDialog):
                 QCheckBox::indicator:hover {
                     border-color: #6366f1;
                 }
-            """)
+            """
+            )
 
             name_label = QLabel(sub.get("name"))
             name_label.setStyleSheet("font-size: 11pt;")  # Larger font
 
             edit_button = QPushButton(self.tr("Edit"))
             edit_button.setFixedWidth(100)
-            edit_button.setStyleSheet("""
+            edit_button.setStyleSheet(
+                """
                 QPushButton {
                     background-color: #6366f1;
                     color: white;
@@ -164,13 +171,16 @@ class SubscriptionManagerDialog(QDialog):
                 QPushButton:pressed {
                     background-color: #4f46e5;
                 }
-            """)
+            """
+            )
             edit_button.clicked.connect(
-                lambda _, index=i: self.edit_subscription(index))
+                lambda _, index=i: self.edit_subscription(index)
+            )
 
             update_button = QPushButton(self.tr("Update"))
             update_button.setFixedWidth(100)
-            update_button.setStyleSheet("""
+            update_button.setStyleSheet(
+                """
                 QPushButton {
                     background-color: #10b981;
                     color: white;
@@ -187,13 +197,16 @@ class SubscriptionManagerDialog(QDialog):
                 QPushButton:pressed {
                     background-color: #047857;
                 }
-            """)
+            """
+            )
             update_button.clicked.connect(
-                lambda _, index=i: self.update_single_subscription(index))
+                lambda _, index=i: self.update_single_subscription(index)
+            )
 
             delete_button = QPushButton(self.tr("Delete"))
             delete_button.setFixedWidth(100)
-            delete_button.setStyleSheet("""
+            delete_button.setStyleSheet(
+                """
                 QPushButton {
                     background-color: #ef4444;
                     color: white;
@@ -210,9 +223,11 @@ class SubscriptionManagerDialog(QDialog):
                 QPushButton:pressed {
                     background-color: #b91c1c;
                 }
-            """)
+            """
+            )
             delete_button.clicked.connect(
-                lambda _, index=i: self.delete_subscription(index))
+                lambda _, index=i: self.delete_subscription(index)
+            )
 
             layout.addWidget(checkbox)
             layout.addWidget(name_label)
@@ -237,7 +252,7 @@ class SubscriptionManagerDialog(QDialog):
             self.sub_list_widget.setItemWidget(list_item, item_widget)
 
     def toggle_subscription(self, index, state):
-        self.subscriptions[index]["enabled"] = (state == Qt.Checked)
+        self.subscriptions[index]["enabled"] = state == Qt.Checked
 
     def add_subscription(self):
         dialog = SubscriptionEditDialog(self)
@@ -257,8 +272,13 @@ class SubscriptionManagerDialog(QDialog):
 
     def delete_subscription(self, index):
         sub_name = self.subscriptions[index].get("name")
-        reply = QMessageBox.question(self, self.tr("Confirm Deletion"),
-                                     self.tr("Are you sure you want to delete subscription '{}'?").format(sub_name))
+        reply = QMessageBox.question(
+            self,
+            self.tr("Confirm Deletion"),
+            self.tr("Are you sure you want to delete subscription '{}'?").format(
+                sub_name
+            ),
+        )
         if reply == QMessageBox.Yes:
             del self.subscriptions[index]
             self.populate_list()
@@ -269,44 +289,67 @@ class SubscriptionManagerDialog(QDialog):
             sub = self.subscriptions[index]
             if sub.get("enabled", True):
                 # Check if parent has subscription manager
-                if hasattr(self.parent(), 'subscription_manager'):
+                if hasattr(self.parent(), "subscription_manager"):
                     if self.parent().subscription_manager.is_update_in_progress():
-                        QMessageBox.warning(self, self.tr("Update In Progress"),
-                                            self.tr("Another subscription update is already running. Please wait."))
+                        QMessageBox.warning(
+                            self,
+                            self.tr("Update In Progress"),
+                            self.tr(
+                                "Another subscription update is already running. Please wait."
+                            ),
+                        )
                         return
-                        
+
                 # Emit signal to parent to update this specific subscription
-                if hasattr(self.parent(), 'update_single_subscription'):
+                if hasattr(self.parent(), "update_single_subscription"):
                     self.parent().update_single_subscription(sub)
                 else:
-                    QMessageBox.information(self, self.tr("Update"),
-                                            self.tr("Updating subscription: {}").format(sub.get("name", "Unknown")))
+                    QMessageBox.information(
+                        self,
+                        self.tr("Update"),
+                        self.tr("Updating subscription: {}").format(
+                            sub.get("name", "Unknown")
+                        ),
+                    )
             else:
-                QMessageBox.warning(self, self.tr("Update"),
-                                    self.tr("Subscription '{}' is disabled. Please enable it first.").format(sub.get("name", "Unknown")))
+                QMessageBox.warning(
+                    self,
+                    self.tr("Update"),
+                    self.tr(
+                        "Subscription '{}' is disabled. Please enable it first."
+                    ).format(sub.get("name", "Unknown")),
+                )
 
     def update_all_subscriptions(self):
         """Update all enabled subscriptions."""
-        enabled_subs = [
-            sub for sub in self.subscriptions if sub.get("enabled", True)]
+        enabled_subs = [sub for sub in self.subscriptions if sub.get("enabled", True)]
         if not enabled_subs:
-            QMessageBox.information(self, self.tr("Update"),
-                                    self.tr("No enabled subscriptions to update."))
+            QMessageBox.information(
+                self, self.tr("Update"), self.tr("No enabled subscriptions to update.")
+            )
             return
 
         # Check if parent has subscription manager
-        if hasattr(self.parent(), 'subscription_manager'):
+        if hasattr(self.parent(), "subscription_manager"):
             if self.parent().subscription_manager.is_update_in_progress():
-                QMessageBox.warning(self, self.tr("Update In Progress"),
-                                    self.tr("Another subscription update is already running. Please wait."))
+                QMessageBox.warning(
+                    self,
+                    self.tr("Update In Progress"),
+                    self.tr(
+                        "Another subscription update is already running. Please wait."
+                    ),
+                )
                 return
 
         # Emit signal to parent to update all subscriptions
-        if hasattr(self.parent(), 'update_all_subscriptions'):
+        if hasattr(self.parent(), "update_all_subscriptions"):
             self.parent().update_all_subscriptions()
         else:
-            QMessageBox.information(self, self.tr("Update"),
-                                    self.tr("Updating {} subscriptions...").format(len(enabled_subs)))
+            QMessageBox.information(
+                self,
+                self.tr("Update"),
+                self.tr("Updating {} subscriptions...").format(len(enabled_subs)),
+            )
 
     def get_subscriptions(self):
         return self.subscriptions

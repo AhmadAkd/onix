@@ -31,7 +31,8 @@ class AboutDialog(QDialog):
         layout.addWidget(version_label)
 
         github_link = QLabel(
-            f'<a href="{GITHUB_RELEASES_URL}">{self.tr("GitHub Releases Page")}</a>')
+            f'<a href="{GITHUB_RELEASES_URL}">{self.tr("GitHub Releases Page")}</a>'
+        )
         github_link.setOpenExternalLinks(True)
         github_link.setAlignment(Qt.AlignCenter)
         layout.addWidget(github_link)

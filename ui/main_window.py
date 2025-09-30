@@ -4,15 +4,50 @@ import mss
 import numpy as np
 from pyzbar.pyzbar import decode
 from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QLabel, QWidget, QHBoxLayout, QVBoxLayout,
-    QListWidget, QStackedWidget, QListWidgetItem, QPushButton, QSystemTrayIcon, QGraphicsOpacityEffect,
-    QMenu, QMessageBox, QDialog, QFileDialog,
-    QTableWidgetItem, QSizePolicy
+    QApplication,
+    QMainWindow,
+    QLabel,
+    QWidget,
+    QHBoxLayout,
+    QVBoxLayout,
+    QListWidget,
+    QStackedWidget,
+    QListWidgetItem,
+    QPushButton,
+    QSystemTrayIcon,
+    QGraphicsOpacityEffect,
+    QMenu,
+    QMessageBox,
+    QDialog,
+    QFileDialog,
+    QTableWidgetItem,
+    QSizePolicy,
 )
-from PySide6.QtCore import Qt, QSize, QPropertyAnimation, QPoint, QEasingCurve, QParallelAnimationGroup, QTimer, QByteArray, QRect
-from PySide6.QtGui import QIcon, QAction, QPixmap, QPalette, QMovie, QPainter, QTextDocument, QTextCursor, QColor, QFont
+from PySide6.QtCore import (
+    Qt,
+    QSize,
+    QPropertyAnimation,
+    QPoint,
+    QEasingCurve,
+    QParallelAnimationGroup,
+    QTimer,
+    QByteArray,
+    QRect,
+)
+from PySide6.QtGui import (
+    QIcon,
+    QAction,
+    QPixmap,
+    QPalette,
+    QMovie,
+    QPainter,
+    QTextDocument,
+    QTextCursor,
+    QColor,
+    QFont,
+)
 import resources_rc  # noqa: F401
-from constants import (TRAY_SHOW, TRAY_QUIT, LogLevel, PROXY_HOST, PROXY_PORT)
+from constants import TRAY_SHOW, TRAY_QUIT, LogLevel, PROXY_HOST, PROXY_PORT
 from ui.signals import ManagerSignals
 from ui.views.connection_view import create_connection_view
 from ui.views.logs_view import create_logs_view
@@ -43,8 +78,8 @@ class PySideUI(QMainWindow):
             # ... (existing colors)
             LogLevel.INFO: self.palette().color(QPalette.WindowText).name(),
             LogLevel.WARNING: "#FFC107",  # Amber
-            LogLevel.ERROR: "#F44336",    # Red
-            LogLevel.DEBUG: "#888888",    # Gray
+            LogLevel.ERROR: "#F44336",  # Red
+            LogLevel.DEBUG: "#888888",  # Gray
             LogLevel.SUCCESS: "#4CAF50",  # Green
         }
 
@@ -66,18 +101,18 @@ class PySideUI(QMainWindow):
             "show_error": self.signals.show_error_message.emit,
         }
         self.subscription_manager = SubscriptionManager(
-            server_manager, self.settings, subscription_callbacks)
+            server_manager, self.settings, subscription_callbacks
+        )
 
         # Initialize speed test and auto-failover services
         self.speed_test_service = SpeedTestService(self.log)
         self.auto_failover_service = AutoFailoverService(self.log)
         # Connect signals to slots
-        self.signals.ping_result.connect(
-            self.on_ping_result, Qt.QueuedConnection)
-        self.signals.ping_started.connect(
-            self.on_ping_started, Qt.QueuedConnection)
+        self.signals.ping_result.connect(self.on_ping_result, Qt.QueuedConnection)
+        self.signals.ping_started.connect(self.on_ping_started, Qt.QueuedConnection)
         self.signals.health_check_progress.connect(
-            self.on_health_check_progress, Qt.QueuedConnection)
+            self.on_health_check_progress, Qt.QueuedConnection
+        )
         self.signals.update_started.connect(self.on_update_started)
         self.signals.log_message.connect(self._log_to_widget)
         self.signals.status_changed.connect(self.on_status_change)
@@ -90,8 +125,7 @@ class PySideUI(QMainWindow):
         self.signals.save_requested.connect(self._request_save_settings)
         # Connect message box signals
         self.signals.show_info_message.connect(self.show_info_message_box)
-        self.signals.show_warning_message.connect(
-            self.show_warning_message_box)
+        self.signals.show_warning_message.connect(self.show_warning_message_box)
         self.signals.show_error_message.connect(self.show_error_message_box)
         self.signals.ask_yes_no_question.connect(self.handle_ask_yes_no)
         self.signals.schedule_task_signal.connect(self._handle_schedule_task)
@@ -145,8 +179,7 @@ class PySideUI(QMainWindow):
         main_layout.addWidget(self.nav_rail)
 
         content_container = QWidget()
-        content_container.setSizePolicy(
-            QSizePolicy.Expanding, QSizePolicy.Expanding)
+        content_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         content_layout = QVBoxLayout(content_container)
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
@@ -171,22 +204,26 @@ class PySideUI(QMainWindow):
 
         # Status icon with modern styling
         self.connection_status_icon = QLabel("●")
-        self.connection_status_icon.setStyleSheet("""
+        self.connection_status_icon.setStyleSheet(
+            """
             color: #f59e0b; 
             font-size: 14px;
             font-weight: bold;
             background-color: #fef3c7;
             padding: 3px 6px;
             border-radius: 4px;
-        """)
+        """
+        )
 
         # Status text with modern styling
         self.connection_status_text = QLabel(self.tr("Disconnected"))
-        self.connection_status_text.setStyleSheet("""
+        self.connection_status_text.setStyleSheet(
+            """
             font-weight: 600; 
             font-size: 12px;
             color: #374151;
-        """)
+        """
+        )
 
         # Connecting animation
         self.connecting_spinner_label = QLabel()
@@ -206,51 +243,56 @@ class PySideUI(QMainWindow):
 
         # IP label with responsive styling
         self.ip_label = QLabel(self.tr("IP: N/A"))
-        self.ip_label.setStyleSheet("""
+        self.ip_label.setStyleSheet(
+            """
             font-size: 10px;
             color: #6b7280;
             background-color: #f3f4f6;
             padding: 3px 6px;
             border-radius: 4px;
-        """)
+        """
+        )
         self.ip_label.setMinimumWidth(80)  # Minimum width for responsiveness
 
         # Latency label with responsive styling
         self.latency_label = QLabel(self.tr("Latency: N/A"))
-        self.latency_label.setStyleSheet("""
+        self.latency_label.setStyleSheet(
+            """
             font-size: 10px;
             color: #6b7280;
             background-color: #f3f4f6;
             padding: 3px 6px;
             border-radius: 4px;
-        """)
-        self.latency_label.setMinimumWidth(
-            100)  # Minimum width for responsiveness
+        """
+        )
+        self.latency_label.setMinimumWidth(100)  # Minimum width for responsiveness
 
         # Speed labels with responsive styling
         self.down_speed_label = QLabel("↓ 0 KB/s")
-        self.down_speed_label.setStyleSheet("""
+        self.down_speed_label.setStyleSheet(
+            """
             font-size: 10px;
             color: #10b981;
             background-color: #d1fae5;
             padding: 3px 6px;
             border-radius: 4px;
             font-weight: 500;
-        """)
-        self.down_speed_label.setMinimumWidth(
-            80)  # Minimum width for responsiveness
+        """
+        )
+        self.down_speed_label.setMinimumWidth(80)  # Minimum width for responsiveness
 
         self.up_speed_label = QLabel("↑ 0 KB/s")
-        self.up_speed_label.setStyleSheet("""
+        self.up_speed_label.setStyleSheet(
+            """
             font-size: 10px;
             color: #3b82f6;
             background-color: #dbeafe;
             padding: 3px 6px;
             border-radius: 4px;
             font-weight: 500;
-        """)
-        self.up_speed_label.setMinimumWidth(
-            80)  # Minimum width for responsiveness
+        """
+        )
+        self.up_speed_label.setMinimumWidth(80)  # Minimum width for responsiveness
 
         network_section.addWidget(self.down_speed_label)
         network_section.addWidget(self.up_speed_label)
@@ -259,7 +301,8 @@ class PySideUI(QMainWindow):
 
         # Start/Stop button with responsive styling
         self.start_stop_button = QPushButton(self.tr("Start"))
-        self.start_stop_button.setStyleSheet("""
+        self.start_stop_button.setStyleSheet(
+            """
             QPushButton {
                 background-color: #10b981;
                 color: white;
@@ -276,9 +319,9 @@ class PySideUI(QMainWindow):
             QPushButton:pressed {
                 background-color: #047857;
             }
-        """)
-        self.start_stop_button.setMaximumWidth(
-            120)  # Maximum width for responsiveness
+        """
+        )
+        self.start_stop_button.setMaximumWidth(120)  # Maximum width for responsiveness
         self.start_stop_button.clicked.connect(self.start_stop_toggle)
 
         # Add sections to main layout with responsive behavior
@@ -298,8 +341,12 @@ class PySideUI(QMainWindow):
         return status_bar
 
     def setup_views(self):
-        nav_items = [(self.tr("Connection"), ":/icons/link.svg"), (self.tr("Routing"), ":/icons/git-merge.svg"),
-                     (self.tr("Logs"), ":/icons/file-text.svg"), (self.tr("Settings"), ":/icons/settings.svg")]
+        nav_items = [
+            (self.tr("Connection"), ":/icons/link.svg"),
+            (self.tr("Routing"), ":/icons/git-merge.svg"),
+            (self.tr("Logs"), ":/icons/file-text.svg"),
+            (self.tr("Settings"), ":/icons/settings.svg"),
+        ]
         for name, icon_name in nav_items:
             item = QListWidgetItem(QIcon(icon_name), name)
             item.setTextAlignment(Qt.AlignCenter)
@@ -324,18 +371,24 @@ class PySideUI(QMainWindow):
         log_file_path = SINGBOX_LOG_FILE
 
         if not os.path.exists(log_file_path):
-            QMessageBox.information(self, self.tr("Log File"),
-                                    self.tr("Core log file does not exist. Nothing to clear."))
+            QMessageBox.information(
+                self,
+                self.tr("Log File"),
+                self.tr("Core log file does not exist. Nothing to clear."),
+            )
             self.log(
-                self.tr("Core log file not found, nothing to clear."), LogLevel.INFO)
+                self.tr("Core log file not found, nothing to clear."), LogLevel.INFO
+            )
             return
 
         reply = QMessageBox.question(
             self,
             self.tr("Confirm Clear"),
-            self.tr("""Are you sure you want to delete the core log file?\n({})
+            self.tr(
+                """Are you sure you want to delete the core log file?\n({})
 
-This action cannot be undone.""").format(log_file_path),
+This action cannot be undone."""
+            ).format(log_file_path),
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No,
         )
@@ -343,13 +396,18 @@ This action cannot be undone.""").format(log_file_path),
         if reply == QMessageBox.Yes:
             try:
                 os.remove(log_file_path)
-                self.log(self.tr("Successfully deleted {}").format(
-                    log_file_path), LogLevel.SUCCESS)
+                self.log(
+                    self.tr("Successfully deleted {}").format(log_file_path),
+                    LogLevel.SUCCESS,
+                )
             except OSError as e:
-                self.log(self.tr("Failed to delete log file: {}").format(
-                    e), LogLevel.ERROR)
+                self.log(
+                    self.tr("Failed to delete log file: {}").format(e), LogLevel.ERROR
+                )
 
-    def _validate_and_save_setting(self, widget, setting_key, setting_name, validation_type="int"):
+    def _validate_and_save_setting(
+        self, widget, setting_key, setting_name, validation_type="int"
+    ):
         """
         Validates the input from a widget, saves it to settings, and shows an error if invalid.
         Returns True on success, False on failure.
@@ -359,7 +417,7 @@ This action cannot be undone.""").format(log_file_path),
             if validation_type == "int":
                 self.settings[setting_key] = int(value)
             elif validation_type == "range":
-                parts = [int(x.strip()) for x in value.split('-')]
+                parts = [int(x.strip()) for x in value.split("-")]
                 if len(parts) != 2:
                     raise ValueError("Range must be in 'min-max' format.")
                 self.settings[setting_key] = value
@@ -370,8 +428,16 @@ This action cannot be undone.""").format(log_file_path),
             QMessageBox.warning(
                 self,
                 self.tr("Invalid Input"),
-                self.tr("The value for '{}' is invalid.\n"
-                        "Please enter a valid {}").format(setting_name, self.tr('number') if validation_type == 'int' else self.tr('range (e.g., 10-100)'))
+                self.tr(
+                    "The value for '{}' is invalid.\n" "Please enter a valid {}"
+                ).format(
+                    setting_name,
+                    (
+                        self.tr("number")
+                        if validation_type == "int"
+                        else self.tr("range (e.g., 10-100)")
+                    ),
+                ),
             )
             widget.setFocus()  # Focus the problematic field
             return False
@@ -426,26 +492,28 @@ This action cannot be undone.""").format(log_file_path),
         self.settings["tun_enabled"] = self.tun_checkbox.isChecked()
 
         # Health Check Settings
-        if hasattr(self, 'health_check_interval_combo'):
+        if hasattr(self, "health_check_interval_combo"):
             interval_text = self.health_check_interval_combo.currentText()
-            self.settings["health_check_interval"] = int(
-                interval_text.split()[0])
-        if hasattr(self, 'health_check_ema_combo'):
+            self.settings["health_check_interval"] = int(interval_text.split()[0])
+        if hasattr(self, "health_check_ema_combo"):
             ema_text = self.health_check_ema_combo.currentText()
-            self.settings["health_check_ema_alpha"] = float(
-                ema_text.split()[0])
-        if hasattr(self, 'health_check_backoff_combo'):
+            self.settings["health_check_ema_alpha"] = float(ema_text.split()[0])
+        if hasattr(self, "health_check_backoff_combo"):
             backoff_text = self.health_check_backoff_combo.currentText()
-            self.settings["health_check_backoff_base"] = int(
-                backoff_text.split()[0])
-        if hasattr(self, 'health_check_auto_start'):
-            self.settings["health_check_auto_start"] = self.health_check_auto_start.isChecked(
+            self.settings["health_check_backoff_base"] = int(backoff_text.split()[0])
+        if hasattr(self, "health_check_auto_start"):
+            self.settings["health_check_auto_start"] = (
+                self.health_check_auto_start.isChecked()
             )
-        if hasattr(self, 'auto_failover_checkbox'):
-            self.settings["auto_failover_enabled"] = self.auto_failover_checkbox.isChecked(
+        if hasattr(self, "auto_failover_checkbox"):
+            self.settings["auto_failover_enabled"] = (
+                self.auto_failover_checkbox.isChecked()
             )
-        self.settings["appearance_mode"] = {self.tr("System"): "System", self.tr("Light"): "Light", self.tr("Dark"): "Dark"}.get(
-            self.appearance_mode_combo.currentText(), "System")
+        self.settings["appearance_mode"] = {
+            self.tr("System"): "System",
+            self.tr("Light"): "Light",
+            self.tr("Dark"): "Dark",
+        }.get(self.appearance_mode_combo.currentText(), "System")
 
         theme_name = self.theme_combo.currentText()
         for code, name in self.theme_names.items():
@@ -461,15 +529,37 @@ This action cannot be undone.""").format(log_file_path),
         self.settings["active_core"] = self.core_selector_combo.currentText()
 
         # Validate and save numeric/range settings
-        if not self._validate_and_save_setting(self.mux_max_streams_entry, "mux_max_streams", "Mux Max Streams", "int"):
+        if not self._validate_and_save_setting(
+            self.mux_max_streams_entry, "mux_max_streams", "Mux Max Streams", "int"
+        ):
             return
-        if not self._validate_and_save_setting(self.tls_fragment_size_entry, "tls_fragment_size", "TLS Fragment Size", "range"):
+        if not self._validate_and_save_setting(
+            self.tls_fragment_size_entry,
+            "tls_fragment_size",
+            "TLS Fragment Size",
+            "range",
+        ):
             return
-        if not self._validate_and_save_setting(self.tls_fragment_sleep_entry, "tls_fragment_sleep", "TLS Fragment Sleep", "range"):
+        if not self._validate_and_save_setting(
+            self.tls_fragment_sleep_entry,
+            "tls_fragment_sleep",
+            "TLS Fragment Sleep",
+            "range",
+        ):
             return
-        if not self._validate_and_save_setting(self.hysteria_up_speed_entry, "hysteria_up_mbps", "Hysteria Upload Speed", "int"):
+        if not self._validate_and_save_setting(
+            self.hysteria_up_speed_entry,
+            "hysteria_up_mbps",
+            "Hysteria Upload Speed",
+            "int",
+        ):
             return
-        if not self._validate_and_save_setting(self.hysteria_down_speed_entry, "hysteria_down_mbps", "Hysteria Download Speed", "int"):
+        if not self._validate_and_save_setting(
+            self.hysteria_down_speed_entry,
+            "hysteria_down_mbps",
+            "Hysteria Download Speed",
+            "int",
+        ):
             return
 
         # Save other settings that don't need complex validation
@@ -479,118 +569,145 @@ This action cannot be undone.""").format(log_file_path),
         self.settings["mux_padding"] = self.mux_padding_checkbox.isChecked()
 
         # Save log level
-        if hasattr(self, 'log_level_combo'):
+        if hasattr(self, "log_level_combo"):
             log_level_map = {
                 self.tr("Debug"): "Debug",
                 self.tr("Info"): "Info",
                 self.tr("Warning"): "Warning",
-                self.tr("Error"): "Error"
+                self.tr("Error"): "Error",
             }
             self.settings["log_level"] = log_level_map.get(
-                self.log_level_combo.currentText(), "Info")
+                self.log_level_combo.currentText(), "Info"
+            )
 
         # Save security settings
-        if hasattr(self, 'enable_ipv6_checkbox'):
+        if hasattr(self, "enable_ipv6_checkbox"):
             self.settings["enable_ipv6"] = self.enable_ipv6_checkbox.isChecked()
-        if hasattr(self, 'allow_insecure_checkbox'):
+        if hasattr(self, "allow_insecure_checkbox"):
             self.settings["allow_insecure"] = self.allow_insecure_checkbox.isChecked()
-        if hasattr(self, 'cert_verification_checkbox'):
-            self.settings["cert_verification"] = self.cert_verification_checkbox.isChecked(
+        if hasattr(self, "cert_verification_checkbox"):
+            self.settings["cert_verification"] = (
+                self.cert_verification_checkbox.isChecked()
             )
-        if hasattr(self, 'custom_ca_entry'):
+        if hasattr(self, "custom_ca_entry"):
             self.settings["custom_ca_cert"] = self.custom_ca_entry.text()
-        if hasattr(self, 'cipher_suites_entry'):
+        if hasattr(self, "cipher_suites_entry"):
             self.settings["cipher_suites"] = self.cipher_suites_entry.text()
-        if hasattr(self, 'security_level_combo'):
+        if hasattr(self, "security_level_combo"):
             security_level_map = {
                 self.tr("High"): "High",
                 self.tr("Medium"): "Medium",
-                self.tr("Low"): "Low"
+                self.tr("Low"): "Low",
             }
             self.settings["security_level"] = security_level_map.get(
-                self.security_level_combo.currentText(), "High")
-        if hasattr(self, 'connection_timeout_entry'):
+                self.security_level_combo.currentText(), "High"
+            )
+        if hasattr(self, "connection_timeout_entry"):
             self.settings["connection_timeout"] = int(
-                self.connection_timeout_entry.text())
-        if hasattr(self, 'retry_attempts_entry'):
-            self.settings["retry_attempts"] = int(
-                self.retry_attempts_entry.text())
-        if hasattr(self, 'keep_alive_checkbox'):
+                self.connection_timeout_entry.text()
+            )
+        if hasattr(self, "retry_attempts_entry"):
+            self.settings["retry_attempts"] = int(self.retry_attempts_entry.text())
+        if hasattr(self, "keep_alive_checkbox"):
             self.settings["keep_alive"] = self.keep_alive_checkbox.isChecked()
 
         # Save performance settings
-        if hasattr(self, 'connection_pool_size_entry'):
+        if hasattr(self, "connection_pool_size_entry"):
             self.settings["connection_pool_size"] = int(
-                self.connection_pool_size_entry.text())
-        if hasattr(self, 'thread_pool_size_entry'):
-            self.settings["thread_pool_size"] = int(
-                self.thread_pool_size_entry.text())
-        if hasattr(self, 'buffer_size_entry'):
-            self.settings["buffer_size"] = int(self.buffer_size_entry.text())
-        if hasattr(self, 'bandwidth_limit_checkbox'):
-            self.settings["bandwidth_limit_enabled"] = self.bandwidth_limit_checkbox.isChecked(
+                self.connection_pool_size_entry.text()
             )
-        if hasattr(self, 'upload_speed_limit_entry'):
+        if hasattr(self, "thread_pool_size_entry"):
+            self.settings["thread_pool_size"] = int(self.thread_pool_size_entry.text())
+        if hasattr(self, "buffer_size_entry"):
+            self.settings["buffer_size"] = int(self.buffer_size_entry.text())
+        if hasattr(self, "bandwidth_limit_checkbox"):
+            self.settings["bandwidth_limit_enabled"] = (
+                self.bandwidth_limit_checkbox.isChecked()
+            )
+        if hasattr(self, "upload_speed_limit_entry"):
             self.settings["upload_speed_limit"] = int(
-                self.upload_speed_limit_entry.text())
-        if hasattr(self, 'download_speed_limit_entry'):
+                self.upload_speed_limit_entry.text()
+            )
+        if hasattr(self, "download_speed_limit_entry"):
             self.settings["download_speed_limit"] = int(
-                self.download_speed_limit_entry.text())
-        if hasattr(self, 'connection_multiplexing_checkbox'):
-            self.settings["connection_multiplexing"] = self.connection_multiplexing_checkbox.isChecked()
-        if hasattr(self, 'compression_checkbox'):
+                self.download_speed_limit_entry.text()
+            )
+        if hasattr(self, "connection_multiplexing_checkbox"):
+            self.settings["connection_multiplexing"] = (
+                self.connection_multiplexing_checkbox.isChecked()
+            )
+        if hasattr(self, "compression_checkbox"):
             self.settings["compression_enabled"] = self.compression_checkbox.isChecked()
-        if hasattr(self, 'fast_open_checkbox'):
+        if hasattr(self, "fast_open_checkbox"):
             self.settings["tcp_fast_open"] = self.fast_open_checkbox.isChecked()
-        if hasattr(self, 'congestion_control_combo'):
+        if hasattr(self, "congestion_control_combo"):
             congestion_map = {
                 self.tr("Cubic"): "Cubic",
                 self.tr("BBR"): "BBR",
                 self.tr("BBR2"): "BBR2",
-                self.tr("Reno"): "Reno"
+                self.tr("Reno"): "Reno",
             }
             self.settings["congestion_control"] = congestion_map.get(
-                self.congestion_control_combo.currentText(), "Cubic")
-        if hasattr(self, 'enable_statistics_checkbox'):
-            self.settings["enable_statistics"] = self.enable_statistics_checkbox.isChecked(
+                self.congestion_control_combo.currentText(), "Cubic"
             )
-        if hasattr(self, 'statistics_interval_entry'):
+        if hasattr(self, "enable_statistics_checkbox"):
+            self.settings["enable_statistics"] = (
+                self.enable_statistics_checkbox.isChecked()
+            )
+        if hasattr(self, "statistics_interval_entry"):
             self.settings["statistics_interval"] = int(
-                self.statistics_interval_entry.text())
+                self.statistics_interval_entry.text()
+            )
 
         # Save privacy settings
-        if hasattr(self, 'disable_telemetry_checkbox'):
-            self.settings["disable_telemetry"] = self.disable_telemetry_checkbox.isChecked(
+        if hasattr(self, "disable_telemetry_checkbox"):
+            self.settings["disable_telemetry"] = (
+                self.disable_telemetry_checkbox.isChecked()
             )
-        if hasattr(self, 'disable_crash_reports_checkbox'):
-            self.settings["disable_crash_reports"] = self.disable_crash_reports_checkbox.isChecked(
+        if hasattr(self, "disable_crash_reports_checkbox"):
+            self.settings["disable_crash_reports"] = (
+                self.disable_crash_reports_checkbox.isChecked()
             )
-        if hasattr(self, 'disable_usage_stats_checkbox'):
-            self.settings["disable_usage_stats"] = self.disable_usage_stats_checkbox.isChecked(
+        if hasattr(self, "disable_usage_stats_checkbox"):
+            self.settings["disable_usage_stats"] = (
+                self.disable_usage_stats_checkbox.isChecked()
             )
-        if hasattr(self, 'disable_detailed_logging_checkbox'):
-            self.settings["disable_detailed_logging"] = self.disable_detailed_logging_checkbox.isChecked()
-        if hasattr(self, 'clear_logs_on_exit_checkbox'):
-            self.settings["clear_logs_on_exit"] = self.clear_logs_on_exit_checkbox.isChecked(
+        if hasattr(self, "disable_detailed_logging_checkbox"):
+            self.settings["disable_detailed_logging"] = (
+                self.disable_detailed_logging_checkbox.isChecked()
             )
-        if hasattr(self, 'disable_connection_logging_checkbox'):
-            self.settings["disable_connection_logging"] = self.disable_connection_logging_checkbox.isChecked()
-        if hasattr(self, 'disable_dns_logging_checkbox'):
-            self.settings["disable_dns_logging"] = self.disable_dns_logging_checkbox.isChecked(
+        if hasattr(self, "clear_logs_on_exit_checkbox"):
+            self.settings["clear_logs_on_exit"] = (
+                self.clear_logs_on_exit_checkbox.isChecked()
             )
-        if hasattr(self, 'disable_traffic_stats_checkbox'):
-            self.settings["disable_traffic_stats"] = self.disable_traffic_stats_checkbox.isChecked(
+        if hasattr(self, "disable_connection_logging_checkbox"):
+            self.settings["disable_connection_logging"] = (
+                self.disable_connection_logging_checkbox.isChecked()
             )
-        if hasattr(self, 'disable_ip_logging_checkbox'):
-            self.settings["disable_ip_logging"] = self.disable_ip_logging_checkbox.isChecked(
+        if hasattr(self, "disable_dns_logging_checkbox"):
+            self.settings["disable_dns_logging"] = (
+                self.disable_dns_logging_checkbox.isChecked()
             )
-        if hasattr(self, 'disable_auto_updates_checkbox'):
-            self.settings["disable_auto_updates"] = self.disable_auto_updates_checkbox.isChecked(
+        if hasattr(self, "disable_traffic_stats_checkbox"):
+            self.settings["disable_traffic_stats"] = (
+                self.disable_traffic_stats_checkbox.isChecked()
             )
-        if hasattr(self, 'disable_core_auto_updates_checkbox'):
-            self.settings["disable_core_auto_updates"] = self.disable_core_auto_updates_checkbox.isChecked()
-        if hasattr(self, 'disable_sub_auto_updates_checkbox'):
-            self.settings["disable_sub_auto_updates"] = self.disable_sub_auto_updates_checkbox.isChecked()
+        if hasattr(self, "disable_ip_logging_checkbox"):
+            self.settings["disable_ip_logging"] = (
+                self.disable_ip_logging_checkbox.isChecked()
+            )
+        if hasattr(self, "disable_auto_updates_checkbox"):
+            self.settings["disable_auto_updates"] = (
+                self.disable_auto_updates_checkbox.isChecked()
+            )
+        if hasattr(self, "disable_core_auto_updates_checkbox"):
+            self.settings["disable_core_auto_updates"] = (
+                self.disable_core_auto_updates_checkbox.isChecked()
+            )
+        if hasattr(self, "disable_sub_auto_updates_checkbox"):
+            self.settings["disable_sub_auto_updates"] = (
+                self.disable_sub_auto_updates_checkbox.isChecked()
+            )
 
         self.server_manager.save_settings()
         self.log(self.tr("Settings saved."))
@@ -630,11 +747,14 @@ This action cannot be undone.""").format(log_file_path),
             self.setLayoutDirection(Qt.RightToLeft)
             self.setAttribute(Qt.WA_RightToLeft, True)
             # Apply RTL-specific styling
-            self.setStyleSheet(self.styleSheet() + """
+            self.setStyleSheet(
+                self.styleSheet()
+                + """
                 QWidget[dir="rtl"] {
                     direction: rtl;
                 }
-            """)
+            """
+            )
         else:
             self.setLayoutDirection(Qt.LeftToRight)
             self.setAttribute(Qt.WA_RightToLeft, False)
@@ -653,7 +773,8 @@ This action cannot be undone.""").format(log_file_path),
 
     def handle_import_profile(self):
         file_path, _ = QFileDialog.getOpenFileName(
-            self, self.tr("Import Profile"), "", self.tr("JSON Files (*.json)"))
+            self, self.tr("Import Profile"), "", self.tr("JSON Files (*.json)")
+        )
 
         if file_path:
             success = self.server_manager.import_settings(file_path)
@@ -662,44 +783,63 @@ This action cannot be undone.""").format(log_file_path),
                     self,
                     self.tr("Import Successful"),
                     self.tr(
-                        "Profile imported successfully. Please restart the application for the changes to take full effect.")
+                        "Profile imported successfully. Please restart the application for the changes to take full effect."
+                    ),
                 )
                 # Optionally, you can try to reload the UI dynamically here,
                 # but a restart is safer and simpler.
             else:
                 QMessageBox.critical(
-                    self, self.tr("Import Failed"), self.tr("The selected file is not a valid Onix profile or is corrupted."))
+                    self,
+                    self.tr("Import Failed"),
+                    self.tr(
+                        "The selected file is not a valid Onix profile or is corrupted."
+                    ),
+                )
 
     def handle_export_profile(self):
         file_path, _ = QFileDialog.getSaveFileName(
-            self, self.tr("Export Profile"), "onix_profile.json", self.tr("JSON Files (*.json)"))
+            self,
+            self.tr("Export Profile"),
+            "onix_profile.json",
+            self.tr("JSON Files (*.json)"),
+        )
 
         if file_path:
             success = self.server_manager.export_settings(file_path)
             if success:
                 QMessageBox.information(
-                    self, self.tr("Export Successful"), self.tr("Profile successfully exported to:\n{}").format(file_path))
+                    self,
+                    self.tr("Export Successful"),
+                    self.tr("Profile successfully exported to:\n{}").format(file_path),
+                )
 
     def _run_update_check(self):
         # Define callbacks that emit signals to the UI thread
         update_callbacks = {
-            'show_info': self.signals.show_info_message.emit,
-            'show_warning': self.signals.show_warning_message.emit,
-            'show_error': self.signals.show_error_message.emit,
-            'ask_yes_no': self.ask_yes_no_from_thread,
+            "show_info": self.signals.show_info_message.emit,
+            "show_warning": self.signals.show_warning_message.emit,
+            "show_error": self.signals.show_error_message.emit,
+            "ask_yes_no": self.ask_yes_no_from_thread,
         }
         active_core = self.settings.get("active_core", "sing-box")
         utils.download_core_if_needed(
-            core_name=active_core, force_update=True, callbacks=update_callbacks)
+            core_name=active_core, force_update=True, callbacks=update_callbacks
+        )
         # Re-enable the button on the main thread
-        QTimer.singleShot(0, lambda: self._update_check_updates_button(
-            True, self.tr("Check for Core Updates")))
+        QTimer.singleShot(
+            0,
+            lambda: self._update_check_updates_button(
+                True, self.tr("Check for Core Updates")
+            ),
+        )
 
     def show_subscription_manager(self):
         current_subs = self.settings.get("subscriptions", [])
         # Pass a copy of the list to the dialog, so we can compare it later.
-        dialog = SubscriptionManagerDialog(self, subscriptions=[
-                                           sub.copy() for sub in current_subs])
+        dialog = SubscriptionManagerDialog(
+            self, subscriptions=[sub.copy() for sub in current_subs]
+        )
         if dialog.exec() == QDialog.Accepted:
             updated_subs = dialog.get_subscriptions()
             if updated_subs is not None:
@@ -707,10 +847,15 @@ This action cannot be undone.""").format(log_file_path),
                 self.save_settings()
                 self.log(self.tr("Subscription list updated."))
                 # Ask user to update subscriptions now that the list has changed.
-                reply = QMessageBox.question(self, self.tr("Update Subscriptions"),
-                                             self.tr(
-                                                 "Subscription list has changed. Do you want to update all enabled subscriptions now?"),
-                                             QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+                reply = QMessageBox.question(
+                    self,
+                    self.tr("Update Subscriptions"),
+                    self.tr(
+                        "Subscription list has changed. Do you want to update all enabled subscriptions now?"
+                    ),
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.Yes,
+                )
                 if reply == QMessageBox.Yes:
                     self.handle_update_subscriptions()
 
@@ -733,20 +878,29 @@ This action cannot be undone.""").format(log_file_path),
 
     def handle_import_wireguard_config(self):
         """Opens a file dialog to import a WireGuard .conf file."""
-        file_path, _ = QFileDialog.getOpenFileName(self, self.tr(
-            "Import WireGuard Config"), "", self.tr("Config Files (*.conf)"))
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            self.tr("Import WireGuard Config"),
+            "",
+            self.tr("Config Files (*.conf)"),
+        )
 
         if file_path:
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, "r", encoding="utf-8") as f:
                     content = f.read()
                 # The server manager will parse and add the config
                 self.server_manager.add_wireguard_config(content, file_path)
             except Exception as e:
                 self.log(
-                    self.tr("Failed to read or parse WireGuard file: {}").format(e), LogLevel.ERROR)
+                    self.tr("Failed to read or parse WireGuard file: {}").format(e),
+                    LogLevel.ERROR,
+                )
                 QMessageBox.critical(
-                    self, self.tr("Import Error"), self.tr("Could not import the WireGuard file:\n{}").format(e))
+                    self,
+                    self.tr("Import Error"),
+                    self.tr("Could not import the WireGuard file:\n{}").format(e),
+                )
 
     def handle_scan_qr_from_screen(self):
         """Hides the window, takes a screenshot, and scans for a QR code."""
@@ -770,15 +924,15 @@ This action cannot be undone.""").format(log_file_path),
                 monitor_info = sct.monitors[1]
                 sct_img = sct.grab(monitor_info)
                 img = np.frombuffer(sct_img.rgb, np.uint8).reshape(
-                    (sct_img.height, sct_img.width, 3))
+                    (sct_img.height, sct_img.width, 3)
+                )
 
             decoded_objects = decode(img)
             if decoded_objects:
-                link = decoded_objects[0].data.decode('utf-8')
+                link = decoded_objects[0].data.decode("utf-8")
                 self.server_manager.add_manual_server(link)
             else:
-                self.log(self.tr("No QR code found on the screen."),
-                         LogLevel.WARNING)
+                self.log(self.tr("No QR code found on the screen."), LogLevel.WARNING)
         finally:
             # Ensure the window is shown again and the button is re-enabled
             QTimer.singleShot(0, self.show_window)
@@ -793,8 +947,11 @@ This action cannot be undone.""").format(log_file_path),
 
         if self.server_list_widget.count() == 0:
             self.log(self.tr("No visible servers to copy."), LogLevel.WARNING)
-            QMessageBox.warning(self, self.tr("Copy Links"),
-                                self.tr("There are no servers in the list to copy."))
+            QMessageBox.warning(
+                self,
+                self.tr("Copy Links"),
+                self.tr("There are no servers in the list to copy."),
+            )
             return
 
         visible_servers = []
@@ -806,20 +963,30 @@ This action cannot be undone.""").format(log_file_path),
 
         if not visible_servers:
             self.log(
-                self.tr("Could not retrieve server data from the list."), LogLevel.ERROR)
+                self.tr("Could not retrieve server data from the list."), LogLevel.ERROR
+            )
             return
 
-        links = [self.server_manager.get_server_link(
-            s) for s in visible_servers if self.server_manager.get_server_link(s)]
+        links = [
+            self.server_manager.get_server_link(s)
+            for s in visible_servers
+            if self.server_manager.get_server_link(s)
+        ]
 
         if links:
             clipboard = QApplication.clipboard()
             clipboard.setText("\n".join(links))
             QMessageBox.information(
-                self, self.tr("Copy Successful"), self.tr("Copied {} server link(s) to clipboard.").format(len(links)))
+                self,
+                self.tr("Copy Successful"),
+                self.tr("Copied {} server link(s) to clipboard.").format(len(links)),
+            )
         else:
             QMessageBox.warning(
-                self, self.tr("Copy Failed"), self.tr("Could not generate links for the visible servers."))
+                self,
+                self.tr("Copy Failed"),
+                self.tr("Could not generate links for the visible servers."),
+            )
 
     def delete_current_group(self):
         """Deletes the currently selected server group after confirmation."""
@@ -828,10 +995,15 @@ This action cannot be undone.""").format(log_file_path),
             self.log(self.tr("No group selected to delete."), LogLevel.WARNING)
             return
 
-        reply = QMessageBox.question(self, self.tr("Confirm Group Deletion"),
-                                     self.tr("Are you sure you want to delete the entire group '{}' and all its servers?").format(
-                                         current_group),
-                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        reply = QMessageBox.question(
+            self,
+            self.tr("Confirm Group Deletion"),
+            self.tr(
+                "Are you sure you want to delete the entire group '{}' and all its servers?"
+            ).format(current_group),
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
 
         if reply == QMessageBox.Yes and self.server_manager:
             self.server_manager.delete_group(current_group)
@@ -840,7 +1012,9 @@ This action cannot be undone.""").format(log_file_path),
         """Handle subscription update using the new subscription manager."""
         if self.subscription_manager.is_update_in_progress():
             self.log(
-                "Subscription update is already in progress. Please wait...", LogLevel.WARNING)
+                "Subscription update is already in progress. Please wait...",
+                LogLevel.WARNING,
+            )
             return
 
         current_group = self.group_dropdown.currentText()
@@ -858,22 +1032,21 @@ This action cannot be undone.""").format(log_file_path),
             # User is in a subscription group, update just this one
             if sub_to_update.get("enabled", True):
                 subs_to_process = [sub_to_update]
-                self.log(
-                    f"Updating current subscription group: {current_group}...")
+                self.log(f"Updating current subscription group: {current_group}...")
             else:
                 self.log(
-                    f"Subscription '{current_group}' is disabled. Please enable it in the Subscription Manager.", LogLevel.WARNING)
+                    f"Subscription '{current_group}' is disabled. Please enable it in the Subscription Manager.",
+                    LogLevel.WARNING,
+                )
                 return
         else:
             # User is not in a subscription group, or group name doesn't match.
             # Fallback to original behavior: update all enabled subs.
-            subs_to_process = [
-                sub for sub in all_subs if sub.get("enabled", True)]
+            subs_to_process = [sub for sub in all_subs if sub.get("enabled", True)]
             self.log("Updating all enabled subscriptions...")
 
         if not subs_to_process:
-            self.log(self.tr("No enabled subscriptions to update."),
-                     LogLevel.WARNING)
+            self.log(self.tr("No enabled subscriptions to update."), LogLevel.WARNING)
             return
 
         # Use the new subscription manager
@@ -890,9 +1063,10 @@ This action cannot be undone.""").format(log_file_path),
         QMessageBox.critical(self, title, message)
 
     def handle_ask_yes_no(self, title, question):
-        reply = QMessageBox.question(self, title, question,
-                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        self._question_response = (reply == QMessageBox.Yes)
+        reply = QMessageBox.question(
+            self, title, question, QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+        )
+        self._question_response = reply == QMessageBox.Yes
 
     def ask_yes_no_from_thread(self, title, question):
         """Synchronously ask a question from a non-GUI thread."""
@@ -916,12 +1090,13 @@ This action cannot be undone.""").format(log_file_path),
         self.routing_table.setRowCount(len(rules))
 
         for row_index, rule in enumerate(rules):
+            self.routing_table.setItem(row_index, 0, QTableWidgetItem(rule.get("type")))
             self.routing_table.setItem(
-                row_index, 0, QTableWidgetItem(rule.get("type")))
+                row_index, 1, QTableWidgetItem(rule.get("value"))
+            )
             self.routing_table.setItem(
-                row_index, 1, QTableWidgetItem(rule.get("value")))
-            self.routing_table.setItem(
-                row_index, 2, QTableWidgetItem(rule.get("action")))
+                row_index, 2, QTableWidgetItem(rule.get("action"))
+            )
 
             # Actions buttons
             actions_widget = QWidget()
@@ -930,13 +1105,15 @@ This action cannot be undone.""").format(log_file_path),
             actions_layout.setSpacing(5)
 
             edit_button = QPushButton("Edit")
-            edit_button.clicked.connect(lambda _, r=row_index: self.show_rule_dialog(
-                rule_to_edit=self.settings["custom_routing_rules"][r], index=r))
+            edit_button.clicked.connect(
+                lambda _, r=row_index: self.show_rule_dialog(
+                    rule_to_edit=self.settings["custom_routing_rules"][r], index=r
+                )
+            )
 
             delete_button = QPushButton("Delete")
             delete_button.setStyleSheet("background-color: #F44336;")
-            delete_button.clicked.connect(
-                lambda _, r=row_index: self.delete_rule(r))
+            delete_button.clicked.connect(lambda _, r=row_index: self.delete_rule(r))
 
             actions_layout.addWidget(edit_button)
             actions_layout.addWidget(delete_button)
@@ -955,21 +1132,22 @@ This action cannot be undone.""").format(log_file_path),
         if dialog.exec() == QDialog.Accepted:
             new_rule_data = dialog.get_rule_data()
             if not new_rule_data["value"]:
-                QMessageBox.warning(self, self.tr("Input Error"), self.tr(
-                    "The 'Value' field cannot be empty."))
+                QMessageBox.warning(
+                    self,
+                    self.tr("Input Error"),
+                    self.tr("The 'Value' field cannot be empty."),
+                )
                 return
 
             rules = self.settings.get("custom_routing_rules", [])
             if rule_to_edit is not None and index is not None:
                 # Editing existing rule
                 rules[index] = new_rule_data
-                self.log(self.tr("Rule updated: {}").format(
-                    new_rule_data['value']))
+                self.log(self.tr("Rule updated: {}").format(new_rule_data["value"]))
             else:
                 # Adding new rule
                 rules.append(new_rule_data)
-                self.log(self.tr("Rule added: {}").format(
-                    new_rule_data['value']))
+                self.log(self.tr("Rule added: {}").format(new_rule_data["value"]))
 
             self.settings["custom_routing_rules"] = rules
             self.save_settings()
@@ -979,12 +1157,16 @@ This action cannot be undone.""").format(log_file_path),
         rules = self.settings.get("custom_routing_rules", [])
         if 0 <= index < len(rules):
             rule_to_delete = rules[index]
-            reply = QMessageBox.question(self, self.tr("Confirm Deletion"), self.tr(
-                "Are you sure you want to delete the rule for '{}'?").format(rule_to_delete.get('value')))
+            reply = QMessageBox.question(
+                self,
+                self.tr("Confirm Deletion"),
+                self.tr("Are you sure you want to delete the rule for '{}'?").format(
+                    rule_to_delete.get("value")
+                ),
+            )
             if reply == QMessageBox.Yes:
                 deleted_rule = rules.pop(index)
-                self.log(self.tr("Rule deleted: {}").format(
-                    deleted_rule['value']))
+                self.log(self.tr("Rule deleted: {}").format(deleted_rule["value"]))
                 self.save_settings()
                 self.update_routing_table()
 
@@ -995,19 +1177,17 @@ This action cannot be undone.""").format(log_file_path),
             current_group = self.group_dropdown.currentText()
             if not current_group:
                 self.health_check_tcp_button.setChecked(False)
-                self.log("No group selected for TCP health checking",
-                         LogLevel.WARNING)
+                self.log("No group selected for TCP health checking", LogLevel.WARNING)
                 return
 
             self.server_manager.start_health_check(current_group, ["tcp"])
-            self.health_check_tcp_button.setText(
-                self.tr("Stop TCP Health Check"))
-            self.health_check_tcp_button.setStyleSheet(
-                "background-color: #F44336;")
+            self.health_check_tcp_button.setText(self.tr("Stop TCP Health Check"))
+            self.health_check_tcp_button.setStyleSheet("background-color: #F44336;")
             self.health_check_progress.setVisible(True)
             self.health_check_progress.setValue(0)
             self.log(
-                f"Started TCP health checking for group: {current_group}", LogLevel.INFO)
+                f"Started TCP health checking for group: {current_group}", LogLevel.INFO
+            )
         else:
             # Stop health checking
             self.server_manager.stop_health_check()
@@ -1023,19 +1203,17 @@ This action cannot be undone.""").format(log_file_path),
             current_group = self.group_dropdown.currentText()
             if not current_group:
                 self.health_check_url_button.setChecked(False)
-                self.log("No group selected for URL health checking",
-                         LogLevel.WARNING)
+                self.log("No group selected for URL health checking", LogLevel.WARNING)
                 return
 
             self.server_manager.start_health_check(current_group, ["url"])
-            self.health_check_url_button.setText(
-                self.tr("Stop URL Health Check"))
-            self.health_check_url_button.setStyleSheet(
-                "background-color: #F44336;")
+            self.health_check_url_button.setText(self.tr("Stop URL Health Check"))
+            self.health_check_url_button.setStyleSheet("background-color: #F44336;")
             self.health_check_progress.setVisible(True)
             self.health_check_progress.setValue(0)
             self.log(
-                f"Started URL health checking for group: {current_group}", LogLevel.INFO)
+                f"Started URL health checking for group: {current_group}", LogLevel.INFO
+            )
         else:
             # Stop health checking
             self.server_manager.stop_health_check()
@@ -1064,12 +1242,12 @@ This action cannot be undone.""").format(log_file_path),
             # Start speed test
             proxy_address = f"{PROXY_HOST}:{PROXY_PORT}"
             self.speed_test_service.start_speed_test(
-                proxy_address,
-                duration=10,
-                callback=self.on_speed_test_result
+                proxy_address, duration=10, callback=self.on_speed_test_result
             )
             self.log(
-                f"Started speed test for server: {self.selected_config.get('name')}", LogLevel.INFO)
+                f"Started speed test for server: {self.selected_config.get('name')}",
+                LogLevel.INFO,
+            )
         else:
             # Stop speed test
             self.speed_test_service.stop_speed_test()
@@ -1083,8 +1261,11 @@ This action cannot be undone.""").format(log_file_path),
         self.on_speed_update(upload_speed, download_speed)
 
         # Log the results
-        self.log(f"Speed test: {download_speed/1024/1024:.2f} MB/s download, "
-                 f"{upload_speed/1024/1024:.2f} MB/s upload", LogLevel.SUCCESS)
+        self.log(
+            f"Speed test: {download_speed/1024/1024:.2f} MB/s download, "
+            f"{upload_speed/1024/1024:.2f} MB/s upload",
+            LogLevel.SUCCESS,
+        )
 
     def show_export_dialog(self):
         """Show export dialog for current group."""
@@ -1100,43 +1281,40 @@ This action cannot be undone.""").format(log_file_path),
 
         # Get health stats from health checker
         health_stats = {}
-        if hasattr(self.server_manager, '_health_checker'):
+        if hasattr(self.server_manager, "_health_checker"):
             for server in servers:
-                server_id = server.get('id')
+                server_id = server.get("id")
                 if server_id:
-                    health_stats[server_id] = self.server_manager._health_checker.get_server_stats(
-                        server_id)
+                    health_stats[server_id] = (
+                        self.server_manager._health_checker.get_server_stats(server_id)
+                    )
 
         dialog = ExportDialog(self, servers, health_stats)
         dialog.exec()
 
     def on_health_check_progress(self, current: int, total: int):
         """Handle health check progress updates."""
-        if hasattr(self, 'health_check_progress'):
+        if hasattr(self, "health_check_progress"):
             percentage = int((current / total) * 100) if total > 0 else 0
             self.health_check_progress.setValue(percentage)
-            self.health_check_progress.setFormat(
-                f"{current}/{total} ({percentage}%)")
+            self.health_check_progress.setFormat(f"{current}/{total} ({percentage}%)")
 
     def start_stop_toggle(self):
         if self.singbox_manager.is_running:
             # Stop health check when manually disconnecting
             self.server_manager.stop_health_check()
             # Reset health check button states
-            if hasattr(self, 'health_check_tcp_button'):
+            if hasattr(self, "health_check_tcp_button"):
                 self.health_check_tcp_button.setChecked(False)
-                self.health_check_tcp_button.setText(
-                    self.tr("Health Check TCP"))
+                self.health_check_tcp_button.setText(self.tr("Health Check TCP"))
                 self.health_check_tcp_button.setStyleSheet("")
-            if hasattr(self, 'health_check_url_button'):
+            if hasattr(self, "health_check_url_button"):
                 self.health_check_url_button.setChecked(False)
-                self.health_check_url_button.setText(
-                    self.tr("Health Check URL"))
+                self.health_check_url_button.setText(self.tr("Health Check URL"))
                 self.health_check_url_button.setStyleSheet("")
-            if hasattr(self, 'health_check_progress'):
+            if hasattr(self, "health_check_progress"):
                 self.health_check_progress.setVisible(False)
-            threading.Thread(target=self.singbox_manager.stop,
-                             daemon=True).start()
+            threading.Thread(target=self.singbox_manager.stop, daemon=True).start()
         else:
             if self.selected_config:
                 # The start method already runs in a background thread.
@@ -1147,49 +1325,72 @@ This action cannot be undone.""").format(log_file_path),
     # --- Slots for Server Card Actions ---
     def handle_server_action(self, action, server_data):
         if action == "ping_url":
-            self.log(self.tr("Latency testing server: {}").format(
-                server_data.get('name')))
-            threading.Thread(target=self.server_manager.test_all_urls, args=(
-                [server_data],), daemon=True).start()
+            self.log(
+                self.tr("Latency testing server: {}").format(server_data.get("name"))
+            )
+            threading.Thread(
+                target=self.server_manager.test_all_urls,
+                args=([server_data],),
+                daemon=True,
+            ).start()
         elif action == "ping_tcp":
-            self.log(self.tr("Latency testing server: {}").format(
-                server_data.get('name')))
-            threading.Thread(target=self.server_manager.test_all_tcp, args=(
-                [server_data],), daemon=True).start()
+            self.log(
+                self.tr("Latency testing server: {}").format(server_data.get("name"))
+            )
+            threading.Thread(
+                target=self.server_manager.test_all_tcp,
+                args=([server_data],),
+                daemon=True,
+            ).start()
         elif action == "delete":
-            reply = QMessageBox.question(self, self.tr("Confirm Deletion"),
-                                         self.tr("Are you sure you want to delete server\n'{}'?").format(server_data.get('name')))
+            reply = QMessageBox.question(
+                self,
+                self.tr("Confirm Deletion"),
+                self.tr("Are you sure you want to delete server\n'{}'?").format(
+                    server_data.get("name")
+                ),
+            )
             if reply == QMessageBox.Yes:
                 self.server_manager.delete_server(server_data)
                 self.update_server_list()
-                if self.selected_config and self.selected_config.get("id") == server_data.get("id"):
+                if self.selected_config and self.selected_config.get(
+                    "id"
+                ) == server_data.get("id"):
                     self.selected_config = None
         elif action == "edit_server":
             dialog = ServerEditDialog(self, server_config=server_data)
             if dialog.exec() == QDialog.Accepted:
                 updated_config = dialog.get_updated_config()
-                self.server_manager.edit_server_config(
-                    server_data, updated_config)
+                self.server_manager.edit_server_config(server_data, updated_config)
                 self.update_server_list()
         elif action == "copy_link":
             server_link = self.server_manager.get_server_link(server_data)
             if server_link:
                 clipboard = QApplication.clipboard()
                 clipboard.setText(server_link)
-                self.log(self.tr("Copied link for '{}' to clipboard.").format(
-                    server_data.get('name')))
+                self.log(
+                    self.tr("Copied link for '{}' to clipboard.").format(
+                        server_data.get("name")
+                    )
+                )
             else:
                 self.log(
-                    self.tr("Could not generate a link for '{}'.").format(server_data.get('name')), LogLevel.WARNING)
+                    self.tr("Could not generate a link for '{}'.").format(
+                        server_data.get("name")
+                    ),
+                    LogLevel.WARNING,
+                )
         elif action == "qr_code":
             server_link = self.server_manager.get_server_link(server_data)
             if server_link:
-                dialog = QRCodeDialog(
-                    server_link, server_data.get('name'), self)
+                dialog = QRCodeDialog(server_link, server_data.get("name"), self)
                 dialog.exec()
             else:
-                QMessageBox.warning(self, self.tr("Error"), self.tr(
-                    "Could not generate a link for this server."))
+                QMessageBox.warning(
+                    self,
+                    self.tr("Error"),
+                    self.tr("Could not generate a link for this server."),
+                )
 
     # --- Log Search Methods ---
     def find_next_log(self):
@@ -1222,8 +1423,7 @@ This action cannot be undone.""").format(log_file_path),
         menu = QMenu()
 
         # Standard "Copy" action for selected text
-        copy_action = menu.addAction(
-            QIcon(":/icons/copy.svg"), self.tr("Copy"))
+        copy_action = menu.addAction(QIcon(":/icons/copy.svg"), self.tr("Copy"))
         copy_action.triggered.connect(self.log_view.copy)
         # Disable if no text is selected
         copy_action.setEnabled(self.log_view.textCursor().hasSelection())
@@ -1263,7 +1463,8 @@ This action cannot be undone.""").format(log_file_path),
 
         if self.log_view:
             color = self.log_level_colors.get(
-                level, self.log_level_colors[LogLevel.INFO])
+                level, self.log_level_colors[LogLevel.INFO]
+            )
 
             # Check if the current level is enabled in filters
             level_enabled = False
@@ -1278,8 +1479,7 @@ This action cannot be undone.""").format(log_file_path),
 
             if level_enabled:
                 # Use HTML to set the color of the appended text
-                self.log_view.append(
-                    f'<span style="color:{color};">{message}</span>')
+                self.log_view.append(f'<span style="color:{color};">{message}</span>')
 
         self.all_logs.append((message, level))
 
@@ -1299,9 +1499,9 @@ This action cannot be undone.""").format(log_file_path),
         for message, level in self.all_logs:
             if level in active_levels:
                 color = self.log_level_colors.get(
-                    level, self.log_level_colors[LogLevel.INFO])
-                self.log_view.append(
-                    f'<span style="color:{color};">{message}</span>')
+                    level, self.log_level_colors[LogLevel.INFO]
+                )
+                self.log_view.append(f'<span style="color:{color};">{message}</span>')
 
     def _get_available_groups(self):
         """Returns a list of available groups, including a special one for chains."""
@@ -1336,8 +1536,7 @@ This action cannot be undone.""").format(log_file_path),
             # Chains don't need sorting
         else:
             self.current_view_mode = "servers"
-            items_to_display = self.server_manager.get_servers_by_group(
-                selected_group)
+            items_to_display = self.server_manager.get_servers_by_group(selected_group)
 
         # --- Manual Sorting ---
         if self.current_view_mode == "servers":
@@ -1347,6 +1546,7 @@ This action cannot be undone.""").format(log_file_path),
                 if tcp_ping is None or tcp_ping == -1:
                     return 9999  # Put N/A at the end
                 return tcp_ping
+
             items_to_display.sort(key=ping_sort_key)
 
         # --- Filtering and Display ---
@@ -1369,8 +1569,9 @@ This action cannot be undone.""").format(log_file_path),
         card = self.server_list_widget.itemWidget(current_item)
         if card:
             self.selected_config = card.server_data
-            self.log(self.tr("Selected server: {}").format(
-                self.selected_config.get('name')))
+            self.log(
+                self.tr("Selected server: {}").format(self.selected_config.get("name"))
+            )
             # self._update_details_panel(self.selected_config)
 
     def _update_details_panel(self, config):
@@ -1383,12 +1584,22 @@ This action cannot be undone.""").format(log_file_path),
         details_html += "<table>"
 
         # Define which keys to show and their display names
-        key_map = {"protocol": "Protocol", "server": "Server", "port": "Port", "uuid": "UUID",
-                   "password": "Password", "sni": "SNI", "transport": "Transport", "ws_path": "Path"}
+        key_map = {
+            "protocol": "Protocol",
+            "server": "Server",
+            "port": "Port",
+            "uuid": "UUID",
+            "password": "Password",
+            "sni": "SNI",
+            "transport": "Transport",
+            "ws_path": "Path",
+        }
 
         for key, label in key_map.items():
             if value := config.get(key):
-                details_html += f"<tr><td width='80'><b>{label}:</b></td><td>{value}</td></tr>"
+                details_html += (
+                    f"<tr><td width='80'><b>{label}:</b></td><td>{value}</td></tr>"
+                )
 
         details_html += "</table>"
         self.server_details_content.setHtml(details_html)
@@ -1397,31 +1608,43 @@ This action cannot be undone.""").format(log_file_path),
     def on_ping_result(self, config, ping, test_type):
         server_id = config.get("id")
         self.log(
-            self.tr("Ping result for '{}' (ID: {}, Type: {}): {} ms. Emitting signal.").format(
-                config.get('name'), server_id, test_type, ping),
-            LogLevel.DEBUG
+            self.tr(
+                "Ping result for '{}' (ID: {}, Type: {}): {} ms. Emitting signal."
+            ).format(config.get("name"), server_id, test_type, ping),
+            LogLevel.DEBUG,
         )
         if not server_id:
             self.log(
-                self.tr("Server ID is missing in ping result. Cannot update UI."), LogLevel.WARNING)
+                self.tr("Server ID is missing in ping result. Cannot update UI."),
+                LogLevel.WARNING,
+            )
             return
 
         # This should be server_card_widgets
         card = self.server_widgets.get(server_id)
         if card:
             self.log(
-                self.tr("Found card for server ID {}. Updating {} ping value.").format(server_id, test_type), LogLevel.DEBUG)
+                self.tr("Found card for server ID {}. Updating {} ping value.").format(
+                    server_id, test_type
+                ),
+                LogLevel.DEBUG,
+            )
             card.update_ping(test_type, ping)
 
             # Update health stats if this is from health checker
-            if hasattr(self.server_manager, '_health_checker'):
+            if hasattr(self.server_manager, "_health_checker"):
                 health_stats = self.server_manager._health_checker.get_server_stats(
-                    server_id)
+                    server_id
+                )
                 if health_stats:
                     card.update_health_stats(health_stats)
         else:
             self.log(
-                self.tr("Could not find card widget for server ID {}").format(server_id), LogLevel.WARNING)
+                self.tr("Could not find card widget for server ID {}").format(
+                    server_id
+                ),
+                LogLevel.WARNING,
+            )
 
     def on_ping_started(self, config):
         server_id = config.get("id")
@@ -1462,12 +1685,16 @@ This action cannot be undone.""").format(log_file_path),
         """Update a single subscription."""
         if self.subscription_manager.is_update_in_progress():
             self.log(
-                "Subscription update is already in progress. Please wait...", LogLevel.WARNING)
+                "Subscription update is already in progress. Please wait...",
+                LogLevel.WARNING,
+            )
             return
 
         if not sub.get("enabled", True):
             self.log(
-                f"Subscription '{sub.get('name', 'Unknown')}' is disabled. Please enable it first.", LogLevel.WARNING)
+                f"Subscription '{sub.get('name', 'Unknown')}' is disabled. Please enable it first.",
+                LogLevel.WARNING,
+            )
             return
 
         self.log(f"Updating subscription: {sub.get('name', 'Unknown')}...")
@@ -1477,7 +1704,9 @@ This action cannot be undone.""").format(log_file_path),
         """Update all enabled subscriptions."""
         if self.subscription_manager.is_update_in_progress():
             self.log(
-                "Subscription update is already in progress. Please wait...", LogLevel.WARNING)
+                "Subscription update is already in progress. Please wait...",
+                LogLevel.WARNING,
+            )
             return
 
         all_subs = self.settings.get("subscriptions", [])
@@ -1496,9 +1725,10 @@ This action cannot be undone.""").format(log_file_path),
             self,
             self.tr("Remove Duplicates"),
             self.tr(
-                "This will remove all duplicate servers based on their configuration. Continue?"),
+                "This will remove all duplicate servers based on their configuration. Continue?"
+            ),
             QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
+            QMessageBox.No,
         )
 
         if reply == QMessageBox.Yes:
@@ -1509,14 +1739,13 @@ This action cannot be undone.""").format(log_file_path),
                 QMessageBox.information(
                     self,
                     self.tr("Duplicates Removed"),
-                    self.tr("Removed {} duplicate server(s).").format(
-                        removed_count)
+                    self.tr("Removed {} duplicate server(s).").format(removed_count),
                 )
             else:
                 QMessageBox.information(
                     self,
                     self.tr("No Duplicates"),
-                    self.tr("No duplicate servers found.")
+                    self.tr("No duplicate servers found."),
                 )
 
     def show_chain_manager(self):
@@ -1524,8 +1753,9 @@ This action cannot be undone.""").format(log_file_path),
         current_chains = self.settings.get("outbound_chains", [])
         all_servers = self.server_manager.get_all_servers()
 
-        dialog = ChainManagerDialog(self, chains=[
-                                    c.copy() for c in current_chains], all_servers=all_servers)
+        dialog = ChainManagerDialog(
+            self, chains=[c.copy() for c in current_chains], all_servers=all_servers
+        )
 
         if dialog.exec() == QDialog.Accepted:
             updated_chains = dialog.get_subscriptions()  # Reusing method name
@@ -1540,28 +1770,32 @@ This action cannot be undone.""").format(log_file_path),
 
         # Modern status styling based on status
         if status == self.tr("Connected"):
-            self.connection_status_icon.setStyleSheet("""
+            self.connection_status_icon.setStyleSheet(
+                """
                 color: #10b981; 
                 font-size: 16px;
                 font-weight: bold;
                 background-color: #d1fae5;
                 padding: 4px 8px;
                 border-radius: 6px;
-            """)
+            """
+            )
         elif status == self.tr("Connecting..."):
             self.connecting_spinner_label.show()
             self.connecting_spinner_label.movie().start()
             self.connection_status_icon.hide()
             return
         else:  # Disconnected
-            self.connection_status_icon.setStyleSheet("""
+            self.connection_status_icon.setStyleSheet(
+                """
                 color: #f59e0b; 
                 font-size: 16px;
                 font-weight: bold;
                 background-color: #fef3c7;
                 padding: 4px 8px;
                 border-radius: 6px;
-            """)
+            """
+            )
 
         self.connecting_spinner_label.hide()
         self.connecting_spinner_label.movie().stop()
@@ -1570,16 +1804,19 @@ This action cannot be undone.""").format(log_file_path),
     def on_connect(self, latency):
         self.on_status_change(self.tr("Connected"), "#10b981")
         self.latency_label.setText(self.tr("Latency: {} ms").format(latency))
-        self.latency_label.setStyleSheet("""
+        self.latency_label.setStyleSheet(
+            """
             font-size: 12px;
             color: #10b981;
             background-color: #d1fae5;
             padding: 4px 8px;
             border-radius: 4px;
             font-weight: 500;
-        """)
+        """
+        )
         self.start_stop_button.setText(self.tr("Disconnect"))
-        self.start_stop_button.setStyleSheet("""
+        self.start_stop_button.setStyleSheet(
+            """
             QPushButton {
                 background-color: #ef4444;
                 color: white;
@@ -1596,23 +1833,27 @@ This action cannot be undone.""").format(log_file_path),
             QPushButton:pressed {
                 background-color: #b91c1c;
             }
-        """)
+        """
+        )
 
     def on_stop(self):
         self.on_status_change(self.tr("Disconnected"), "#f59e0b")
         self.latency_label.setText(self.tr("Latency: N/A"))
-        self.latency_label.setStyleSheet("""
+        self.latency_label.setStyleSheet(
+            """
             font-size: 12px;
             color: #6b7280;
             background-color: #f3f4f6;
             padding: 4px 8px;
             border-radius: 4px;
-        """)
+        """
+        )
         self.ip_label.setText(self.tr("IP: N/A"))
         self.up_speed_label.setText("↑ 0 KB/s")
         self.down_speed_label.setText("↓ 0 KB/s")
         self.start_stop_button.setText(self.tr("Start"))
-        self.start_stop_button.setStyleSheet("""
+        self.start_stop_button.setStyleSheet(
+            """
             QPushButton {
                 background-color: #10b981;
                 color: white;
@@ -1629,18 +1870,21 @@ This action cannot be undone.""").format(log_file_path),
             QPushButton:pressed {
                 background-color: #047857;
             }
-        """)
+        """
+        )
 
     def on_ip_update(self, ip_address):
         self.ip_label.setText(self.tr("IP: {}").format(ip_address))
-        self.ip_label.setStyleSheet("""
+        self.ip_label.setStyleSheet(
+            """
             font-size: 12px;
             color: #10b981;
             background-color: #d1fae5;
             padding: 4px 8px;
             border-radius: 4px;
             font-weight: 500;
-        """)
+        """
+        )
 
     def on_speed_update(self, up_speed, down_speed):
         self.up_speed_label.setText(f"↑ {self.format_speed(up_speed)}")
@@ -1667,23 +1911,27 @@ This action cannot be undone.""").format(log_file_path),
             down_color = "#6b7280"
             down_bg = "#f3f4f6"
 
-        self.up_speed_label.setStyleSheet(f"""
+        self.up_speed_label.setStyleSheet(
+            f"""
             font-size: 12px;
             color: {up_color};
             background-color: {up_bg};
             padding: 4px 8px;
             border-radius: 4px;
             font-weight: 500;
-        """)
+        """
+        )
 
-        self.down_speed_label.setStyleSheet(f"""
+        self.down_speed_label.setStyleSheet(
+            f"""
             font-size: 12px;
             color: {down_color};
             background-color: {down_bg};
             padding: 4px 8px;
             border-radius: 4px;
             font-weight: 500;
-        """)
+        """
+        )
 
         # Update the tray icon with the new speeds
         self.update_tray_icon(up_speed, down_speed)
@@ -1808,7 +2056,7 @@ This action cannot be undone.""").format(log_file_path),
             "Onix is running",
             self.tr("The application is still running in the background."),
             QSystemTrayIcon.Information,
-            2000
+            2000,
         )
 
     def _handle_schedule_task(self, delay_ms, func, args):
@@ -1824,8 +2072,9 @@ This action cannot be undone.""").format(log_file_path),
             return
         self.settings["window_maximized"] = self.isMaximized()
         # Use saveGeometry() which returns a QByteArray
-        self.settings["window_geometry"] = self.saveGeometry(
-        ).toBase64().data().decode('ascii')
+        self.settings["window_geometry"] = (
+            self.saveGeometry().toBase64().data().decode("ascii")
+        )
         self.server_manager.save_settings()
 
     def restore_window_geometry(self):
@@ -1833,8 +2082,7 @@ This action cannot be undone.""").format(log_file_path),
         geometry_b64 = self.settings.get("window_geometry")
         if geometry_b64:
             # Convert base64 string back to QByteArray
-            self.restoreGeometry(QByteArray.fromBase64(
-                geometry_b64.encode('ascii')))
+            self.restoreGeometry(QByteArray.fromBase64(geometry_b64.encode("ascii")))
 
         if self.settings.get("window_maximized", False):
             self.showMaximized()
@@ -1905,5 +2153,6 @@ This action cannot be undone.""").format(log_file_path),
         self.animation_group.addAnimation(anim_fade_in)
 
         self.animation_group.finished.connect(
-            lambda: self.stacked_widget.setCurrentIndex(next_index))
+            lambda: self.stacked_widget.setCurrentIndex(next_index)
+        )
         self.animation_group.start()

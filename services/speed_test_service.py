@@ -20,8 +20,12 @@ class SpeedTestService:
         self._stop_event = threading.Event()
         self._test_thread = None
 
-    def start_speed_test(self, proxy_address: str, duration: int = 10,
-                         callback: Optional[Callable[[float, float], None]] = None) -> bool:
+    def start_speed_test(
+        self,
+        proxy_address: str,
+        duration: int = 10,
+        callback: Optional[Callable[[float, float], None]] = None,
+    ) -> bool:
         """Start a speed test through the given proxy."""
         if self._is_testing:
             self.log("Speed test is already running", LogLevel.WARNING)
@@ -33,7 +37,7 @@ class SpeedTestService:
         self._test_thread = threading.Thread(
             target=self._run_speed_test,
             args=(proxy_address, duration, callback),
-            daemon=True
+            daemon=True,
         )
         self._test_thread.start()
 
@@ -56,20 +60,24 @@ class SpeedTestService:
         """Check if speed test is currently running."""
         return self._is_testing
 
-    def _run_speed_test(self, proxy_address: str, duration: int,
-                        callback: Optional[Callable[[float, float], None]]):
+    def _run_speed_test(
+        self,
+        proxy_address: str,
+        duration: int,
+        callback: Optional[Callable[[float, float], None]],
+    ):
         """Run the actual speed test."""
         try:
             proxies = {
                 "http": f"http://{proxy_address}",
-                "https": f"http://{proxy_address}"
+                "https": f"http://{proxy_address}",
             }
 
             # Test URLs for download speed
             test_urls = [
                 "http://speedtest.tele2.net/10MB.zip",
                 "http://speedtest.tele2.net/100MB.zip",
-                "https://releases.ubuntu.com/20.04/ubuntu-20.04.6-desktop-amd64.iso"
+                "https://releases.ubuntu.com/20.04/ubuntu-20.04.6-desktop-amd64.iso",
             ]
 
             start_time = time.time()
@@ -80,10 +88,7 @@ class SpeedTestService:
                 # Download test
                 try:
                     response = requests.get(
-                        test_urls[0],
-                        proxies=proxies,
-                        timeout=5,
-                        stream=True
+                        test_urls[0], proxies=proxies, timeout=5, stream=True
                     )
 
                     chunk_size = 8192
@@ -116,8 +121,11 @@ class SpeedTestService:
                 if callback:
                     callback(final_download_speed, final_upload_speed)
 
-                self.log(f"Speed test completed: {final_download_speed/1024/1024:.2f} MB/s download, "
-                         f"{final_upload_speed/1024/1024:.2f} MB/s upload", LogLevel.SUCCESS)
+                self.log(
+                    f"Speed test completed: {final_download_speed/1024/1024:.2f} MB/s download, "
+                    f"{final_upload_speed/1024/1024:.2f} MB/s upload",
+                    LogLevel.SUCCESS,
+                )
 
         except Exception as e:
             self.log(f"Speed test error: {e}", LogLevel.ERROR)
@@ -137,8 +145,12 @@ class AutoFailoverService:
         self._servers = []
         self._failover_callback = None
 
-    def start_monitoring(self, servers: list, current_server: Dict[str, Any],
-                         failover_callback: Optional[Callable[[Dict[str, Any]], None]] = None):
+    def start_monitoring(
+        self,
+        servers: list,
+        current_server: Dict[str, Any],
+        failover_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
+    ):
         """Start monitoring servers for automatic failover."""
         if self._is_monitoring:
             self.log("Auto-failover is already running", LogLevel.WARNING)
@@ -151,8 +163,7 @@ class AutoFailoverService:
         self._stop_event.clear()
 
         self._monitor_thread = threading.Thread(
-            target=self._monitor_servers,
-            daemon=True
+            target=self._monitor_servers, daemon=True
         )
         self._monitor_thread.start()
 
@@ -182,14 +193,18 @@ class AutoFailoverService:
                 # Test current server
                 if self._current_server:
                     if not self._test_server_health(self._current_server):
-                        self.log(f"Current server {self._current_server.get('name')} failed health check",
-                                 LogLevel.WARNING)
+                        self.log(
+                            f"Current server {self._current_server.get('name')} failed health check",
+                            LogLevel.WARNING,
+                        )
 
                         # Find best alternative server
                         best_server = self._find_best_server()
                         if best_server and best_server != self._current_server:
-                            self.log(f"Switching to server: {best_server.get('name')}",
-                                     LogLevel.INFO)
+                            self.log(
+                                f"Switching to server: {best_server.get('name')}",
+                                LogLevel.INFO,
+                            )
 
                             if self._failover_callback:
                                 self._failover_callback(best_server)
@@ -224,7 +239,7 @@ class AutoFailoverService:
     def _find_best_server(self) -> Optional[Dict[str, Any]]:
         """Find the best available server."""
         best_server = None
-        best_ping = float('inf')
+        best_ping = float("inf")
 
         for server in self._servers:
             if server == self._current_server:

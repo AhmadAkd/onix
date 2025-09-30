@@ -46,8 +46,7 @@ def tcp_ping(host, port, timeout=TCP_PING_TIMEOUT, proxy_address=None):
 
                 # Send HTTP CONNECT request to the proxy
                 connect_request = (
-                    f"CONNECT {host}:{port} HTTP/1.1\r\n"
-                    f"Host: {host}:{port}\r\n\r\n"
+                    f"CONNECT {host}:{port} HTTP/1.1\r\n" f"Host: {host}:{port}\r\n\r\n"
                 )
                 sock.sendall(connect_request.encode())
                 response = sock.recv(1024)
@@ -73,10 +72,11 @@ def tcp_ping(host, port, timeout=TCP_PING_TIMEOUT, proxy_address=None):
         return -1
 
 
-def _url_test_request(proxy_address, url=URL_TEST_DEFAULT_URL, timeout=URL_TEST_TIMEOUT):
+def _url_test_request(
+    proxy_address, url=URL_TEST_DEFAULT_URL, timeout=URL_TEST_TIMEOUT
+):
     """Tests a URL through a given proxy to measure real-world latency."""
-    proxies = {"http": f"http://{proxy_address}",
-               "https": f"http://{proxy_address}"}
+    proxies = {"http": f"http://{proxy_address}", "https": f"http://{proxy_address}"}
     try:
         start_time = time.time()
         response = requests.get(url, proxies=proxies, timeout=timeout)
@@ -99,18 +99,21 @@ def perform_test_on_proxy(proxy_address, test_type="url"):
     if test_type == "tcp":
         # For TCP test, we just ping a known reliable and fast host like Google's DNS.
         # The connection goes through the proxy, so it measures the protocol latency.
-        return tcp_ping("8.8.8.8", 53, timeout=TCP_PING_TIMEOUT, proxy_address=proxy_address), "direct_tcp"
+        return (
+            tcp_ping(
+                "8.8.8.8", 53, timeout=TCP_PING_TIMEOUT, proxy_address=proxy_address
+            ),
+            "direct_tcp",
+        )
     else:  # Default to URL test
         return _url_test_request(proxy_address, timeout=URL_TEST_TIMEOUT), "url"
 
 
 def get_external_ip(proxy_address, timeout=GET_EXTERNAL_IP_TIMEOUT):
     """Fetches the external IP address through a given proxy."""
-    proxies = {"http": f"http://{proxy_address}",
-               "https": f"http://{proxy_address}"}
+    proxies = {"http": f"http://{proxy_address}", "https": f"http://{proxy_address}"}
     try:
-        response = requests.get(GET_EXTERNAL_IP_URL,
-                                proxies=proxies, timeout=timeout)
+        response = requests.get(GET_EXTERNAL_IP_URL, proxies=proxies, timeout=timeout)
         response.raise_for_status()
         return response.text
     except requests.exceptions.RequestException:
@@ -158,7 +161,8 @@ class CoreTester:
         try:
             # 1. Generate the special test configuration
             test_config = self.config_generator.generate_test_config(
-                self.servers, self.settings)
+                self.servers, self.settings
+            )
 
             # 2. Map server IDs to their assigned inbound ports
             for i, server in enumerate(self.servers):
@@ -174,12 +178,12 @@ class CoreTester:
 
             # 4. Determine which core executable to use
             active_core = self.settings.get("active_core", "sing-box")
-            os_key = "windows" if sys.platform.startswith(
-                "win") else sys.platform.lower()
+            os_key = (
+                "windows" if sys.platform.startswith("win") else sys.platform.lower()
+            )
 
             if active_core == "sing-box":
-                executable_name = SINGBOX_EXECUTABLE_NAMES.get(
-                    os_key, "sing-box")
+                executable_name = SINGBOX_EXECUTABLE_NAMES.get(os_key, "sing-box")
             else:  # xray
                 executable_name = XRAY_EXECUTABLE_NAMES.get(os_key, "xray")
 
@@ -192,8 +196,9 @@ class CoreTester:
                 self.temp_config_file,
             ]
 
-            creationflags = subprocess.CREATE_NO_WINDOW if sys.platform.startswith(
-                "win") else 0
+            creationflags = (
+                subprocess.CREATE_NO_WINDOW if sys.platform.startswith("win") else 0
+            )
 
             self.core_process = subprocess.Popen(
                 command,
@@ -213,31 +218,39 @@ class CoreTester:
                     try:
                         # Try to get output without blocking forever
                         stdout_output, stderr_output = self.core_process.communicate(
-                            timeout=1)
+                            timeout=1
+                        )
                         error_details = stderr_output.strip() or stdout_output.strip()
                         if not error_details:
                             error_details = f"Process exited with code {self.core_process.returncode}."
                     except subprocess.TimeoutExpired:
-                        error_details = "Process exited but could not read its error output."
+                        error_details = (
+                            "Process exited but could not read its error output."
+                        )
                     raise RuntimeError(
-                        f"Temporary {active_core} instance failed to start. Core error: {error_details}")
+                        f"Temporary {active_core} instance failed to start. Core error: {error_details}"
+                    )
                 else:
                     raise RuntimeError(
-                        f"Temporary {active_core} instance for testing did not start in time.")
+                        f"Temporary {active_core} instance for testing did not start in time."
+                    )
 
             self._ready = True
             self.log(
-                f"CoreTester ready with {active_core} for {len(self.servers)} servers.", LogLevel.DEBUG)
+                f"CoreTester ready with {active_core} for {len(self.servers)} servers.",
+                LogLevel.DEBUG,
+            )
 
             return self
 
         except FileNotFoundError:
             self.log(
-                f"{executable_name} not found. Please ensure it's in the correct directory.", LogLevel.ERROR)
+                f"{executable_name} not found. Please ensure it's in the correct directory.",
+                LogLevel.ERROR,
+            )
             raise
         except Exception as e:
-            self.log(
-                f"Error starting CoreTester instance: {e}", LogLevel.ERROR)
+            self.log(f"Error starting CoreTester instance: {e}", LogLevel.ERROR)
             raise
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -249,7 +262,9 @@ class CoreTester:
                 os.remove(self.temp_config_file)
             except OSError as e:
                 self.log(
-                    f"Could not remove temp config file {self.temp_config_file}: {e}", LogLevel.WARNING)
+                    f"Could not remove temp config file {self.temp_config_file}: {e}",
+                    LogLevel.WARNING,
+                )
 
     def is_ready(self):
         return self._ready
@@ -259,8 +274,7 @@ class CoreTester:
         server_id = server_config.get("id")
         port = self.server_ports.get(server_id)
         if not port:
-            self.log(
-                f"No port assigned for server ID {server_id}", LogLevel.ERROR)
+            self.log(f"No port assigned for server ID {server_id}", LogLevel.ERROR)
             return -1
 
         proxy_address = f"{PROXY_HOST}:{port}"

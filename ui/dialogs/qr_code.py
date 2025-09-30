@@ -26,7 +26,6 @@ class QRCodeDialog(QDialog):
             pixmap.loadFromData(img_bytes)
             qr_label.setPixmap(pixmap)
         except Exception as e:
-            qr_label.setText(
-                self.tr("Could not generate QR code: {}").format(e))
+            qr_label.setText(self.tr("Could not generate QR code: {}").format(e))
 
         layout.addWidget(qr_label)

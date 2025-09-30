@@ -42,8 +42,7 @@ def find_executable(name):
 def run_command(command):
     """Runs a command and checks for errors."""
     print(f"Executing: {' '.join(command)}")
-    result = subprocess.run(command, capture_output=True,
-                            text=True, encoding='utf-8')
+    result = subprocess.run(command, capture_output=True, text=True, encoding="utf-8")
     if result.returncode != 0:
         print("--- ERROR ---")
         print(result.stdout)
@@ -63,12 +62,13 @@ def main():
     lrelease_exe = find_executable("pyside6-lrelease")
 
     print("--- 1. Updating translation source files (.ts) ---")
-    ts_files = [os.path.join(
-        TRANSLATIONS_DIR, f"{TS_FILE_PREFIX}_{lang}.ts") for lang in LANGUAGES]
+    ts_files = [
+        os.path.join(TRANSLATIONS_DIR, f"{TS_FILE_PREFIX}_{lang}.ts")
+        for lang in LANGUAGES
+    ]
     source_paths = [os.path.join(PROJECT_ROOT, f) for f in SOURCE_FILES]
 
-    lupdate_cmd = [lupdate_exe, "-no-obsolete"] + \
-        source_paths + ["-ts"] + ts_files
+    lupdate_cmd = [lupdate_exe, "-no-obsolete"] + source_paths + ["-ts"] + ts_files
     if not run_command(lupdate_cmd):
         print("\nFailed to update .ts files. Aborting.")
         sys.exit(1)

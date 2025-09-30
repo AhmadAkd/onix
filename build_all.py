@@ -38,7 +38,8 @@ def run_command(cmd, shell=False):
     print(f"Running: {' '.join(cmd) if isinstance(cmd, list) else cmd}")
     try:
         result = subprocess.run(
-            cmd, shell=shell, check=True, capture_output=True, text=True)
+            cmd, shell=shell, check=True, capture_output=True, text=True
+        )
         if result.stdout:
             print(result.stdout)
         return True
@@ -61,6 +62,7 @@ def ensure_dependencies():
     # Check PyInstaller
     try:
         import PyInstaller
+
         print(f"PyInstaller version: {PyInstaller.__version__}")
     except ImportError:
         print("Installing PyInstaller...")
@@ -69,14 +71,19 @@ def ensure_dependencies():
 
     # Install all requirements
     print("Installing all requirements...")
-    if not run_command([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"]):
+    if not run_command(
+        [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"]
+    ):
         return False
-    if not run_command([sys.executable, "-m", "pip", "install", "-r", "requirements-dev.txt"]):
+    if not run_command(
+        [sys.executable, "-m", "pip", "install", "-r", "requirements-dev.txt"]
+    ):
         return False
 
     # Check other dependencies
     try:
         import PySide6
+
         print(f"PySide6 version: {PySide6.__version__}")
     except ImportError:
         print("Installing PySide6...")
@@ -95,7 +102,9 @@ def download_cores():
         print("Warning: Failed to download sing-box, continuing...")
 
     # Download xray if needed
-    if not run_command([sys.executable, "-c", "import utils; utils.download_core_if_needed('xray')"]):
+    if not run_command(
+        [sys.executable, "-c", "import utils; utils.download_core_if_needed('xray')"]
+    ):
         print("Warning: Failed to download xray, continuing...")
 
     return True  # Continue even if cores fail to download
@@ -119,7 +128,7 @@ def download_geoip():
 
     print("Downloading GeoIP database...")
     if platform.system().lower() == "windows":
-        cmd = 'powershell -Command "Invoke-WebRequest -Uri \'https://github.com/SagerNet/sing-geoip/releases/latest/download/geoip.db\' -OutFile \'geoip.db\'"'
+        cmd = "powershell -Command \"Invoke-WebRequest -Uri 'https://github.com/SagerNet/sing-geoip/releases/latest/download/geoip.db' -OutFile 'geoip.db'\""
     else:
         cmd = "curl -L -o geoip.db https://github.com/SagerNet/sing-geoip/releases/latest/download/geoip.db"
 
@@ -139,16 +148,21 @@ def build_executable():
 
     # PyInstaller command
     cmd = [
-        sys.executable, "-m", "PyInstaller",
+        sys.executable,
+        "-m",
+        "PyInstaller",
         "--noconfirm",
         "--onefile",
         "--windowed",
         f"--name={executable_name}",
-        "--add-data", "version.txt:.",
-        "--add-data", "geoip.db:.",
-        "--add-data", "translations:translations",
+        "--add-data",
+        "version.txt:.",
+        "--add-data",
+        "geoip.db:.",
+        "--add-data",
+        "translations:translations",
         "--icon=assets/icon.ico",
-        "main.py"
+        "main.py",
     ]
 
     # Platform-specific adjustments
@@ -189,11 +203,7 @@ def create_package():
     shutil.copy2(exe_src, exe_dst)
 
     # Copy additional files
-    additional_files = [
-        "README.md",
-        "LICENSE",
-        "CHANGELOG.md"
-    ]
+    additional_files = ["README.md", "LICENSE", "CHANGELOG.md"]
 
     for file in additional_files:
         if Path(file).exists():
@@ -201,8 +211,7 @@ def create_package():
 
     # Create archive
     archive_name = f"onix-v1.0.0-{platform_name}-{arch_name}.zip"
-    shutil.make_archive(
-        f"dist/{archive_name[:-4]}", "zip", "dist", package_dir.name)
+    shutil.make_archive(f"dist/{archive_name[:-4]}", "zip", "dist", package_dir.name)
 
     print(f"Package created: dist/{archive_name}")
     return archive_name
@@ -230,7 +239,7 @@ def main():
         ("Compiling translations", compile_translations),
         ("Downloading GeoIP", download_geoip),
         ("Building executable", build_executable),
-        ("Creating package", create_package)
+        ("Creating package", create_package),
     ]
 
     for step_name, step_func in steps:

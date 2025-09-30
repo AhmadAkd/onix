@@ -23,7 +23,8 @@ class ServerCardWidget(QWidget):
         self.setMinimumHeight(90)
         self.setMaximumHeight(120)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        self.setStyleSheet("""
+        self.setStyleSheet(
+            """
             ServerCardWidget {
                 background-color: #ffffff;
                 border: 1px solid #e5e7eb;
@@ -35,7 +36,8 @@ class ServerCardWidget(QWidget):
                 border-color: #6366f1;
                 background-color: #f8fafc;
             }
-        """)
+        """
+        )
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(16, 16, 16, 16)
@@ -47,12 +49,14 @@ class ServerCardWidget(QWidget):
 
         # Server name with modern styling
         self.name_label = QLabel(server_data.get("name", "Unnamed"))
-        self.name_label.setStyleSheet("""
+        self.name_label.setStyleSheet(
+            """
             font-size: 14px; 
             font-weight: 600; 
             color: #1f2937;
             margin-bottom: 2px;
-        """)
+        """
+        )
 
         # Server protocol/type info
         protocol = server_data.get("protocol", "Unknown")
@@ -65,11 +69,12 @@ class ServerCardWidget(QWidget):
             "trojan": "Trojan",
             "hysteria2": "Hysteria2",
             "tuic": "TUIC",
-            "wireguard": "WireGuard"
+            "wireguard": "WireGuard",
         }
         display_protocol = protocol_map.get(protocol.lower(), protocol.upper())
         self.protocol_label = QLabel(display_protocol)
-        self.protocol_label.setStyleSheet("""
+        self.protocol_label.setStyleSheet(
+            """
             font-size: 10px; 
             font-weight: 500; 
             color: #6b7280;
@@ -77,7 +82,8 @@ class ServerCardWidget(QWidget):
             padding: 2px 8px;
             border-radius: 4px;
             min-width: 80px;
-        """)
+        """
+        )
         self.protocol_label.setAlignment(Qt.AlignCenter)
 
         info_layout.addWidget(self.name_label)
@@ -89,7 +95,8 @@ class ServerCardWidget(QWidget):
         stats_layout.setAlignment(Qt.AlignRight)
 
         self.tcp_ping_label = QLabel("TCP: N/A")
-        self.tcp_ping_label.setStyleSheet("""
+        self.tcp_ping_label.setStyleSheet(
+            """
             font-size: 13px; 
             font-weight: 600;
             color: #ef4444;
@@ -99,10 +106,12 @@ class ServerCardWidget(QWidget):
             margin: 2px 0;
             min-width: 80px;
             min-height: 20px;
-        """)
+        """
+        )
 
         self.url_ping_label = QLabel("URI: N/A")
-        self.url_ping_label.setStyleSheet("""
+        self.url_ping_label.setStyleSheet(
+            """
             font-size: 13px; 
             font-weight: 600;
             color: #ef4444;
@@ -112,7 +121,8 @@ class ServerCardWidget(QWidget):
             margin: 2px 0;
             min-width: 80px;
             min-height: 20px;
-        """)
+        """
+        )
 
         # Health stats label removed - using TCP/URI badges instead
 
@@ -120,11 +130,11 @@ class ServerCardWidget(QWidget):
         stats_layout.addWidget(self.url_ping_label)
 
         # Menu button with modern styling
-        self.menu_button = QPushButton(
-            QIcon(":/icons/more-horizontal.svg"), "")
+        self.menu_button = QPushButton(QIcon(":/icons/more-horizontal.svg"), "")
         self.menu_button.setObjectName("ServerCardMenuButton")
         self.menu_button.setFixedSize(32, 32)
-        self.menu_button.setStyleSheet("""
+        self.menu_button.setStyleSheet(
+            """
             QPushButton {
                 border: none;
                 border-radius: 8px;
@@ -135,7 +145,8 @@ class ServerCardWidget(QWidget):
                 background-color: #f3f4f6;
                 color: #6366f1;
             }
-        """)
+        """
+        )
         self.menu_button.hide()  # Hide by default, show on hover
 
         layout.addLayout(info_layout)
@@ -163,36 +174,42 @@ class ServerCardWidget(QWidget):
     def setup_menu(self):
         self.menu = QMenu(self)
 
-        ping_action = QAction(QIcon(":/icons/zap.svg"),
-                              self.tr("Test Ping (TCP)"), self)
+        ping_action = QAction(
+            QIcon(":/icons/zap.svg"), self.tr("Test Ping (TCP)"), self
+        )
         ping_action.triggered.connect(
-            lambda: self.action_requested.emit("ping_tcp", self.server_data))
+            lambda: self.action_requested.emit("ping_tcp", self.server_data)
+        )
 
         url_test_action = QAction(
-            QIcon(":/icons/activity.svg"), self.tr("Test Latency (URL)"), self)
+            QIcon(":/icons/activity.svg"), self.tr("Test Latency (URL)"), self
+        )
         url_test_action.triggered.connect(
-            lambda: self.action_requested.emit("ping_url", self.server_data))
+            lambda: self.action_requested.emit("ping_url", self.server_data)
+        )
 
-        edit_action = QAction(QIcon(":/icons/edit-2.svg"),
-                              self.tr("Edit Server"), self)
+        edit_action = QAction(QIcon(":/icons/edit-2.svg"), self.tr("Edit Server"), self)
         edit_action.triggered.connect(
-            lambda: self.action_requested.emit("edit_server", self.server_data))
+            lambda: self.action_requested.emit("edit_server", self.server_data)
+        )
 
         copy_link_action = QAction(
-            QIcon(":/icons/copy.svg"), self.tr("Copy Link"), self)
+            QIcon(":/icons/copy.svg"), self.tr("Copy Link"), self
+        )
         copy_link_action.triggered.connect(
-            lambda: self.action_requested.emit("copy_link", self.server_data))
+            lambda: self.action_requested.emit("copy_link", self.server_data)
+        )
 
         # Using a placeholder icon
-        qr_action = QAction(QIcon(":/icons/qr-code.svg"),
-                            self.tr("Show QR Code"), self)
+        qr_action = QAction(QIcon(":/icons/qr-code.svg"), self.tr("Show QR Code"), self)
         qr_action.triggered.connect(
-            lambda: self.action_requested.emit("qr_code", self.server_data))
+            lambda: self.action_requested.emit("qr_code", self.server_data)
+        )
 
-        delete_action = QAction(
-            QIcon(":/icons/trash-2.svg"), self.tr("Delete"), self)
+        delete_action = QAction(QIcon(":/icons/trash-2.svg"), self.tr("Delete"), self)
         delete_action.triggered.connect(
-            lambda: self.action_requested.emit("delete", self.server_data))
+            lambda: self.action_requested.emit("delete", self.server_data)
+        )
 
         self.menu.addAction(ping_action)
         self.menu.addAction(url_test_action)
@@ -240,7 +257,8 @@ class ServerCardWidget(QWidget):
                 bg_color = "#fef2f2"  # Light red background
 
         label_to_update.setText(text)
-        label_to_update.setStyleSheet(f"""
+        label_to_update.setStyleSheet(
+            f"""
             color: {color};
             background-color: {bg_color};
             padding: 10px 16px;
@@ -250,7 +268,8 @@ class ServerCardWidget(QWidget):
             margin: 2px 0;
             min-width: 80px;
             min-height: 20px;
-        """)
+        """
+        )
 
     def update_health_stats(self, stats):
         """Health stats removed - using TCP/URI badges instead."""

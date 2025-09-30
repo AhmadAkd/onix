@@ -19,7 +19,12 @@ class BrowserIntegrationService:
     def __init__(self, log_callback: Callable[[str, LogLevel], None]):
         self.log = log_callback
         self._supported_browsers = [
-            "chrome", "firefox", "edge", "opera", "brave", "safari"
+            "chrome",
+            "firefox",
+            "edge",
+            "opera",
+            "brave",
+            "safari",
         ]
         self._browser_profiles = {}
 
@@ -59,8 +64,7 @@ class BrowserIntegrationService:
         chrome_paths = [
             r"C:\Program Files\Google\Chrome\Application\chrome.exe",
             r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
-            os.path.expanduser(
-                r"~\AppData\Local\Google\Chrome\Application\chrome.exe")
+            os.path.expanduser(r"~\AppData\Local\Google\Chrome\Application\chrome.exe"),
         ]
 
         for path in chrome_paths:
@@ -69,7 +73,7 @@ class BrowserIntegrationService:
                     "name": "Google Chrome",
                     "executable": path,
                     "type": "chrome",
-                    "version": self._get_browser_version(path)
+                    "version": self._get_browser_version(path),
                 }
         return None
 
@@ -77,7 +81,7 @@ class BrowserIntegrationService:
         """Detect Mozilla Firefox."""
         firefox_paths = [
             r"C:\Program Files\Mozilla Firefox\firefox.exe",
-            r"C:\Program Files (x86)\Mozilla Firefox\firefox.exe"
+            r"C:\Program Files (x86)\Mozilla Firefox\firefox.exe",
         ]
 
         for path in firefox_paths:
@@ -86,7 +90,7 @@ class BrowserIntegrationService:
                     "name": "Mozilla Firefox",
                     "executable": path,
                     "type": "firefox",
-                    "version": self._get_browser_version(path)
+                    "version": self._get_browser_version(path),
                 }
         return None
 
@@ -94,7 +98,7 @@ class BrowserIntegrationService:
         """Detect Microsoft Edge."""
         edge_paths = [
             r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
-            r"C:\Program Files\Microsoft\Edge\Application\msedge.exe"
+            r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
         ]
 
         for path in edge_paths:
@@ -103,7 +107,7 @@ class BrowserIntegrationService:
                     "name": "Microsoft Edge",
                     "executable": path,
                     "type": "edge",
-                    "version": self._get_browser_version(path)
+                    "version": self._get_browser_version(path),
                 }
         return None
 
@@ -112,7 +116,7 @@ class BrowserIntegrationService:
         opera_paths = [
             r"C:\Program Files\Opera\opera.exe",
             r"C:\Program Files (x86)\Opera\opera.exe",
-            os.path.expanduser(r"~\AppData\Local\Programs\Opera\opera.exe")
+            os.path.expanduser(r"~\AppData\Local\Programs\Opera\opera.exe"),
         ]
 
         for path in opera_paths:
@@ -121,7 +125,7 @@ class BrowserIntegrationService:
                     "name": "Opera",
                     "executable": path,
                     "type": "opera",
-                    "version": self._get_browser_version(path)
+                    "version": self._get_browser_version(path),
                 }
         return None
 
@@ -131,7 +135,8 @@ class BrowserIntegrationService:
             r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe",
             r"C:\Program Files (x86)\BraveSoftware\Brave-Browser\Application\brave.exe",
             os.path.expanduser(
-                r"~\AppData\Local\BraveSoftware\Brave-Browser\Application\brave.exe")
+                r"~\AppData\Local\BraveSoftware\Brave-Browser\Application\brave.exe"
+            ),
         ]
 
         for path in brave_paths:
@@ -140,7 +145,7 @@ class BrowserIntegrationService:
                     "name": "Brave Browser",
                     "executable": path,
                     "type": "brave",
-                    "version": self._get_browser_version(path)
+                    "version": self._get_browser_version(path),
                 }
         return None
 
@@ -148,7 +153,7 @@ class BrowserIntegrationService:
         """Detect Safari (Windows version)."""
         safari_paths = [
             r"C:\Program Files\Safari\Safari.exe",
-            r"C:\Program Files (x86)\Safari\Safari.exe"
+            r"C:\Program Files (x86)\Safari\Safari.exe",
         ]
 
         for path in safari_paths:
@@ -157,7 +162,7 @@ class BrowserIntegrationService:
                     "name": "Safari",
                     "executable": path,
                     "type": "safari",
-                    "version": self._get_browser_version(path)
+                    "version": self._get_browser_version(path),
                 }
         return None
 
@@ -166,7 +171,9 @@ class BrowserIntegrationService:
         try:
             result = subprocess.run(
                 [executable_path, "--version"],
-                capture_output=True, text=True, timeout=5
+                capture_output=True,
+                text=True,
+                timeout=5,
             )
             return result.stdout.strip()
         except Exception:
@@ -183,7 +190,9 @@ class BrowserIntegrationService:
                 return self._configure_edge_proxy(proxy_address)
             else:
                 self.log(
-                    f"Proxy configuration not supported for {browser_type}", LogLevel.WARNING)
+                    f"Proxy configuration not supported for {browser_type}",
+                    LogLevel.WARNING,
+                )
                 return False
         except Exception as e:
             self.log(f"Failed to configure browser proxy: {e}", LogLevel.ERROR)
@@ -196,9 +205,11 @@ class BrowserIntegrationService:
             host, port = proxy_address.split(":")
 
             # Set system proxy
-            subprocess.run([
-                "netsh", "winhttp", "set", "proxy", f"{host}:{port}"
-            ], shell=True, check=True)
+            subprocess.run(
+                ["netsh", "winhttp", "set", "proxy", f"{host}:{port}"],
+                shell=True,
+                check=True,
+            )
 
             self.log("Chrome proxy configured", LogLevel.SUCCESS)
             return True
@@ -211,8 +222,7 @@ class BrowserIntegrationService:
         try:
             # Firefox requires manual configuration or user.js file
             # This is a simplified approach
-            self.log(
-                "Firefox proxy configuration requires manual setup", LogLevel.INFO)
+            self.log("Firefox proxy configuration requires manual setup", LogLevel.INFO)
             return True
         except Exception as e:
             self.log(f"Failed to configure Firefox proxy: {e}", LogLevel.ERROR)
@@ -224,9 +234,11 @@ class BrowserIntegrationService:
             # Edge uses system proxy by default
             host, port = proxy_address.split(":")
 
-            subprocess.run([
-                "netsh", "winhttp", "set", "proxy", f"{host}:{port}"
-            ], shell=True, check=True)
+            subprocess.run(
+                ["netsh", "winhttp", "set", "proxy", f"{host}:{port}"],
+                shell=True,
+                check=True,
+            )
 
             self.log("Edge proxy configured", LogLevel.SUCCESS)
             return True
@@ -246,27 +258,32 @@ class KeyboardShortcutManager(QObject):
         self._shortcuts = {}
         self._default_shortcuts = self._load_default_shortcuts()
 
-    def register_shortcut(self, shortcut_name: str, key_sequence: str,
-                          callback: Callable[[], None]) -> bool:
+    def register_shortcut(
+        self, shortcut_name: str, key_sequence: str, callback: Callable[[], None]
+    ) -> bool:
         """Register a keyboard shortcut."""
         try:
-            shortcut = QShortcut(QKeySequence(key_sequence),
-                                 QApplication.activeWindow())
+            shortcut = QShortcut(
+                QKeySequence(key_sequence), QApplication.activeWindow()
+            )
             shortcut.activated.connect(callback)
 
             self._shortcuts[shortcut_name] = {
                 "shortcut": shortcut,
                 "key_sequence": key_sequence,
-                "callback": callback
+                "callback": callback,
             }
 
             self.log(
-                f"Registered shortcut: {shortcut_name} ({key_sequence})", LogLevel.SUCCESS)
+                f"Registered shortcut: {shortcut_name} ({key_sequence})",
+                LogLevel.SUCCESS,
+            )
             return True
 
         except Exception as e:
             self.log(
-                f"Failed to register shortcut {shortcut_name}: {e}", LogLevel.ERROR)
+                f"Failed to register shortcut {shortcut_name}: {e}", LogLevel.ERROR
+            )
             return False
 
     def unregister_shortcut(self, shortcut_name: str) -> bool:
@@ -274,13 +291,13 @@ class KeyboardShortcutManager(QObject):
         try:
             if shortcut_name in self._shortcuts:
                 del self._shortcuts[shortcut_name]
-                self.log(
-                    f"Unregistered shortcut: {shortcut_name}", LogLevel.SUCCESS)
+                self.log(f"Unregistered shortcut: {shortcut_name}", LogLevel.SUCCESS)
                 return True
             return False
         except Exception as e:
             self.log(
-                f"Failed to unregister shortcut {shortcut_name}: {e}", LogLevel.ERROR)
+                f"Failed to unregister shortcut {shortcut_name}: {e}", LogLevel.ERROR
+            )
             return False
 
     def get_shortcuts(self) -> Dict[str, str]:
@@ -292,15 +309,17 @@ class KeyboardShortcutManager(QObject):
         try:
             if shortcut_name in self._shortcuts:
                 self._shortcuts[shortcut_name]["shortcut"].setKey(
-                    QKeySequence(key_sequence))
+                    QKeySequence(key_sequence)
+                )
                 self._shortcuts[shortcut_name]["key_sequence"] = key_sequence
                 self.log(
-                    f"Updated shortcut: {shortcut_name} -> {key_sequence}", LogLevel.SUCCESS)
+                    f"Updated shortcut: {shortcut_name} -> {key_sequence}",
+                    LogLevel.SUCCESS,
+                )
                 return True
             return False
         except Exception as e:
-            self.log(
-                f"Failed to set shortcut {shortcut_name}: {e}", LogLevel.ERROR)
+            self.log(f"Failed to set shortcut {shortcut_name}: {e}", LogLevel.ERROR)
             return False
 
     def _load_default_shortcuts(self) -> Dict[str, str]:
@@ -315,7 +334,7 @@ class KeyboardShortcutManager(QObject):
             "speed_test": "Ctrl+Shift+S",
             "health_check": "Ctrl+Shift+H",
             "export_config": "Ctrl+Shift+E",
-            "import_config": "Ctrl+Shift+I"
+            "import_config": "Ctrl+Shift+I",
         }
 
 
@@ -328,23 +347,22 @@ class QuickActionsService:
         self._action_history = []
         self._setup_default_actions()
 
-    def register_action(self, action_name: str, action_func: Callable[[], Any],
-                        description: str = "") -> bool:
+    def register_action(
+        self, action_name: str, action_func: Callable[[], Any], description: str = ""
+    ) -> bool:
         """Register a quick action."""
         try:
             self._actions[action_name] = {
                 "function": action_func,
                 "description": description,
-                "created_at": time.time()
+                "created_at": time.time(),
             }
 
-            self.log(
-                f"Registered quick action: {action_name}", LogLevel.SUCCESS)
+            self.log(f"Registered quick action: {action_name}", LogLevel.SUCCESS)
             return True
 
         except Exception as e:
-            self.log(
-                f"Failed to register action {action_name}: {e}", LogLevel.ERROR)
+            self.log(f"Failed to register action {action_name}: {e}", LogLevel.ERROR)
             return False
 
     def execute_action(self, action_name: str) -> Any:
@@ -358,33 +376,35 @@ class QuickActionsService:
             result = action["function"]()
 
             # Log action execution
-            self._action_history.append({
-                "action_name": action_name,
-                "timestamp": time.time(),
-                "success": True
-            })
+            self._action_history.append(
+                {"action_name": action_name, "timestamp": time.time(), "success": True}
+            )
 
             self.log(f"Executed action: {action_name}", LogLevel.SUCCESS)
             return result
 
         except Exception as e:
-            self._action_history.append({
-                "action_name": action_name,
-                "timestamp": time.time(),
-                "success": False,
-                "error": str(e)
-            })
+            self._action_history.append(
+                {
+                    "action_name": action_name,
+                    "timestamp": time.time(),
+                    "success": False,
+                    "error": str(e),
+                }
+            )
 
-            self.log(
-                f"Failed to execute action {action_name}: {e}", LogLevel.ERROR)
+            self.log(f"Failed to execute action {action_name}: {e}", LogLevel.ERROR)
             return None
 
     def get_actions(self) -> Dict[str, Dict[str, Any]]:
         """Get all registered actions."""
-        return {name: {
-            "description": action["description"],
-            "created_at": action["created_at"]
-        } for name, action in self._actions.items()}
+        return {
+            name: {
+                "description": action["description"],
+                "created_at": action["created_at"],
+            }
+            for name, action in self._actions.items()
+        }
 
     def get_action_history(self, limit: int = 50) -> List[Dict[str, Any]]:
         """Get action execution history."""
@@ -396,39 +416,42 @@ class QuickActionsService:
         self.register_action(
             "quick_connect_best",
             lambda: self.log("Quick connect to best server", LogLevel.INFO),
-            "Connect to the best available server"
+            "Connect to the best available server",
         )
 
         self.register_action(
             "toggle_proxy",
             lambda: self.log("Toggle proxy on/off", LogLevel.INFO),
-            "Toggle proxy connection"
+            "Toggle proxy connection",
         )
 
         self.register_action(
             "test_speed",
             lambda: self.log("Run speed test", LogLevel.INFO),
-            "Run speed test on current connection"
+            "Run speed test on current connection",
         )
 
         self.register_action(
             "export_logs",
             lambda: self.log("Export logs", LogLevel.INFO),
-            "Export application logs"
+            "Export application logs",
         )
 
         self.register_action(
             "clear_cache",
             lambda: self.log("Clear cache", LogLevel.INFO),
-            "Clear application cache"
+            "Clear application cache",
         )
 
 
 class SystemTrayEnhancementService:
     """Service for enhanced system tray functionality."""
 
-    def __init__(self, log_callback: Callable[[str, LogLevel], None],
-                 tray_icon: Optional[Any] = None):
+    def __init__(
+        self,
+        log_callback: Callable[[str, LogLevel], None],
+        tray_icon: Optional[Any] = None,
+    ):
         self.log = log_callback
         self.tray_icon = tray_icon
         self._context_menu = None
@@ -472,7 +495,8 @@ class SystemTrayEnhancementService:
 
             if connected:
                 self.tray_icon.setToolTip(
-                    f"Onix - Connected to {server_name or 'Unknown'}")
+                    f"Onix - Connected to {server_name or 'Unknown'}"
+                )
                 # Set connected icon
             else:
                 self.tray_icon.setToolTip("Onix - Disconnected")
@@ -481,8 +505,9 @@ class SystemTrayEnhancementService:
         except Exception as e:
             self.log(f"Failed to update tray status: {e}", LogLevel.ERROR)
 
-    def show_notification(self, title: str, message: str,
-                          notification_type: str = "info"):
+    def show_notification(
+        self, title: str, message: str, notification_type: str = "info"
+    ):
         """Show system tray notification."""
         try:
             if self.tray_icon:
@@ -491,7 +516,7 @@ class SystemTrayEnhancementService:
                     "info": 0,  # QSystemTrayIcon.Information
                     "warning": 1,  # QSystemTrayIcon.Warning
                     "error": 2,  # QSystemTrayIcon.Critical
-                    "success": 0  # QSystemTrayIcon.Information
+                    "success": 0,  # QSystemTrayIcon.Information
                 }
 
                 self.tray_icon.showMessage(

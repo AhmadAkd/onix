@@ -37,9 +37,7 @@ class KillSwitchService:
             self._stop_event.clear()
 
             self._monitor_thread = threading.Thread(
-                target=self._monitor_connection,
-                args=(proxy_address,),
-                daemon=True
+                target=self._monitor_connection, args=(proxy_address,), daemon=True
             )
             self._monitor_thread.start()
 
@@ -76,10 +74,7 @@ class KillSwitchService:
             if platform.system() == "Windows":
                 # Backup Windows routes
                 result = subprocess.run(
-                    ["route", "print"],
-                    capture_output=True,
-                    text=True,
-                    shell=True
+                    ["route", "print"], capture_output=True, text=True, shell=True
                 )
                 self._original_routes = result.stdout
 
@@ -88,7 +83,7 @@ class KillSwitchService:
                     ["netsh", "interface", "ip", "show", "dns"],
                     capture_output=True,
                     text=True,
-                    shell=True
+                    shell=True,
                 )
                 self._backup_dns = result.stdout
 
@@ -102,15 +97,21 @@ class KillSwitchService:
                 # Restore DNS settings
                 if self._backup_dns:
                     subprocess.run(
-                        ["netsh", "interface", "ip", "set",
-                            "dns", "name=\"Wi-Fi\"", "dhcp"],
+                        [
+                            "netsh",
+                            "interface",
+                            "ip",
+                            "set",
+                            "dns",
+                            'name="Wi-Fi"',
+                            "dhcp",
+                        ],
                         shell=True,
-                        check=False
+                        check=False,
                     )
 
         except Exception as e:
-            self.log(
-                f"Failed to restore network config: {e}", LogLevel.WARNING)
+            self.log(f"Failed to restore network config: {e}", LogLevel.WARNING)
 
     def _monitor_connection(self, proxy_address: str):
         """Monitor proxy connection and block internet if disconnected."""
@@ -119,7 +120,8 @@ class KillSwitchService:
                 # Test proxy connection
                 if not self._test_proxy_connection(proxy_address):
                     self.log(
-                        "Proxy connection lost - blocking internet", LogLevel.WARNING)
+                        "Proxy connection lost - blocking internet", LogLevel.WARNING
+                    )
                     self._block_internet()
                 else:
                     self._unblock_internet()
@@ -147,10 +149,18 @@ class KillSwitchService:
             if platform.system() == "Windows":
                 # Block all traffic except local
                 subprocess.run(
-                    ["netsh", "advfirewall", "firewall", "add", "rule",
-                     "name=\"KillSwitch\", dir=out", "action=block", "enable=yes"],
+                    [
+                        "netsh",
+                        "advfirewall",
+                        "firewall",
+                        "add",
+                        "rule",
+                        'name="KillSwitch", dir=out',
+                        "action=block",
+                        "enable=yes",
+                    ],
                     shell=True,
-                    check=False
+                    check=False,
                 )
         except Exception as e:
             self.log(f"Failed to block internet: {e}", LogLevel.ERROR)
@@ -161,10 +171,16 @@ class KillSwitchService:
             if platform.system() == "Windows":
                 # Remove block rule
                 subprocess.run(
-                    ["netsh", "advfirewall", "firewall",
-                        "delete", "rule", "name=\"KillSwitch\""],
+                    [
+                        "netsh",
+                        "advfirewall",
+                        "firewall",
+                        "delete",
+                        "rule",
+                        'name="KillSwitch"',
+                    ],
                     shell=True,
-                    check=False
+                    check=False,
                 )
         except Exception as e:
             self.log(f"Failed to unblock internet: {e}", LogLevel.ERROR)
@@ -190,9 +206,7 @@ class DNSLeakProtectionService:
             self._stop_event.clear()
 
             self._monitor_thread = threading.Thread(
-                target=self._monitor_dns,
-                args=(dns_servers,),
-                daemon=True
+                target=self._monitor_dns, args=(dns_servers,), daemon=True
             )
             self._monitor_thread.start()
 
@@ -200,8 +214,7 @@ class DNSLeakProtectionService:
             return True
 
         except Exception as e:
-            self.log(
-                f"Failed to start DNS Leak Protection: {e}", LogLevel.ERROR)
+            self.log(f"Failed to start DNS Leak Protection: {e}", LogLevel.ERROR)
             return False
 
     def stop_dns_protection(self):
@@ -243,7 +256,7 @@ class DNSLeakProtectionService:
                     ["netsh", "interface", "ip", "show", "dns"],
                     capture_output=True,
                     text=True,
-                    shell=True
+                    shell=True,
                 )
                 current_dns = result.stdout.lower()
 
@@ -261,10 +274,19 @@ class DNSLeakProtectionService:
             if platform.system() == "Windows":
                 for i, dns in enumerate(dns_servers):
                     subprocess.run(
-                        ["netsh", "interface", "ip", "set", "dns",
-                         "name=\"Wi-Fi\"", "static", dns, f"index={i+1}"],
+                        [
+                            "netsh",
+                            "interface",
+                            "ip",
+                            "set",
+                            "dns",
+                            'name="Wi-Fi"',
+                            "static",
+                            dns,
+                            f"index={i+1}",
+                        ],
                         shell=True,
-                        check=False
+                        check=False,
                     )
         except Exception as e:
             self.log(f"Failed to fix DNS servers: {e}", LogLevel.ERROR)
@@ -299,8 +321,7 @@ class CertificatePinningService:
         try:
             if hostname in self._pinned_certificates:
                 del self._pinned_certificates[hostname]
-                self.log(
-                    f"Removed certificate pin for {hostname}", LogLevel.SUCCESS)
+                self.log(f"Removed certificate pin for {hostname}", LogLevel.SUCCESS)
                 return True
             return False
         except Exception as e:
@@ -321,18 +342,33 @@ class IPv6LeakProtectionService:
             if platform.system() == "Windows":
                 # Disable IPv6 on all interfaces
                 subprocess.run(
-                    ["netsh", "interface", "ipv6", "set",
-                        "global", "randomizeidentifiers=disabled"],
+                    [
+                        "netsh",
+                        "interface",
+                        "ipv6",
+                        "set",
+                        "global",
+                        "randomizeidentifiers=disabled",
+                    ],
                     shell=True,
-                    check=False
+                    check=False,
                 )
 
                 # Block IPv6 traffic
                 subprocess.run(
-                    ["netsh", "advfirewall", "firewall", "add", "rule",
-                     "name=\"BlockIPv6\", dir=out", "action=block", "protocol=41", "enable=yes"],
+                    [
+                        "netsh",
+                        "advfirewall",
+                        "firewall",
+                        "add",
+                        "rule",
+                        'name="BlockIPv6", dir=out',
+                        "action=block",
+                        "protocol=41",
+                        "enable=yes",
+                    ],
                     shell=True,
-                    check=False
+                    check=False,
                 )
 
             self._is_active = True
@@ -340,8 +376,7 @@ class IPv6LeakProtectionService:
             return True
 
         except Exception as e:
-            self.log(
-                f"Failed to start IPv6 Leak Protection: {e}", LogLevel.ERROR)
+            self.log(f"Failed to start IPv6 Leak Protection: {e}", LogLevel.ERROR)
             return False
 
     def stop_ipv6_protection(self):
@@ -350,18 +385,23 @@ class IPv6LeakProtectionService:
             if platform.system() == "Windows":
                 # Remove IPv6 block rule
                 subprocess.run(
-                    ["netsh", "advfirewall", "firewall",
-                        "delete", "rule", "name=\"BlockIPv6\""],
+                    [
+                        "netsh",
+                        "advfirewall",
+                        "firewall",
+                        "delete",
+                        "rule",
+                        'name="BlockIPv6"',
+                    ],
                     shell=True,
-                    check=False
+                    check=False,
                 )
 
             self._is_active = False
             self.log("IPv6 Leak Protection deactivated", LogLevel.INFO)
 
         except Exception as e:
-            self.log(
-                f"Failed to stop IPv6 Leak Protection: {e}", LogLevel.ERROR)
+            self.log(f"Failed to stop IPv6 Leak Protection: {e}", LogLevel.ERROR)
 
     def is_active(self) -> bool:
         """Check if IPv6 Leak Protection is active."""

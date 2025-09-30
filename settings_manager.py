@@ -157,13 +157,11 @@ def import_settings(file_path, log_callback=None):
         return True
     except FileNotFoundError:
         if log_callback:
-            log_callback(
-                f"Error: File not found at {file_path}", LogLevel.ERROR)
+            log_callback(f"Error: File not found at {file_path}", LogLevel.ERROR)
         return False
     except json.JSONDecodeError:
         if log_callback:
-            log_callback(
-                f"Error: Invalid JSON format in {file_path}", LogLevel.ERROR)
+            log_callback(f"Error: Invalid JSON format in {file_path}", LogLevel.ERROR)
         return False
     except Exception as e:
         if log_callback:

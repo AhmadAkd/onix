@@ -43,7 +43,8 @@ def create_settings_view(main_window):
     search_field.setPlaceholderText(main_window.tr("Search settings..."))
     search_field.setObjectName("SettingsSearch")
     search_field.setMaximumHeight(35)  # Limit height
-    search_field.setStyleSheet("""
+    search_field.setStyleSheet(
+        """
         QLineEdit#SettingsSearch {
             padding: 6px 10px;
             border: 1px solid #dee2e6;
@@ -56,7 +57,8 @@ def create_settings_view(main_window):
             border-color: #007bff;
             outline: none;
         }
-    """)
+    """
+    )
     nav_layout.addWidget(search_field)
 
     settings_nav = QListWidget()
@@ -103,25 +105,21 @@ def create_settings_view(main_window):
     # Pages on the right
     main_window.settings_pages = QStackedWidget()
     main_window.settings_pages.setSizePolicy(
-        QSizePolicy.Expanding, QSizePolicy.Expanding)
+        QSizePolicy.Expanding, QSizePolicy.Expanding
+    )
 
     # Connect search functionality
     search_field.textChanged.connect(
-        lambda text: _filter_settings_pages(main_window, text))
+        lambda text: _filter_settings_pages(main_window, text)
+    )
 
     # Create and add pages
-    main_window.settings_pages.addWidget(
-        _create_general_settings_page(main_window))
-    main_window.settings_pages.addWidget(
-        _create_network_settings_page(main_window))
-    main_window.settings_pages.addWidget(
-        _create_protocols_settings_page(main_window))
-    main_window.settings_pages.addWidget(
-        _create_security_settings_page(main_window))
-    main_window.settings_pages.addWidget(
-        _create_performance_settings_page(main_window))
-    main_window.settings_pages.addWidget(
-        _create_privacy_settings_page(main_window))
+    main_window.settings_pages.addWidget(_create_general_settings_page(main_window))
+    main_window.settings_pages.addWidget(_create_network_settings_page(main_window))
+    main_window.settings_pages.addWidget(_create_protocols_settings_page(main_window))
+    main_window.settings_pages.addWidget(_create_security_settings_page(main_window))
+    main_window.settings_pages.addWidget(_create_performance_settings_page(main_window))
+    main_window.settings_pages.addWidget(_create_privacy_settings_page(main_window))
 
     # Add items to navigation
     general_item = QListWidgetItem(
@@ -144,8 +142,14 @@ def create_settings_view(main_window):
     )
 
     # Set size hints and add items
-    items = [general_item, network_item, protocols_item,
-             security_item, performance_item, privacy_item]
+    items = [
+        general_item,
+        network_item,
+        protocols_item,
+        security_item,
+        performance_item,
+        privacy_item,
+    ]
     for item in items:
         item.setSizeHint(QSize(item.sizeHint().width(), 35))  # Reduced height
         settings_nav.addItem(item)
@@ -158,11 +162,9 @@ def create_settings_view(main_window):
 
     # Set layout properties
     main_layout.setStretchFactor(nav_container, 0)  # Don't stretch navigation
-    main_layout.setStretchFactor(
-        main_window.settings_pages, 1)  # Stretch content
+    main_layout.setStretchFactor(main_window.settings_pages, 1)  # Stretch content
 
-    settings_nav.currentRowChanged.connect(
-        main_window.settings_pages.setCurrentIndex)
+    settings_nav.currentRowChanged.connect(main_window.settings_pages.setCurrentIndex)
     settings_nav.setCurrentRow(0)
 
     return widget
@@ -192,14 +194,14 @@ def _create_general_settings_page(main_window):
 
     main_window.appearance_mode_combo = QComboBox()
     main_window.appearance_mode_combo.addItems(
-        [main_window.tr("System"), main_window.tr(
-            "Light"), main_window.tr("Dark")]
+        [main_window.tr("System"), main_window.tr("Light"), main_window.tr("Dark")]
     )
     main_window.appearance_mode_combo.setCurrentText(
         main_window.tr(main_window.settings.get("appearance_mode", "System"))
     )
     main_window.appearance_mode_combo.currentTextChanged.connect(
-        main_window.apply_theme)
+        main_window.apply_theme
+    )
 
     main_window.theme_combo = QComboBox()
     main_window.theme_names = {
@@ -211,11 +213,9 @@ def _create_general_settings_page(main_window):
     main_window.theme_combo.addItems(main_window.theme_names.values())
     current_theme_code = main_window.settings.get("theme_color", "blue")
     main_window.theme_combo.setCurrentText(
-        main_window.theme_names.get(
-            current_theme_code, main_window.tr("Indigo"))
+        main_window.theme_names.get(current_theme_code, main_window.tr("Indigo"))
     )
-    main_window.theme_combo.currentTextChanged.connect(
-        main_window.on_theme_change)
+    main_window.theme_combo.currentTextChanged.connect(main_window.on_theme_change)
 
     appearance_layout.addRow(
         main_window.tr("Appearance Mode:"), main_window.appearance_mode_combo
@@ -234,16 +234,15 @@ def _create_general_settings_page(main_window):
     current_lang_name = main_window.languages.get(current_lang_code, "English")
     main_window.language_combo.setCurrentText(current_lang_name)
     main_window.language_combo.currentTextChanged.connect(
-        main_window.on_language_change)
+        main_window.on_language_change
+    )
 
     # Add a restart button for language and core changes
     main_window.restart_button = QPushButton(main_window.tr("Apply & Restart"))
     main_window.restart_button.clicked.connect(main_window.handle_restart)
     main_window.restart_button.hide()  # Initially hidden
-    appearance_layout.addRow(main_window.tr(
-        "Language:"), main_window.language_combo)
-    appearance_layout.addRow(main_window.tr(
-        LBL_THEME_COLOR), main_window.theme_combo)
+    appearance_layout.addRow(main_window.tr("Language:"), main_window.language_combo)
+    appearance_layout.addRow(main_window.tr(LBL_THEME_COLOR), main_window.theme_combo)
 
     layout.addWidget(appearance_group)
 
@@ -267,19 +266,18 @@ def _create_general_settings_page(main_window):
 
     # Add Log Level setting
     main_window.log_level_combo = QComboBox()
-    main_window.log_level_combo.addItems([
-        main_window.tr("Debug"),
-        main_window.tr("Info"),
-        main_window.tr("Warning"),
-        main_window.tr("Error")
-    ])
+    main_window.log_level_combo.addItems(
+        [
+            main_window.tr("Debug"),
+            main_window.tr("Info"),
+            main_window.tr("Warning"),
+            main_window.tr("Error"),
+        ]
+    )
     current_log_level = main_window.settings.get("log_level", "Info")
-    main_window.log_level_combo.setCurrentText(
-        main_window.tr(current_log_level))
-    main_window.log_level_combo.currentTextChanged.connect(
-        main_window.save_settings)
-    log_layout.addRow(main_window.tr("Log Level:"),
-                      main_window.log_level_combo)
+    main_window.log_level_combo.setCurrentText(main_window.tr(current_log_level))
+    main_window.log_level_combo.currentTextChanged.connect(main_window.save_settings)
+    log_layout.addRow(main_window.tr("Log Level:"), main_window.log_level_combo)
 
     clear_core_log_button = QPushButton(
         QIcon(":/icons/trash-2.svg"), main_window.tr("Clear Core Log File")
@@ -300,7 +298,8 @@ def _create_general_settings_page(main_window):
         main_window.settings.get("active_core", "sing-box")
     )
     main_window.core_selector_combo.currentTextChanged.connect(
-        main_window.on_core_change)
+        main_window.on_core_change
+    )
     core_management_layout.addRow(
         main_window.tr("Active Core:"), main_window.core_selector_combo
     )
@@ -309,7 +308,8 @@ def _create_general_settings_page(main_window):
         main_window.tr("Check for Core Updates")
     )
     main_window.check_updates_button.clicked.connect(
-        main_window.handle_check_for_updates)
+        main_window.handle_check_for_updates
+    )
     core_management_layout.addRow(main_window.check_updates_button)
     core_management_layout.addRow(main_window.restart_button)
 
@@ -321,23 +321,27 @@ def _create_general_settings_page(main_window):
 
     # Preset selection
     main_window.settings_preset_combo = QComboBox()
-    main_window.settings_preset_combo.addItems([
-        main_window.tr("Custom"),
-        main_window.tr("Balanced"),
-        main_window.tr("Performance"),
-        main_window.tr("Security"),
-        main_window.tr("Privacy")
-    ])
+    main_window.settings_preset_combo.addItems(
+        [
+            main_window.tr("Custom"),
+            main_window.tr("Balanced"),
+            main_window.tr("Performance"),
+            main_window.tr("Security"),
+            main_window.tr("Privacy"),
+        ]
+    )
     main_window.settings_preset_combo.currentTextChanged.connect(
-        lambda preset: _apply_settings_preset(main_window, preset))
-    presets_layout.addRow(main_window.tr("Preset:"),
-                          main_window.settings_preset_combo)
+        lambda preset: _apply_settings_preset(main_window, preset)
+    )
+    presets_layout.addRow(main_window.tr("Preset:"), main_window.settings_preset_combo)
 
     # Reset to defaults button
     reset_defaults_button = QPushButton(
-        QIcon(":/icons/refresh-cw.svg"), main_window.tr("Reset to Defaults"))
+        QIcon(":/icons/refresh-cw.svg"), main_window.tr("Reset to Defaults")
+    )
     reset_defaults_button.clicked.connect(
-        lambda: _reset_settings_to_defaults(main_window))
+        lambda: _reset_settings_to_defaults(main_window)
+    )
     presets_layout.addRow(reset_defaults_button)
 
     layout.addWidget(presets_group)
@@ -365,47 +369,63 @@ def _create_network_settings_page(main_window):
     # Health Check Interval
     main_window.health_check_interval_combo = QComboBox()
     main_window.health_check_interval_combo.addItems(
-        ["30 seconds", "60 seconds", "120 seconds", "300 seconds"])
+        ["30 seconds", "60 seconds", "120 seconds", "300 seconds"]
+    )
     current_interval = main_window.settings.get("health_check_interval", 30)
     main_window.health_check_interval_combo.setCurrentText(
-        f"{current_interval} seconds")
-    health_layout.addRow(main_window.tr("Check Interval:"),
-                         main_window.health_check_interval_combo)
+        f"{current_interval} seconds"
+    )
+    health_layout.addRow(
+        main_window.tr("Check Interval:"), main_window.health_check_interval_combo
+    )
 
     # EMA Alpha
     main_window.health_check_ema_combo = QComboBox()
     main_window.health_check_ema_combo.addItems(
-        ["0.1 (Fast)", "0.3 (Balanced)", "0.5 (Slow)"])
+        ["0.1 (Fast)", "0.3 (Balanced)", "0.5 (Slow)"]
+    )
     current_ema = main_window.settings.get("health_check_ema_alpha", 0.3)
     main_window.health_check_ema_combo.setCurrentText(
-        f"{current_ema} (Balanced)" if current_ema == 0.3 else f"{current_ema} (Fast)" if current_ema == 0.1 else f"{current_ema} (Slow)")
-    health_layout.addRow(main_window.tr("Smoothing:"),
-                         main_window.health_check_ema_combo)
+        f"{current_ema} (Balanced)"
+        if current_ema == 0.3
+        else f"{current_ema} (Fast)" if current_ema == 0.1 else f"{current_ema} (Slow)"
+    )
+    health_layout.addRow(
+        main_window.tr("Smoothing:"), main_window.health_check_ema_combo
+    )
 
     # Backoff Base
     main_window.health_check_backoff_combo = QComboBox()
     main_window.health_check_backoff_combo.addItems(
-        ["1 second", "2 seconds", "5 seconds"])
+        ["1 second", "2 seconds", "5 seconds"]
+    )
     current_backoff = main_window.settings.get("health_check_backoff_base", 1)
     main_window.health_check_backoff_combo.setCurrentText(
-        f"{current_backoff} second" if current_backoff == 1 else f"{current_backoff} seconds")
-    health_layout.addRow(main_window.tr("Backoff Base:"),
-                         main_window.health_check_backoff_combo)
+        f"{current_backoff} second"
+        if current_backoff == 1
+        else f"{current_backoff} seconds"
+    )
+    health_layout.addRow(
+        main_window.tr("Backoff Base:"), main_window.health_check_backoff_combo
+    )
 
     # Auto-start for groups
     main_window.health_check_auto_start = QCheckBox(
-        main_window.tr("Auto-start Health Check for new groups"))
+        main_window.tr("Auto-start Health Check for new groups")
+    )
     main_window.health_check_auto_start.setChecked(
-        main_window.settings.get("health_check_auto_start", False))
+        main_window.settings.get("health_check_auto_start", False)
+    )
     health_layout.addRow(main_window.health_check_auto_start)
 
     # Auto-failover
     main_window.auto_failover_checkbox = QCheckBox(
-        main_window.tr("Enable Auto-failover"))
+        main_window.tr("Enable Auto-failover")
+    )
     main_window.auto_failover_checkbox.setChecked(
-        main_window.settings.get("auto_failover_enabled", False))
-    main_window.auto_failover_checkbox.stateChanged.connect(
-        main_window.save_settings)
+        main_window.settings.get("auto_failover_enabled", False)
+    )
+    main_window.auto_failover_checkbox.stateChanged.connect(main_window.save_settings)
     health_layout.addRow(main_window.auto_failover_checkbox)
 
     main_window.connection_mode_combo = QComboBox()
@@ -421,16 +441,13 @@ def _create_network_settings_page(main_window):
 
     main_window.dns_entry = QLineEdit()
     main_window.dns_entry.setText(main_window.settings.get("dns_servers", ""))
-    main_window.dns_entry.setPlaceholderText(
-        main_window.tr("e.g., 1.1.1.1,8.8.8.8"))
-    network_layout.addRow(main_window.tr(
-        "DNS Servers:"), main_window.dns_entry)
+    main_window.dns_entry.setPlaceholderText(main_window.tr("e.g., 1.1.1.1,8.8.8.8"))
+    network_layout.addRow(main_window.tr("DNS Servers:"), main_window.dns_entry)
 
     main_window.tun_checkbox = QCheckBox(
         main_window.tr("Enable TUN Mode (System-wide Proxy)")
     )
-    main_window.tun_checkbox.setChecked(
-        main_window.settings.get("tun_enabled", False))
+    main_window.tun_checkbox.setChecked(main_window.settings.get("tun_enabled", False))
     main_window.tun_checkbox.stateChanged.connect(main_window.save_settings)
     network_layout.addRow(main_window.tun_checkbox)
     layout.addWidget(network_group)
@@ -453,15 +470,11 @@ def _create_network_settings_page(main_window):
 
     # Add Bypass IPs field
     main_window.bypass_ips_entry = QLineEdit()
-    main_window.bypass_ips_entry.setText(
-        main_window.settings.get("bypass_ips", "")
-    )
+    main_window.bypass_ips_entry.setText(main_window.settings.get("bypass_ips", ""))
     main_window.bypass_ips_entry.setPlaceholderText(
         main_window.tr("Comma-separated IPs (e.g., 192.168.0.0/16,127.0.0.1)")
     )
-    bypass_layout.addRow(
-        main_window.tr("Bypass IPs:"), main_window.bypass_ips_entry
-    )
+    bypass_layout.addRow(main_window.tr("Bypass IPs:"), main_window.bypass_ips_entry)
 
     layout.addWidget(bypass_group)
 
@@ -475,35 +488,30 @@ def _create_protocols_settings_page(main_window):
     # --- Muxing Settings Group ---
     mux_group = QGroupBox(main_window.tr("Muxing Settings"))
     mux_layout = QFormLayout(mux_group)
-    main_window.mux_enabled_checkbox = QCheckBox(
-        main_window.tr("Enable Muxing"))
+    main_window.mux_enabled_checkbox = QCheckBox(main_window.tr("Enable Muxing"))
     main_window.mux_enabled_checkbox.setChecked(
         main_window.settings.get("mux_enabled", False)
     )
-    main_window.mux_enabled_checkbox.stateChanged.connect(
-        main_window.save_settings)
+    main_window.mux_enabled_checkbox.stateChanged.connect(main_window.save_settings)
     mux_layout.addRow(main_window.mux_enabled_checkbox)
     main_window.mux_protocol_combo = QComboBox()
     main_window.mux_protocol_combo.addItems(["smux", "h2mux", "yamux"])
     main_window.mux_protocol_combo.setCurrentText(
         main_window.settings.get("mux_protocol", "smux")
     )
-    mux_layout.addRow(main_window.tr("Protocol:"),
-                      main_window.mux_protocol_combo)
+    mux_layout.addRow(main_window.tr("Protocol:"), main_window.mux_protocol_combo)
     main_window.mux_max_streams_entry = QLineEdit()
     main_window.mux_max_streams_entry.setText(
         str(main_window.settings.get("mux_max_streams", 8))
     )
-    mux_layout.addRow(main_window.tr("Max Streams:"),
-                      main_window.mux_max_streams_entry)
+    mux_layout.addRow(main_window.tr("Max Streams:"), main_window.mux_max_streams_entry)
 
     # Add Mux Padding checkbox
-    main_window.mux_padding_checkbox = QCheckBox(
-        main_window.tr("Enable Mux Padding"))
+    main_window.mux_padding_checkbox = QCheckBox(main_window.tr("Enable Mux Padding"))
     main_window.mux_padding_checkbox.setChecked(
-        main_window.settings.get("mux_padding", False))
-    main_window.mux_padding_checkbox.stateChanged.connect(
-        main_window.save_settings)
+        main_window.settings.get("mux_padding", False)
+    )
+    main_window.mux_padding_checkbox.stateChanged.connect(main_window.save_settings)
     mux_layout.addRow(main_window.mux_padding_checkbox)
 
     layout.addWidget(mux_group)
@@ -511,13 +519,11 @@ def _create_protocols_settings_page(main_window):
     # --- Advanced TLS Settings Group ---
     tls_group = QGroupBox(main_window.tr("Advanced TLS Settings"))
     tls_layout = QFormLayout(tls_group)
-    main_window.tls_fragment_checkbox = QCheckBox(
-        main_window.tr("Enable TLS Fragment"))
+    main_window.tls_fragment_checkbox = QCheckBox(main_window.tr("Enable TLS Fragment"))
     main_window.tls_fragment_checkbox.setChecked(
         main_window.settings.get("tls_fragment_enabled", False)
     )
-    main_window.tls_fragment_checkbox.stateChanged.connect(
-        main_window.save_settings)
+    main_window.tls_fragment_checkbox.stateChanged.connect(main_window.save_settings)
     tls_layout.addRow(main_window.tls_fragment_checkbox)
     main_window.tls_fragment_size_entry = QLineEdit()
     main_window.tls_fragment_size_entry.setText(
@@ -543,8 +549,7 @@ def _create_protocols_settings_page(main_window):
         str(main_window.settings.get("hysteria_up_mbps", 50))
     )
     hysteria_layout.addRow(
-        main_window.tr(
-            "Default Upload (Mbps):"), main_window.hysteria_up_speed_entry
+        main_window.tr("Default Upload (Mbps):"), main_window.hysteria_up_speed_entry
     )
     main_window.hysteria_down_speed_entry = QLineEdit()
     main_window.hysteria_down_speed_entry.setText(
@@ -558,33 +563,32 @@ def _create_protocols_settings_page(main_window):
 
     # Connect all settings widgets to the save_settings method
     main_window.appearance_mode_combo.currentTextChanged.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     main_window.connection_mode_combo.currentTextChanged.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     main_window.dns_entry.editingFinished.connect(main_window.save_settings)
-    main_window.bypass_domains_entry.editingFinished.connect(
-        main_window.save_settings)
-    main_window.bypass_ips_entry.editingFinished.connect(
-        main_window.save_settings)
+    main_window.bypass_domains_entry.editingFinished.connect(main_window.save_settings)
+    main_window.bypass_ips_entry.editingFinished.connect(main_window.save_settings)
     main_window.tun_checkbox.stateChanged.connect(main_window.save_settings)
-    main_window.mux_enabled_checkbox.stateChanged.connect(
-        main_window.save_settings)
-    main_window.mux_protocol_combo.currentTextChanged.connect(
-        main_window.save_settings)
-    main_window.mux_max_streams_entry.editingFinished.connect(
-        main_window.save_settings)
-    main_window.mux_padding_checkbox.stateChanged.connect(
-        main_window.save_settings)
-    main_window.tls_fragment_checkbox.stateChanged.connect(
-        main_window.save_settings)
+    main_window.mux_enabled_checkbox.stateChanged.connect(main_window.save_settings)
+    main_window.mux_protocol_combo.currentTextChanged.connect(main_window.save_settings)
+    main_window.mux_max_streams_entry.editingFinished.connect(main_window.save_settings)
+    main_window.mux_padding_checkbox.stateChanged.connect(main_window.save_settings)
+    main_window.tls_fragment_checkbox.stateChanged.connect(main_window.save_settings)
     main_window.tls_fragment_size_entry.editingFinished.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     main_window.tls_fragment_sleep_entry.editingFinished.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     main_window.hysteria_up_speed_entry.editingFinished.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     main_window.hysteria_down_speed_entry.editingFinished.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
 
     return container
 
@@ -594,35 +598,37 @@ def _create_security_settings_page(main_window):
     container, layout = _create_settings_page_container(main_window)
 
     # --- Connection Security Group ---
-    connection_security_group = QGroupBox(
-        main_window.tr("Connection Security"))
+    connection_security_group = QGroupBox(main_window.tr("Connection Security"))
     connection_security_layout = QFormLayout(connection_security_group)
 
     # Enable IPv6
-    main_window.enable_ipv6_checkbox = QCheckBox(
-        main_window.tr("Enable IPv6 Support"))
+    main_window.enable_ipv6_checkbox = QCheckBox(main_window.tr("Enable IPv6 Support"))
     main_window.enable_ipv6_checkbox.setChecked(
-        main_window.settings.get("enable_ipv6", True))
-    main_window.enable_ipv6_checkbox.stateChanged.connect(
-        main_window.save_settings)
+        main_window.settings.get("enable_ipv6", True)
+    )
+    main_window.enable_ipv6_checkbox.stateChanged.connect(main_window.save_settings)
     connection_security_layout.addRow(main_window.enable_ipv6_checkbox)
 
     # Allow Insecure
     main_window.allow_insecure_checkbox = QCheckBox(
-        main_window.tr("Allow Insecure Connections"))
+        main_window.tr("Allow Insecure Connections")
+    )
     main_window.allow_insecure_checkbox.setChecked(
-        main_window.settings.get("allow_insecure", False))
-    main_window.allow_insecure_checkbox.stateChanged.connect(
-        main_window.save_settings)
+        main_window.settings.get("allow_insecure", False)
+    )
+    main_window.allow_insecure_checkbox.stateChanged.connect(main_window.save_settings)
     connection_security_layout.addRow(main_window.allow_insecure_checkbox)
 
     # Certificate Verification
     main_window.cert_verification_checkbox = QCheckBox(
-        main_window.tr("Verify SSL Certificates"))
+        main_window.tr("Verify SSL Certificates")
+    )
     main_window.cert_verification_checkbox.setChecked(
-        main_window.settings.get("cert_verification", True))
+        main_window.settings.get("cert_verification", True)
+    )
     main_window.cert_verification_checkbox.stateChanged.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     connection_security_layout.addRow(main_window.cert_verification_checkbox)
 
     layout.addWidget(connection_security_group)
@@ -633,82 +639,89 @@ def _create_security_settings_page(main_window):
 
     # Custom CA Certificate
     main_window.custom_ca_entry = QLineEdit()
-    main_window.custom_ca_entry.setText(
-        main_window.settings.get("custom_ca_cert", ""))
+    main_window.custom_ca_entry.setText(main_window.settings.get("custom_ca_cert", ""))
     main_window.custom_ca_entry.setPlaceholderText(
-        main_window.tr("Path to custom CA certificate file"))
+        main_window.tr("Path to custom CA certificate file")
+    )
     advanced_security_layout.addRow(
-        main_window.tr("Custom CA Certificate:"), main_window.custom_ca_entry)
+        main_window.tr("Custom CA Certificate:"), main_window.custom_ca_entry
+    )
 
     # Cipher Suites
     main_window.cipher_suites_entry = QLineEdit()
     main_window.cipher_suites_entry.setText(
-        main_window.settings.get("cipher_suites", ""))
+        main_window.settings.get("cipher_suites", "")
+    )
     main_window.cipher_suites_entry.setPlaceholderText(
-        main_window.tr("Comma-separated cipher suites"))
+        main_window.tr("Comma-separated cipher suites")
+    )
     advanced_security_layout.addRow(
-        main_window.tr("Cipher Suites:"), main_window.cipher_suites_entry)
+        main_window.tr("Cipher Suites:"), main_window.cipher_suites_entry
+    )
 
     # Security Level
     main_window.security_level_combo = QComboBox()
-    main_window.security_level_combo.addItems([
-        main_window.tr("High"),
-        main_window.tr("Medium"),
-        main_window.tr("Low")
-    ])
+    main_window.security_level_combo.addItems(
+        [main_window.tr("High"), main_window.tr("Medium"), main_window.tr("Low")]
+    )
     current_security_level = main_window.settings.get("security_level", "High")
     main_window.security_level_combo.setCurrentText(
-        main_window.tr(current_security_level))
+        main_window.tr(current_security_level)
+    )
     main_window.security_level_combo.currentTextChanged.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     advanced_security_layout.addRow(
-        main_window.tr("Security Level:"), main_window.security_level_combo)
+        main_window.tr("Security Level:"), main_window.security_level_combo
+    )
 
     layout.addWidget(advanced_security_group)
 
     # --- Connection Settings Group ---
-    connection_settings_group = QGroupBox(
-        main_window.tr("Connection Settings"))
+    connection_settings_group = QGroupBox(main_window.tr("Connection Settings"))
     connection_settings_layout = QFormLayout(connection_settings_group)
 
     # Connection Timeout
     main_window.connection_timeout_entry = QLineEdit()
     main_window.connection_timeout_entry.setText(
-        str(main_window.settings.get("connection_timeout", 30)))
+        str(main_window.settings.get("connection_timeout", 30))
+    )
     main_window.connection_timeout_entry.setPlaceholderText(
-        main_window.tr("Connection timeout in seconds"))
+        main_window.tr("Connection timeout in seconds")
+    )
     connection_settings_layout.addRow(
-        main_window.tr("Connection Timeout:"), main_window.connection_timeout_entry)
+        main_window.tr("Connection Timeout:"), main_window.connection_timeout_entry
+    )
 
     # Retry Attempts
     main_window.retry_attempts_entry = QLineEdit()
     main_window.retry_attempts_entry.setText(
-        str(main_window.settings.get("retry_attempts", 3)))
+        str(main_window.settings.get("retry_attempts", 3))
+    )
     main_window.retry_attempts_entry.setPlaceholderText(
-        main_window.tr("Number of retry attempts"))
+        main_window.tr("Number of retry attempts")
+    )
     connection_settings_layout.addRow(
-        main_window.tr("Retry Attempts:"), main_window.retry_attempts_entry)
+        main_window.tr("Retry Attempts:"), main_window.retry_attempts_entry
+    )
 
     # Keep Alive
-    main_window.keep_alive_checkbox = QCheckBox(
-        main_window.tr("Enable Keep-Alive"))
+    main_window.keep_alive_checkbox = QCheckBox(main_window.tr("Enable Keep-Alive"))
     main_window.keep_alive_checkbox.setChecked(
-        main_window.settings.get("keep_alive", True))
-    main_window.keep_alive_checkbox.stateChanged.connect(
-        main_window.save_settings)
+        main_window.settings.get("keep_alive", True)
+    )
+    main_window.keep_alive_checkbox.stateChanged.connect(main_window.save_settings)
     connection_settings_layout.addRow(main_window.keep_alive_checkbox)
 
     layout.addWidget(connection_settings_group)
 
     # Connect all settings widgets to the save_settings method
-    main_window.custom_ca_entry.editingFinished.connect(
-        main_window.save_settings)
-    main_window.cipher_suites_entry.editingFinished.connect(
-        main_window.save_settings)
+    main_window.custom_ca_entry.editingFinished.connect(main_window.save_settings)
+    main_window.cipher_suites_entry.editingFinished.connect(main_window.save_settings)
     main_window.connection_timeout_entry.editingFinished.connect(
-        main_window.save_settings)
-    main_window.retry_attempts_entry.editingFinished.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
+    main_window.retry_attempts_entry.editingFinished.connect(main_window.save_settings)
 
     return container
 
@@ -718,122 +731,139 @@ def _create_performance_settings_page(main_window):
     container, layout = _create_settings_page_container(main_window)
 
     # --- Connection Performance Group ---
-    connection_performance_group = QGroupBox(
-        main_window.tr("Connection Performance"))
+    connection_performance_group = QGroupBox(main_window.tr("Connection Performance"))
     connection_performance_layout = QFormLayout(connection_performance_group)
 
     # Connection Pool Size
     main_window.connection_pool_size_entry = QLineEdit()
     main_window.connection_pool_size_entry.setText(
-        str(main_window.settings.get("connection_pool_size", 10)))
+        str(main_window.settings.get("connection_pool_size", 10))
+    )
     main_window.connection_pool_size_entry.setPlaceholderText(
-        main_window.tr("Number of connections in pool"))
+        main_window.tr("Number of connections in pool")
+    )
     connection_performance_layout.addRow(
-        main_window.tr("Connection Pool Size:"), main_window.connection_pool_size_entry)
+        main_window.tr("Connection Pool Size:"), main_window.connection_pool_size_entry
+    )
 
     # Thread Pool Size
     main_window.thread_pool_size_entry = QLineEdit()
     main_window.thread_pool_size_entry.setText(
-        str(main_window.settings.get("thread_pool_size", 5)))
+        str(main_window.settings.get("thread_pool_size", 5))
+    )
     main_window.thread_pool_size_entry.setPlaceholderText(
-        main_window.tr("Number of worker threads"))
+        main_window.tr("Number of worker threads")
+    )
     connection_performance_layout.addRow(
-        main_window.tr("Thread Pool Size:"), main_window.thread_pool_size_entry)
+        main_window.tr("Thread Pool Size:"), main_window.thread_pool_size_entry
+    )
 
     # Buffer Size
     main_window.buffer_size_entry = QLineEdit()
     main_window.buffer_size_entry.setText(
-        str(main_window.settings.get("buffer_size", 8192)))
+        str(main_window.settings.get("buffer_size", 8192))
+    )
     main_window.buffer_size_entry.setPlaceholderText(
-        main_window.tr("Buffer size in bytes"))
+        main_window.tr("Buffer size in bytes")
+    )
     connection_performance_layout.addRow(
-        main_window.tr("Buffer Size:"), main_window.buffer_size_entry)
+        main_window.tr("Buffer Size:"), main_window.buffer_size_entry
+    )
 
     layout.addWidget(connection_performance_group)
 
     # --- Network Performance Group ---
-    network_performance_group = QGroupBox(
-        main_window.tr("Network Performance"))
+    network_performance_group = QGroupBox(main_window.tr("Network Performance"))
     network_performance_layout = QFormLayout(network_performance_group)
 
     # Bandwidth Limiting
     main_window.bandwidth_limit_checkbox = QCheckBox(
-        main_window.tr("Enable Bandwidth Limiting"))
+        main_window.tr("Enable Bandwidth Limiting")
+    )
     main_window.bandwidth_limit_checkbox.setChecked(
-        main_window.settings.get("bandwidth_limit_enabled", False))
-    main_window.bandwidth_limit_checkbox.stateChanged.connect(
-        main_window.save_settings)
+        main_window.settings.get("bandwidth_limit_enabled", False)
+    )
+    main_window.bandwidth_limit_checkbox.stateChanged.connect(main_window.save_settings)
     network_performance_layout.addRow(main_window.bandwidth_limit_checkbox)
 
     # Upload Speed Limit
     main_window.upload_speed_limit_entry = QLineEdit()
     main_window.upload_speed_limit_entry.setText(
-        str(main_window.settings.get("upload_speed_limit", 0)))
+        str(main_window.settings.get("upload_speed_limit", 0))
+    )
     main_window.upload_speed_limit_entry.setPlaceholderText(
-        main_window.tr("Upload speed limit in KB/s (0 = unlimited)"))
+        main_window.tr("Upload speed limit in KB/s (0 = unlimited)")
+    )
     network_performance_layout.addRow(
-        main_window.tr("Upload Speed Limit:"), main_window.upload_speed_limit_entry)
+        main_window.tr("Upload Speed Limit:"), main_window.upload_speed_limit_entry
+    )
 
     # Download Speed Limit
     main_window.download_speed_limit_entry = QLineEdit()
     main_window.download_speed_limit_entry.setText(
-        str(main_window.settings.get("download_speed_limit", 0)))
+        str(main_window.settings.get("download_speed_limit", 0))
+    )
     main_window.download_speed_limit_entry.setPlaceholderText(
-        main_window.tr("Download speed limit in KB/s (0 = unlimited)"))
+        main_window.tr("Download speed limit in KB/s (0 = unlimited)")
+    )
     network_performance_layout.addRow(
-        main_window.tr("Download Speed Limit:"), main_window.download_speed_limit_entry)
+        main_window.tr("Download Speed Limit:"), main_window.download_speed_limit_entry
+    )
 
     layout.addWidget(network_performance_group)
 
     # --- Advanced Performance Group ---
-    advanced_performance_group = QGroupBox(
-        main_window.tr("Advanced Performance"))
+    advanced_performance_group = QGroupBox(main_window.tr("Advanced Performance"))
     advanced_performance_layout = QFormLayout(advanced_performance_group)
 
     # Connection Multiplexing
     main_window.connection_multiplexing_checkbox = QCheckBox(
-        main_window.tr("Enable Connection Multiplexing"))
+        main_window.tr("Enable Connection Multiplexing")
+    )
     main_window.connection_multiplexing_checkbox.setChecked(
-        main_window.settings.get("connection_multiplexing", True))
+        main_window.settings.get("connection_multiplexing", True)
+    )
     main_window.connection_multiplexing_checkbox.stateChanged.connect(
-        main_window.save_settings)
-    advanced_performance_layout.addRow(
-        main_window.connection_multiplexing_checkbox)
+        main_window.save_settings
+    )
+    advanced_performance_layout.addRow(main_window.connection_multiplexing_checkbox)
 
     # Compression
-    main_window.compression_checkbox = QCheckBox(
-        main_window.tr("Enable Compression"))
+    main_window.compression_checkbox = QCheckBox(main_window.tr("Enable Compression"))
     main_window.compression_checkbox.setChecked(
-        main_window.settings.get("compression_enabled", False))
-    main_window.compression_checkbox.stateChanged.connect(
-        main_window.save_settings)
+        main_window.settings.get("compression_enabled", False)
+    )
+    main_window.compression_checkbox.stateChanged.connect(main_window.save_settings)
     advanced_performance_layout.addRow(main_window.compression_checkbox)
 
     # Fast Open
-    main_window.fast_open_checkbox = QCheckBox(
-        main_window.tr("Enable TCP Fast Open"))
+    main_window.fast_open_checkbox = QCheckBox(main_window.tr("Enable TCP Fast Open"))
     main_window.fast_open_checkbox.setChecked(
-        main_window.settings.get("tcp_fast_open", False))
-    main_window.fast_open_checkbox.stateChanged.connect(
-        main_window.save_settings)
+        main_window.settings.get("tcp_fast_open", False)
+    )
+    main_window.fast_open_checkbox.stateChanged.connect(main_window.save_settings)
     advanced_performance_layout.addRow(main_window.fast_open_checkbox)
 
     # Congestion Control
     main_window.congestion_control_combo = QComboBox()
-    main_window.congestion_control_combo.addItems([
-        main_window.tr("Cubic"),
-        main_window.tr("BBR"),
-        main_window.tr("BBR2"),
-        main_window.tr("Reno")
-    ])
-    current_congestion = main_window.settings.get(
-        "congestion_control", "Cubic")
+    main_window.congestion_control_combo.addItems(
+        [
+            main_window.tr("Cubic"),
+            main_window.tr("BBR"),
+            main_window.tr("BBR2"),
+            main_window.tr("Reno"),
+        ]
+    )
+    current_congestion = main_window.settings.get("congestion_control", "Cubic")
     main_window.congestion_control_combo.setCurrentText(
-        main_window.tr(current_congestion))
+        main_window.tr(current_congestion)
+    )
     main_window.congestion_control_combo.currentTextChanged.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     advanced_performance_layout.addRow(
-        main_window.tr("Congestion Control:"), main_window.congestion_control_combo)
+        main_window.tr("Congestion Control:"), main_window.congestion_control_combo
+    )
 
     layout.addWidget(advanced_performance_group)
 
@@ -843,37 +873,47 @@ def _create_performance_settings_page(main_window):
 
     # Enable Statistics
     main_window.enable_statistics_checkbox = QCheckBox(
-        main_window.tr("Enable Performance Statistics"))
+        main_window.tr("Enable Performance Statistics")
+    )
     main_window.enable_statistics_checkbox.setChecked(
-        main_window.settings.get("enable_statistics", True))
+        main_window.settings.get("enable_statistics", True)
+    )
     main_window.enable_statistics_checkbox.stateChanged.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     monitoring_layout.addRow(main_window.enable_statistics_checkbox)
 
     # Statistics Interval
     main_window.statistics_interval_entry = QLineEdit()
     main_window.statistics_interval_entry.setText(
-        str(main_window.settings.get("statistics_interval", 5)))
+        str(main_window.settings.get("statistics_interval", 5))
+    )
     main_window.statistics_interval_entry.setPlaceholderText(
-        main_window.tr("Statistics update interval in seconds"))
+        main_window.tr("Statistics update interval in seconds")
+    )
     monitoring_layout.addRow(
-        main_window.tr("Statistics Interval:"), main_window.statistics_interval_entry)
+        main_window.tr("Statistics Interval:"), main_window.statistics_interval_entry
+    )
 
     layout.addWidget(monitoring_group)
 
     # Connect all settings widgets to the save_settings method
     main_window.connection_pool_size_entry.editingFinished.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     main_window.thread_pool_size_entry.editingFinished.connect(
-        main_window.save_settings)
-    main_window.buffer_size_entry.editingFinished.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
+    main_window.buffer_size_entry.editingFinished.connect(main_window.save_settings)
     main_window.upload_speed_limit_entry.editingFinished.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     main_window.download_speed_limit_entry.editingFinished.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     main_window.statistics_interval_entry.editingFinished.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
 
     return container
 
@@ -897,9 +937,28 @@ def _filter_settings_pages(main_window, search_text):
         # Security
         3: ["security", "ipv6", "insecure", "cert", "cipher", "timeout", "retry"],
         # Performance
-        4: ["performance", "pool", "thread", "buffer", "bandwidth", "multiplexing", "compression"],
+        4: [
+            "performance",
+            "pool",
+            "thread",
+            "buffer",
+            "bandwidth",
+            "multiplexing",
+            "compression",
+        ],
         # Privacy
-        5: ["privacy", "telemetry", "crash", "usage", "logging", "dns", "traffic", "ip", "auto", "update"]
+        5: [
+            "privacy",
+            "telemetry",
+            "crash",
+            "usage",
+            "logging",
+            "dns",
+            "traffic",
+            "ip",
+            "auto",
+            "update",
+        ],
     }
 
     # Show/hide pages based on search
@@ -1017,7 +1076,7 @@ def _apply_settings_preset(main_window, preset_name):
             "enable_statistics": False,
             "statistics_interval": 15,
             "auto_failover_enabled": True,
-        }
+        },
     }
 
     if preset_name in presets:
@@ -1039,107 +1098,118 @@ def _apply_settings_preset(main_window, preset_name):
 def _update_settings_ui(main_window, settings):
     """Update UI widgets with new settings."""
     # Update widgets if they exist
-    if hasattr(main_window, 'connection_mode_combo'):
+    if hasattr(main_window, "connection_mode_combo"):
         mode_map = {
-            "Rule-Based": main_window.tr("Rule-Based"), "Global": main_window.tr("Global")}
+            "Rule-Based": main_window.tr("Rule-Based"),
+            "Global": main_window.tr("Global"),
+        }
         for key, value in mode_map.items():
             if settings.get("connection_mode") == key:
                 main_window.connection_mode_combo.setCurrentText(value)
                 break
 
-    if hasattr(main_window, 'dns_entry'):
+    if hasattr(main_window, "dns_entry"):
         main_window.dns_entry.setText(settings.get("dns_servers", ""))
 
-    if hasattr(main_window, 'bypass_domains_entry'):
-        main_window.bypass_domains_entry.setText(
-            settings.get("bypass_domains", ""))
+    if hasattr(main_window, "bypass_domains_entry"):
+        main_window.bypass_domains_entry.setText(settings.get("bypass_domains", ""))
 
-    if hasattr(main_window, 'tun_checkbox'):
+    if hasattr(main_window, "tun_checkbox"):
         main_window.tun_checkbox.setChecked(settings.get("tun_enabled", False))
 
-    if hasattr(main_window, 'mux_enabled_checkbox'):
-        main_window.mux_enabled_checkbox.setChecked(
-            settings.get("mux_enabled", False))
+    if hasattr(main_window, "mux_enabled_checkbox"):
+        main_window.mux_enabled_checkbox.setChecked(settings.get("mux_enabled", False))
 
-    if hasattr(main_window, 'mux_protocol_combo'):
-        protocol_map = {"smux": main_window.tr(
-            "smux"), "yamux": main_window.tr("yamux")}
+    if hasattr(main_window, "mux_protocol_combo"):
+        protocol_map = {
+            "smux": main_window.tr("smux"),
+            "yamux": main_window.tr("yamux"),
+        }
         for key, value in protocol_map.items():
             if settings.get("mux_protocol") == key:
                 main_window.mux_protocol_combo.setCurrentText(value)
                 break
 
-    if hasattr(main_window, 'tls_fragment_checkbox'):
+    if hasattr(main_window, "tls_fragment_checkbox"):
         main_window.tls_fragment_checkbox.setChecked(
-            settings.get("tls_fragment_enabled", False))
+            settings.get("tls_fragment_enabled", False)
+        )
 
-    if hasattr(main_window, 'enable_ipv6_checkbox'):
-        main_window.enable_ipv6_checkbox.setChecked(
-            settings.get("enable_ipv6", True))
+    if hasattr(main_window, "enable_ipv6_checkbox"):
+        main_window.enable_ipv6_checkbox.setChecked(settings.get("enable_ipv6", True))
 
-    if hasattr(main_window, 'allow_insecure_checkbox'):
+    if hasattr(main_window, "allow_insecure_checkbox"):
         main_window.allow_insecure_checkbox.setChecked(
-            settings.get("allow_insecure", False))
+            settings.get("allow_insecure", False)
+        )
 
-    if hasattr(main_window, 'cert_verification_checkbox'):
+    if hasattr(main_window, "cert_verification_checkbox"):
         main_window.cert_verification_checkbox.setChecked(
-            settings.get("cert_verification", True))
+            settings.get("cert_verification", True)
+        )
 
-    if hasattr(main_window, 'connection_timeout_entry'):
+    if hasattr(main_window, "connection_timeout_entry"):
         main_window.connection_timeout_entry.setText(
-            str(settings.get("connection_timeout", 30)))
+            str(settings.get("connection_timeout", 30))
+        )
 
-    if hasattr(main_window, 'retry_attempts_entry'):
-        main_window.retry_attempts_entry.setText(
-            str(settings.get("retry_attempts", 3)))
+    if hasattr(main_window, "retry_attempts_entry"):
+        main_window.retry_attempts_entry.setText(str(settings.get("retry_attempts", 3)))
 
-    if hasattr(main_window, 'connection_pool_size_entry'):
+    if hasattr(main_window, "connection_pool_size_entry"):
         main_window.connection_pool_size_entry.setText(
-            str(settings.get("connection_pool_size", 10)))
+            str(settings.get("connection_pool_size", 10))
+        )
 
-    if hasattr(main_window, 'thread_pool_size_entry'):
+    if hasattr(main_window, "thread_pool_size_entry"):
         main_window.thread_pool_size_entry.setText(
-            str(settings.get("thread_pool_size", 5)))
+            str(settings.get("thread_pool_size", 5))
+        )
 
-    if hasattr(main_window, 'buffer_size_entry'):
-        main_window.buffer_size_entry.setText(
-            str(settings.get("buffer_size", 8192)))
+    if hasattr(main_window, "buffer_size_entry"):
+        main_window.buffer_size_entry.setText(str(settings.get("buffer_size", 8192)))
 
-    if hasattr(main_window, 'bandwidth_limit_checkbox'):
+    if hasattr(main_window, "bandwidth_limit_checkbox"):
         main_window.bandwidth_limit_checkbox.setChecked(
-            settings.get("bandwidth_limit_enabled", False))
+            settings.get("bandwidth_limit_enabled", False)
+        )
 
-    if hasattr(main_window, 'connection_multiplexing_checkbox'):
+    if hasattr(main_window, "connection_multiplexing_checkbox"):
         main_window.connection_multiplexing_checkbox.setChecked(
-            settings.get("connection_multiplexing", True))
+            settings.get("connection_multiplexing", True)
+        )
 
-    if hasattr(main_window, 'compression_checkbox'):
+    if hasattr(main_window, "compression_checkbox"):
         main_window.compression_checkbox.setChecked(
-            settings.get("compression_enabled", False))
+            settings.get("compression_enabled", False)
+        )
 
-    if hasattr(main_window, 'tcp_fast_open_checkbox'):
+    if hasattr(main_window, "tcp_fast_open_checkbox"):
         main_window.tcp_fast_open_checkbox.setChecked(
-            settings.get("tcp_fast_open", False))
+            settings.get("tcp_fast_open", False)
+        )
 
-    if hasattr(main_window, 'congestion_control_combo'):
-        control_map = {"Cubic": main_window.tr(
-            "Cubic"), "BBR": main_window.tr("BBR")}
+    if hasattr(main_window, "congestion_control_combo"):
+        control_map = {"Cubic": main_window.tr("Cubic"), "BBR": main_window.tr("BBR")}
         for key, value in control_map.items():
             if settings.get("congestion_control") == key:
                 main_window.congestion_control_combo.setCurrentText(value)
                 break
 
-    if hasattr(main_window, 'enable_statistics_checkbox'):
+    if hasattr(main_window, "enable_statistics_checkbox"):
         main_window.enable_statistics_checkbox.setChecked(
-            settings.get("enable_statistics", True))
+            settings.get("enable_statistics", True)
+        )
 
-    if hasattr(main_window, 'statistics_interval_entry'):
+    if hasattr(main_window, "statistics_interval_entry"):
         main_window.statistics_interval_entry.setText(
-            str(settings.get("statistics_interval", 5)))
+            str(settings.get("statistics_interval", 5))
+        )
 
-    if hasattr(main_window, 'auto_failover_checkbox'):
+    if hasattr(main_window, "auto_failover_checkbox"):
         main_window.auto_failover_checkbox.setChecked(
-            settings.get("auto_failover_enabled", False))
+            settings.get("auto_failover_enabled", False)
+        )
 
 
 def _reset_settings_to_defaults(main_window):
@@ -1148,7 +1218,13 @@ def _reset_settings_to_defaults(main_window):
 
     # Apply default settings
     for key, value in DEFAULT_SETTINGS.items():
-        if key not in ["app_version", "subscriptions", "servers", "window_geometry", "window_maximized"]:
+        if key not in [
+            "app_version",
+            "subscriptions",
+            "servers",
+            "window_geometry",
+            "window_maximized",
+        ]:
             main_window.settings[key] = value
 
     # Update UI
@@ -1170,29 +1246,38 @@ def _create_privacy_settings_page(main_window):
 
     # Disable telemetry
     main_window.disable_telemetry_checkbox = QCheckBox(
-        main_window.tr("Disable Telemetry"))
+        main_window.tr("Disable Telemetry")
+    )
     main_window.disable_telemetry_checkbox.setChecked(
-        main_window.settings.get("disable_telemetry", True))
+        main_window.settings.get("disable_telemetry", True)
+    )
     main_window.disable_telemetry_checkbox.stateChanged.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     data_collection_layout.addRow(main_window.disable_telemetry_checkbox)
 
     # Disable crash reports
     main_window.disable_crash_reports_checkbox = QCheckBox(
-        main_window.tr("Disable Crash Reports"))
+        main_window.tr("Disable Crash Reports")
+    )
     main_window.disable_crash_reports_checkbox.setChecked(
-        main_window.settings.get("disable_crash_reports", True))
+        main_window.settings.get("disable_crash_reports", True)
+    )
     main_window.disable_crash_reports_checkbox.stateChanged.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     data_collection_layout.addRow(main_window.disable_crash_reports_checkbox)
 
     # Disable usage statistics
     main_window.disable_usage_stats_checkbox = QCheckBox(
-        main_window.tr("Disable Usage Statistics"))
+        main_window.tr("Disable Usage Statistics")
+    )
     main_window.disable_usage_stats_checkbox.setChecked(
-        main_window.settings.get("disable_usage_stats", True))
+        main_window.settings.get("disable_usage_stats", True)
+    )
     main_window.disable_usage_stats_checkbox.stateChanged.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     data_collection_layout.addRow(main_window.disable_usage_stats_checkbox)
 
     layout.addWidget(data_collection_group)
@@ -1203,32 +1288,39 @@ def _create_privacy_settings_page(main_window):
 
     # Disable detailed logging
     main_window.disable_detailed_logging_checkbox = QCheckBox(
-        main_window.tr("Disable Detailed Logging"))
+        main_window.tr("Disable Detailed Logging")
+    )
     main_window.disable_detailed_logging_checkbox.setChecked(
-        main_window.settings.get("disable_detailed_logging", False))
+        main_window.settings.get("disable_detailed_logging", False)
+    )
     main_window.disable_detailed_logging_checkbox.stateChanged.connect(
-        main_window.save_settings)
-    logging_privacy_layout.addRow(
-        main_window.disable_detailed_logging_checkbox)
+        main_window.save_settings
+    )
+    logging_privacy_layout.addRow(main_window.disable_detailed_logging_checkbox)
 
     # Clear logs on exit
     main_window.clear_logs_on_exit_checkbox = QCheckBox(
-        main_window.tr("Clear Logs on Exit"))
+        main_window.tr("Clear Logs on Exit")
+    )
     main_window.clear_logs_on_exit_checkbox.setChecked(
-        main_window.settings.get("clear_logs_on_exit", False))
+        main_window.settings.get("clear_logs_on_exit", False)
+    )
     main_window.clear_logs_on_exit_checkbox.stateChanged.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     logging_privacy_layout.addRow(main_window.clear_logs_on_exit_checkbox)
 
     # Disable connection logging
     main_window.disable_connection_logging_checkbox = QCheckBox(
-        main_window.tr("Disable Connection Logging"))
+        main_window.tr("Disable Connection Logging")
+    )
     main_window.disable_connection_logging_checkbox.setChecked(
-        main_window.settings.get("disable_connection_logging", False))
+        main_window.settings.get("disable_connection_logging", False)
+    )
     main_window.disable_connection_logging_checkbox.stateChanged.connect(
-        main_window.save_settings)
-    logging_privacy_layout.addRow(
-        main_window.disable_connection_logging_checkbox)
+        main_window.save_settings
+    )
+    logging_privacy_layout.addRow(main_window.disable_connection_logging_checkbox)
 
     layout.addWidget(logging_privacy_group)
 
@@ -1238,29 +1330,38 @@ def _create_privacy_settings_page(main_window):
 
     # Disable DNS logging
     main_window.disable_dns_logging_checkbox = QCheckBox(
-        main_window.tr("Disable DNS Query Logging"))
+        main_window.tr("Disable DNS Query Logging")
+    )
     main_window.disable_dns_logging_checkbox.setChecked(
-        main_window.settings.get("disable_dns_logging", True))
+        main_window.settings.get("disable_dns_logging", True)
+    )
     main_window.disable_dns_logging_checkbox.stateChanged.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     network_privacy_layout.addRow(main_window.disable_dns_logging_checkbox)
 
     # Disable traffic statistics
     main_window.disable_traffic_stats_checkbox = QCheckBox(
-        main_window.tr("Disable Traffic Statistics"))
+        main_window.tr("Disable Traffic Statistics")
+    )
     main_window.disable_traffic_stats_checkbox.setChecked(
-        main_window.settings.get("disable_traffic_stats", False))
+        main_window.settings.get("disable_traffic_stats", False)
+    )
     main_window.disable_traffic_stats_checkbox.stateChanged.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     network_privacy_layout.addRow(main_window.disable_traffic_stats_checkbox)
 
     # Disable IP logging
     main_window.disable_ip_logging_checkbox = QCheckBox(
-        main_window.tr("Disable IP Address Logging"))
+        main_window.tr("Disable IP Address Logging")
+    )
     main_window.disable_ip_logging_checkbox.setChecked(
-        main_window.settings.get("disable_ip_logging", True))
+        main_window.settings.get("disable_ip_logging", True)
+    )
     main_window.disable_ip_logging_checkbox.stateChanged.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     network_privacy_layout.addRow(main_window.disable_ip_logging_checkbox)
 
     layout.addWidget(network_privacy_group)
@@ -1271,29 +1372,38 @@ def _create_privacy_settings_page(main_window):
 
     # Disable auto-updates
     main_window.disable_auto_updates_checkbox = QCheckBox(
-        main_window.tr("Disable Auto-Updates"))
+        main_window.tr("Disable Auto-Updates")
+    )
     main_window.disable_auto_updates_checkbox.setChecked(
-        main_window.settings.get("disable_auto_updates", False))
+        main_window.settings.get("disable_auto_updates", False)
+    )
     main_window.disable_auto_updates_checkbox.stateChanged.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     app_privacy_layout.addRow(main_window.disable_auto_updates_checkbox)
 
     # Disable core auto-updates
     main_window.disable_core_auto_updates_checkbox = QCheckBox(
-        main_window.tr("Disable Core Auto-Updates"))
+        main_window.tr("Disable Core Auto-Updates")
+    )
     main_window.disable_core_auto_updates_checkbox.setChecked(
-        main_window.settings.get("disable_core_auto_updates", False))
+        main_window.settings.get("disable_core_auto_updates", False)
+    )
     main_window.disable_core_auto_updates_checkbox.stateChanged.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     app_privacy_layout.addRow(main_window.disable_core_auto_updates_checkbox)
 
     # Disable subscription auto-updates
     main_window.disable_sub_auto_updates_checkbox = QCheckBox(
-        main_window.tr("Disable Subscription Auto-Updates"))
+        main_window.tr("Disable Subscription Auto-Updates")
+    )
     main_window.disable_sub_auto_updates_checkbox.setChecked(
-        main_window.settings.get("disable_sub_auto_updates", False))
+        main_window.settings.get("disable_sub_auto_updates", False)
+    )
     main_window.disable_sub_auto_updates_checkbox.stateChanged.connect(
-        main_window.save_settings)
+        main_window.save_settings
+    )
     app_privacy_layout.addRow(main_window.disable_sub_auto_updates_checkbox)
 
     layout.addWidget(app_privacy_group)
@@ -1304,16 +1414,16 @@ def _create_privacy_settings_page(main_window):
 
     # Clear all data button
     clear_data_button = QPushButton(
-        QIcon(":/icons/trash-2.svg"), main_window.tr("Clear All Data"))
-    clear_data_button.clicked.connect(
-        lambda: _clear_all_privacy_data(main_window))
+        QIcon(":/icons/trash-2.svg"), main_window.tr("Clear All Data")
+    )
+    clear_data_button.clicked.connect(lambda: _clear_all_privacy_data(main_window))
     privacy_actions_layout.addRow(clear_data_button)
 
     # Export privacy settings button
     export_privacy_button = QPushButton(
-        QIcon(":/icons/file-text.svg"), main_window.tr("Export Privacy Settings"))
-    export_privacy_button.clicked.connect(
-        lambda: _export_privacy_settings(main_window))
+        QIcon(":/icons/file-text.svg"), main_window.tr("Export Privacy Settings")
+    )
+    export_privacy_button.clicked.connect(lambda: _export_privacy_settings(main_window))
     privacy_actions_layout.addRow(export_privacy_button)
 
     layout.addWidget(privacy_actions_group)
@@ -1329,15 +1439,17 @@ def _clear_all_privacy_data(main_window):
         main_window,
         main_window.tr("Clear All Data"),
         main_window.tr(
-            "This will clear all logs, cache, and temporary data. Continue?"),
+            "This will clear all logs, cache, and temporary data. Continue?"
+        ),
         QMessageBox.Yes | QMessageBox.No,
-        QMessageBox.No
+        QMessageBox.No,
     )
 
     if reply == QMessageBox.Yes:
         try:
             # Clear logs
             import os
+
             log_files = ["xray_core.log", "singbox_core.log"]
             for log_file in log_files:
                 if os.path.exists(log_file):
@@ -1349,12 +1461,12 @@ def _clear_all_privacy_data(main_window):
 
             # Clear temp directory
             import shutil
+
             if os.path.exists("storage/temp"):
                 shutil.rmtree("storage/temp")
                 os.makedirs("storage/temp", exist_ok=True)
 
-            main_window.log(
-                "Cleared all privacy-sensitive data", LogLevel.SUCCESS)
+            main_window.log("Cleared all privacy-sensitive data", LogLevel.SUCCESS)
 
         except Exception as e:
             main_window.log(f"Error clearing data: {e}", LogLevel.ERROR)
@@ -1365,26 +1477,45 @@ def _export_privacy_settings(main_window):
     try:
         privacy_settings = {
             "disable_telemetry": main_window.settings.get("disable_telemetry", True),
-            "disable_crash_reports": main_window.settings.get("disable_crash_reports", True),
-            "disable_usage_stats": main_window.settings.get("disable_usage_stats", True),
-            "disable_detailed_logging": main_window.settings.get("disable_detailed_logging", False),
+            "disable_crash_reports": main_window.settings.get(
+                "disable_crash_reports", True
+            ),
+            "disable_usage_stats": main_window.settings.get(
+                "disable_usage_stats", True
+            ),
+            "disable_detailed_logging": main_window.settings.get(
+                "disable_detailed_logging", False
+            ),
             "clear_logs_on_exit": main_window.settings.get("clear_logs_on_exit", False),
-            "disable_connection_logging": main_window.settings.get("disable_connection_logging", False),
-            "disable_dns_logging": main_window.settings.get("disable_dns_logging", True),
-            "disable_traffic_stats": main_window.settings.get("disable_traffic_stats", False),
+            "disable_connection_logging": main_window.settings.get(
+                "disable_connection_logging", False
+            ),
+            "disable_dns_logging": main_window.settings.get(
+                "disable_dns_logging", True
+            ),
+            "disable_traffic_stats": main_window.settings.get(
+                "disable_traffic_stats", False
+            ),
             "disable_ip_logging": main_window.settings.get("disable_ip_logging", True),
-            "disable_auto_updates": main_window.settings.get("disable_auto_updates", False),
-            "disable_core_auto_updates": main_window.settings.get("disable_core_auto_updates", False),
-            "disable_sub_auto_updates": main_window.settings.get("disable_sub_auto_updates", False),
+            "disable_auto_updates": main_window.settings.get(
+                "disable_auto_updates", False
+            ),
+            "disable_core_auto_updates": main_window.settings.get(
+                "disable_core_auto_updates", False
+            ),
+            "disable_sub_auto_updates": main_window.settings.get(
+                "disable_sub_auto_updates", False
+            ),
         }
 
         import json
+
         with open("privacy_settings.json", "w", encoding="utf-8") as f:
             json.dump(privacy_settings, f, indent=2, ensure_ascii=False)
 
         main_window.log(
-            "Exported privacy settings to privacy_settings.json", LogLevel.SUCCESS)
+            "Exported privacy settings to privacy_settings.json", LogLevel.SUCCESS
+        )
 
     except Exception as e:
-        main_window.log(
-            f"Error exporting privacy settings: {e}", LogLevel.ERROR)
+        main_window.log(f"Error exporting privacy settings: {e}", LogLevel.ERROR)

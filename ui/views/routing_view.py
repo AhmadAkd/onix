@@ -18,8 +18,12 @@ def create_routing_view(main_window):
     layout.setContentsMargins(20, 20, 20, 20)
 
     top_layout = QHBoxLayout()
-    top_layout.addWidget(QLabel(main_window.tr("Custom Routing Rules"),
-                         styleSheet="font-size: 14pt; font-weight: bold;"))
+    top_layout.addWidget(
+        QLabel(
+            main_window.tr("Custom Routing Rules"),
+            styleSheet="font-size: 14pt; font-weight: bold;",
+        )
+    )
     top_layout.addStretch()
     add_rule_button = QPushButton(main_window.tr("Add Rule"))
     add_rule_button.clicked.connect(main_window.show_rule_dialog)
@@ -29,7 +33,13 @@ def create_routing_view(main_window):
     main_window.routing_table = QTableWidget()
     main_window.routing_table.setColumnCount(4)
     main_window.routing_table.setHorizontalHeaderLabels(
-        [main_window.tr("Type"), main_window.tr("Value"), main_window.tr("Action"), main_window.tr("Actions")])
+        [
+            main_window.tr("Type"),
+            main_window.tr("Value"),
+            main_window.tr("Action"),
+            main_window.tr("Actions"),
+        ]
+    )
 
     # Enable sorting by clicking on headers
     main_window.routing_table.setSortingEnabled(True)
@@ -43,7 +53,8 @@ def create_routing_view(main_window):
     header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
 
     main_window.routing_table.setEditTriggers(
-        QTableWidget.NoEditTriggers)  # Disable direct editing
+        QTableWidget.NoEditTriggers
+    )  # Disable direct editing
     main_window.routing_table.setSelectionBehavior(QTableWidget.SelectRows)
     layout.addWidget(main_window.routing_table)
 

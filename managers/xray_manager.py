@@ -39,34 +39,39 @@ class XrayManager(CoreManager):
     def start(self, config: Dict[str, Any]) -> None:
         if self.is_running and self.process and self.process.poll() is None:
             self.log(
-                "Switching servers... Stopping previous connection first.", LogLevel.INFO)
+                "Switching servers... Stopping previous connection first.",
+                LogLevel.INFO,
+            )
             self.stop()
             time.sleep(CONNECTION_STOP_DELAY)
 
         self.log("Starting Xray connection...", LogLevel.INFO)
-        self.callbacks.get("on_status_change", lambda s,
-                           c: None)("Connecting...", "yellow")
+        self.callbacks.get("on_status_change", lambda s, c: None)(
+            "Connecting...", "yellow"
+        )
 
-        thread = threading.Thread(
-            target=self._run_and_log, args=(config,), daemon=True)
+        thread = threading.Thread(target=self._run_and_log, args=(config,), daemon=True)
         thread.start()
 
         # Schedule connection check and store the timer reference
         self.connection_check_timer = threading.Timer(
-            CONNECTION_CHECK_DELAY / 1000.0, self.check_connection)
+            CONNECTION_CHECK_DELAY / 1000.0, self.check_connection
+        )
         self.connection_check_timer.start()
 
     def _run_and_log(self, config: Dict[str, Any]) -> None:
         config_filename = None
         try:
             full_config = self.config_generator.generate_config_json(
-                config, self.settings)
-            with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json", encoding="utf-8") as f:
+                config, self.settings
+            )
+            with tempfile.NamedTemporaryFile(
+                mode="w", delete=False, suffix=".json", encoding="utf-8"
+            ) as f:
                 json.dump(full_config, f, indent=2)
                 config_filename = f.name
 
-            self.log(
-                "Xray configuration generated. Starting process...", LogLevel.INFO)
+            self.log("Xray configuration generated. Starting process...", LogLevel.INFO)
 
             os_key = "windows" if os.name == "nt" else os.name.lower()
             executable_name = XRAY_EXECUTABLE_NAMES.get(os_key, "xray")
@@ -74,7 +79,7 @@ class XrayManager(CoreManager):
 
             command = [executable_path, "run", "-c", config_filename]
 
-            creation_flags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
+            creation_flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
 
             self.process = subprocess.Popen(
                 command,
@@ -96,14 +101,15 @@ class XrayManager(CoreManager):
 
         except FileNotFoundError:
             # Use default values if variables are not defined
-            exec_name = executable_name if 'executable_name' in locals() else "xray"
-            exec_path = executable_path if 'executable_path' in locals() else "xray"
-            self.log(
-                f"Error: {exec_name} not found at '{exec_path}'!", LogLevel.ERROR)
+            exec_name = executable_name if "executable_name" in locals() else "xray"
+            exec_path = executable_path if "executable_path" in locals() else "xray"
+            self.log(f"Error: {exec_name} not found at '{exec_path}'!", LogLevel.ERROR)
             self.stop()
         except Exception as e:
             self.log(
-                f"An unexpected error occurred during Xray execution: {e}", LogLevel.ERROR)
+                f"An unexpected error occurred during Xray execution: {e}",
+                LogLevel.ERROR,
+            )
             self.stop()
         finally:
             if self.is_running:
@@ -114,7 +120,9 @@ class XrayManager(CoreManager):
                     os.remove(config_filename)
                 except OSError as e:
                     self.log(
-                        f"Warning: Could not remove temp config file {config_filename}: {e}", LogLevel.WARNING)
+                        f"Warning: Could not remove temp config file {config_filename}: {e}",
+                        LogLevel.WARNING,
+                    )
 
     def stop(self) -> None:
         if not self.is_running and not self.process:
@@ -141,15 +149,16 @@ class XrayManager(CoreManager):
 
         result = network_tester.url_test(PROXY_SERVER_ADDRESS)
         if result != -1:
-            self.log(
-                f"Connection successful! Latency: {result} ms.", LogLevel.SUCCESS)
+            self.log(f"Connection successful! Latency: {result} ms.", LogLevel.SUCCESS)
             system_proxy.set_system_proxy(True, self.settings, self.log)
             self.callbacks.get("on_connect", lambda r: None)(result)
             ip_address = network_tester.get_external_ip(PROXY_SERVER_ADDRESS)
             self.callbacks.get("on_ip_update", lambda ip: None)(ip_address)
         else:
             self.log(
-                "Error: Connection test failed. Check server config.", LogLevel.ERROR)
-            self.callbacks.get("on_status_change", lambda s,
-                               c: None)("Connection Failed", "red")
+                "Error: Connection test failed. Check server config.", LogLevel.ERROR
+            )
+            self.callbacks.get("on_status_change", lambda s, c: None)(
+                "Connection Failed", "red"
+            )
             self.stop()

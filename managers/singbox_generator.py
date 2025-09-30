@@ -17,8 +17,7 @@ class SingboxConfigGenerator(BaseConfigGenerator):
         """Generates a sing-box config for testing multiple servers."""
         # For testing, DNS should resolve directly, not through the proxy.
         # The "final" resolver must be a tag from the DNS servers list.
-        dns_config, _ = self._build_dns_config(
-            settings, final_resolver="dns_direct")
+        dns_config, _ = self._build_dns_config(settings, final_resolver="dns_direct")
         inbounds = []
         outbounds = [
             {"type": "direct", "tag": "direct"},
@@ -29,20 +28,32 @@ class SingboxConfigGenerator(BaseConfigGenerator):
             port = 11000 + i
             # Use HTTP inbound for tests because the tester performs HTTP URL requests
             # and HTTP CONNECT for TCP pings through the proxy.
-            inbounds.append({
-                "type": "http",
-                "tag": f"http-in-{i}",
-                "listen": "127.0.0.1",
-                "listen_port": port
-            })
-            outbounds.append(self._build_outbound_config(
-                server_config, settings, tag=f"proxy-out-{i}"))
+            inbounds.append(
+                {
+                    "type": "http",
+                    "tag": f"http-in-{i}",
+                    "listen": "127.0.0.1",
+                    "listen_port": port,
+                }
+            )
+            outbounds.append(
+                self._build_outbound_config(
+                    server_config, settings, tag=f"proxy-out-{i}"
+                )
+            )
 
-        route_rules = [{"inbound": f"http-in-{i}",
-                        "outbound": f"proxy-out-{i}"} for i in range(len(servers))]
+        route_rules = [
+            {"inbound": f"http-in-{i}", "outbound": f"proxy-out-{i}"}
+            for i in range(len(servers))
+        ]
         route_config = {"rules": route_rules, "final": "direct"}
 
-        return {"dns": dns_config, "inbounds": inbounds, "outbounds": outbounds, "route": route_config}
+        return {
+            "dns": dns_config,
+            "inbounds": inbounds,
+            "outbounds": outbounds,
+            "route": route_config,
+        }
 
     def generate_config_json(self, server_config, settings):
         """Generates the complete sing-box configuration JSON."""
@@ -50,17 +61,19 @@ class SingboxConfigGenerator(BaseConfigGenerator):
         route_config = self._build_route_config(settings)
 
         # --- Outbound Generation Logic ---
-        outbounds = [{"type": "direct", "tag": "direct"},
-                     {"type": "block", "tag": "block"}]
+        outbounds = [
+            {"type": "direct", "tag": "direct"},
+            {"type": "block", "tag": "block"},
+        ]
         if server_config.get("is_chain"):
             # It's a chain configuration
-            chain_outbounds = self._build_chained_outbounds(
-                server_config, settings)
+            chain_outbounds = self._build_chained_outbounds(server_config, settings)
             outbounds.extend(chain_outbounds)
         else:
             # It's a single server configuration
             single_outbound = self._build_outbound_config(
-                server_config, settings, tag="proxy-out")
+                server_config, settings, tag="proxy-out"
+            )
             outbounds.append(single_outbound)
 
         return {
@@ -69,11 +82,12 @@ class SingboxConfigGenerator(BaseConfigGenerator):
                 "output": SINGBOX_LOG_FILE,
             },
             "experimental": {
-                "cache_file": {"enabled": True, "path": "cache.db", "store_fakeip": True},
-                "stats": {
-                    "listen": PROXY_HOST,
-                    "listen_port": STATS_API_PORT
-                }
+                "cache_file": {
+                    "enabled": True,
+                    "path": "cache.db",
+                    "store_fakeip": True,
+                },
+                "stats": {"listen": PROXY_HOST, "listen_port": STATS_API_PORT},
             },
             "dns": dns_config,
             "inbounds": [
@@ -112,8 +126,7 @@ class SingboxConfigGenerator(BaseConfigGenerator):
 
     def _build_dns_config(self, settings, final_resolver="proxy-out"):
         user_dns_str = settings.get("dns_servers")
-        user_dns_list = [s.strip()
-                         for s in user_dns_str.split(",") if s.strip()]
+        user_dns_list = [s.strip() for s in user_dns_str.split(",") if s.strip()]
 
         # The `servers` field must be an array of objects, each with a tag and address.
         dns_servers = []
@@ -122,8 +135,7 @@ class SingboxConfigGenerator(BaseConfigGenerator):
             dns_direct_address = (
                 user_dns_list[1] if len(user_dns_list) > 1 else "8.8.8.8"
             )
-            dns_servers.append(
-                {"tag": "dns_direct", "address": dns_direct_address})
+            dns_servers.append({"tag": "dns_direct", "address": dns_direct_address})
         else:
             dns_servers.extend(
                 [
@@ -143,7 +155,8 @@ class SingboxConfigGenerator(BaseConfigGenerator):
         dns_rules = []
         if non_geosite_bypass_domains:
             dns_rules.append(
-                {"domain": non_geosite_bypass_domains, "server": "dns_direct"})
+                {"domain": non_geosite_bypass_domains, "server": "dns_direct"}
+            )
 
         return {
             "servers": dns_servers,
@@ -159,16 +172,13 @@ class SingboxConfigGenerator(BaseConfigGenerator):
         ]
 
         bypass_ips_str = settings.get("bypass_ips")
-        bypass_ips_list = [i.strip()
-                           for i in bypass_ips_str.split(",") if i.strip()]
+        bypass_ips_list = [i.strip() for i in bypass_ips_str.split(",") if i.strip()]
 
         route_rules = []
         rule_sets = []
 
         # Add a rule to route DNS queries to the dns-out outbound
-        route_rules.append(
-            {"protocol": ["dns"], "outbound": "dns"}
-        )
+        route_rules.append({"protocol": ["dns"], "outbound": "dns"})
 
         # Add custom rules from settings
         custom_routing_rules = settings.get("custom_routing_rules", [])
@@ -181,11 +191,11 @@ class SingboxConfigGenerator(BaseConfigGenerator):
                 outbound_tag = "proxy-out" if rule_action == "proxy" else rule_action
 
                 if rule_type == "domain":
-                    route_rules.append(
-                        {"domain": rule_value, "outbound": outbound_tag})
+                    route_rules.append({"domain": rule_value, "outbound": outbound_tag})
                 elif rule_type == "ip":
                     route_rules.append(
-                        {"ip_cidr": rule_value, "outbound": outbound_tag})
+                        {"ip_cidr": rule_value, "outbound": outbound_tag}
+                    )
                 elif rule_type == "process":
                     route_rules.append(
                         {"process_name": rule_value, "outbound": outbound_tag}
@@ -193,7 +203,8 @@ class SingboxConfigGenerator(BaseConfigGenerator):
                 elif rule_type == "geosite":
                     rule_set_tag = f"geosite-{rule_value}"
                     route_rules.append(
-                        {"rule_set": rule_set_tag, "outbound": outbound_tag})
+                        {"rule_set": rule_set_tag, "outbound": outbound_tag}
+                    )
                     # Add rule_set definition if not already present
                     if not any(rs.get("tag") == rule_set_tag for rs in rule_sets):
                         url = GEOSITE_RULE_SET_URL.format(code=rule_value)
@@ -211,7 +222,8 @@ class SingboxConfigGenerator(BaseConfigGenerator):
                 elif rule_type == "geoip":
                     rule_set_tag = f"geoip-{rule_value}"
                     route_rules.append(
-                        {"rule_set": rule_set_tag, "outbound": outbound_tag})
+                        {"rule_set": rule_set_tag, "outbound": outbound_tag}
+                    )
                     # Add rule_set definition if not already present
                     if not any(rs.get("tag") == rule_set_tag for rs in rule_sets):
                         url = GEOIP_RULE_SET_URL.format(code=rule_value)
@@ -231,8 +243,7 @@ class SingboxConfigGenerator(BaseConfigGenerator):
         geoip_codes = [
             i.replace("geoip:", "") for i in bypass_ips_list if i.startswith("geoip:")
         ]
-        ip_cidr_rules = [
-            i for i in bypass_ips_list if not i.startswith("geoip:")]
+        ip_cidr_rules = [i for i in bypass_ips_list if not i.startswith("geoip:")]
 
         if "private" in geoip_codes:
             route_rules.append({"ip_is_private": True, "outbound": "direct"})
@@ -240,8 +251,7 @@ class SingboxConfigGenerator(BaseConfigGenerator):
 
         if geoip_codes:
             rule_set_tags = [f"geoip-{code}" for code in geoip_codes]
-            route_rules.append(
-                {"rule_set": rule_set_tags, "outbound": "direct"})
+            route_rules.append({"rule_set": rule_set_tags, "outbound": "direct"})
             for code in geoip_codes:
                 url = GEOIP_RULE_SET_URL.format(code=code)
                 if code == "ir":
@@ -257,8 +267,7 @@ class SingboxConfigGenerator(BaseConfigGenerator):
                 )
 
         if ip_cidr_rules:
-            route_rules.append(
-                {"ip_cidr": ip_cidr_rules, "outbound": "direct"})
+            route_rules.append({"ip_cidr": ip_cidr_rules, "outbound": "direct"})
 
         # Geosite handling
         geosite_domains = [
@@ -271,10 +280,10 @@ class SingboxConfigGenerator(BaseConfigGenerator):
         ]
 
         if geosite_domains:
-            geosite_rule_set_tags = [
-                f"geosite-{code}" for code in geosite_domains]
+            geosite_rule_set_tags = [f"geosite-{code}" for code in geosite_domains]
             route_rules.append(
-                {"rule_set": geosite_rule_set_tags, "outbound": "direct"})
+                {"rule_set": geosite_rule_set_tags, "outbound": "direct"}
+            )
             for code in geosite_domains:
                 url = GEOSITE_RULE_SET_URL.format(code=code)
                 if code == "ir" or code == "tld-ir":
@@ -315,13 +324,11 @@ class SingboxConfigGenerator(BaseConfigGenerator):
                     "alpn": ["h2", "http/1.1"],
                 }
                 if fingerprint := server_config.get("fp"):
-                    tls_config["utls"] = {
-                        "enabled": True, "fingerprint": fingerprint}
+                    tls_config["utls"] = {"enabled": True, "fingerprint": fingerprint}
                 if settings.get("tls_fragment_enabled"):
                     try:
                         size_str = settings.get("tls_fragment_size", "10-100")
-                        sleep_str = settings.get(
-                            "tls_fragment_sleep", "10-100")
+                        sleep_str = settings.get("tls_fragment_sleep", "10-100")
                         size = [int(x.strip()) for x in size_str.split("-")]
                         sleep = [int(x.strip()) for x in sleep_str.split("-")]
                         if len(size) == 2 and len(sleep) == 2:
@@ -380,8 +387,7 @@ class SingboxConfigGenerator(BaseConfigGenerator):
                 "insecure": True,
             }
             if fingerprint := server_config.get("fp"):
-                tls_config["utls"] = {
-                    "enabled": True, "fingerprint": fingerprint}
+                tls_config["utls"] = {"enabled": True, "fingerprint": fingerprint}
             if settings.get("tls_fragment_enabled"):
                 try:
                     size_str = settings.get("tls_fragment_size", "10-100")
@@ -403,7 +409,9 @@ class SingboxConfigGenerator(BaseConfigGenerator):
                 {
                     "uuid": server_config.get("uuid"),
                     "password": server_config.get("password"),
-                    "congestion_control": server_config.get("congestion_control", "bbr"),
+                    "congestion_control": server_config.get(
+                        "congestion_control", "bbr"
+                    ),
                     "udp_relay_mode": server_config.get("udp_relay_mode", "native"),
                 }
             )
@@ -453,27 +461,36 @@ class SingboxConfigGenerator(BaseConfigGenerator):
             outbound.pop("server", None)
             outbound.pop("server_port", None)
 
-            outbound.update({
-                "local_address": [server_config.get("local_address")],
-                "private_key": server_config.get("private_key"),
-                "mtu": 1420,  # A common MTU for WireGuard
-                "peers": [
-                    {
-                        "server": server_config.get("server"),
-                        "server_port": server_config.get("port"),
-                        "public_key": server_config.get("public_key"),
-                        "preshared_key": server_config.get("preshared_key"),
-                        "allowed_ips": [ip.strip() for ip in server_config.get("allowed_ips", "").split(",")],
-                    }
-                ]
-            })
+            outbound.update(
+                {
+                    "local_address": [server_config.get("local_address")],
+                    "private_key": server_config.get("private_key"),
+                    "mtu": 1420,  # A common MTU for WireGuard
+                    "peers": [
+                        {
+                            "server": server_config.get("server"),
+                            "server_port": server_config.get("port"),
+                            "public_key": server_config.get("public_key"),
+                            "preshared_key": server_config.get("preshared_key"),
+                            "allowed_ips": [
+                                ip.strip()
+                                for ip in server_config.get("allowed_ips", "").split(
+                                    ","
+                                )
+                            ],
+                        }
+                    ],
+                }
+            )
 
         elif protocol == "ssh":
-            outbound.update({
-                "user": server_config.get("user"),
-                "password": server_config.get("password"),
-                # You can add more options like private_key if needed
-            })
+            outbound.update(
+                {
+                    "user": server_config.get("user"),
+                    "password": server_config.get("password"),
+                    # You can add more options like private_key if needed
+                }
+            )
             # SSH does not typically use multiplexing in this context
 
         return outbound
@@ -485,7 +502,8 @@ class SingboxConfigGenerator(BaseConfigGenerator):
         all_outbounds = []
         node_tags = []
         all_servers_map = {
-            s['id']: s for s in self.parent.server_manager.get_all_servers()}
+            s["id"]: s for s in self.parent.server_manager.get_all_servers()
+        }
 
         node_ids = chain_config.get("nodes", [])
 
@@ -499,14 +517,15 @@ class SingboxConfigGenerator(BaseConfigGenerator):
 
             # Build the individual outbound config for this node
             outbound_node = self._build_outbound_config(
-                server_config, settings, tag=node_tag)
+                server_config, settings, tag=node_tag
+            )
             all_outbounds.append(outbound_node)
 
         # Create the main 'chain' outbound that links them all
         chain_outbound = {
             "type": "chain",
             "tag": "proxy-out",  # This is the final outbound the router will use
-            "outbounds": node_tags
+            "outbounds": node_tags,
         }
         # Add the chain outbound at the beginning
         all_outbounds.insert(0, chain_outbound)

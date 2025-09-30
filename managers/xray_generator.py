@@ -30,36 +30,31 @@ class XrayConfigGenerator(BaseConfigGenerator):
                 "tag": inbound_tag,
                 "listen": "127.0.0.1",
                 "port": port,
-                "settings": {
-                    "allowTransparent": False
-                },
-                "sniffing": {
-                    "enabled": False
-                }
+                "settings": {"allowTransparent": False},
+                "sniffing": {"enabled": False},
             }
 
             inbounds.append(inbound_config)
-            outbounds.append(self._build_test_outbound_config(
-                server_config, settings, tag=outbound_tag))
+            outbounds.append(
+                self._build_test_outbound_config(
+                    server_config, settings, tag=outbound_tag
+                )
+            )
 
         # Create routing rules
         route_rules = []
         for i in range(len(servers)):
-            route_rules.append({
-                "inboundTag": [f"http-in-{i}"],
-                "outboundTag": f"proxy-out-{i}"
-            })
+            route_rules.append(
+                {"inboundTag": [f"http-in-{i}"], "outboundTag": f"proxy-out-{i}"}
+            )
 
-        routing_config = {
-            "rules": route_rules,
-            "domainStrategy": "AsIs"
-        }
+        routing_config = {"rules": route_rules, "domainStrategy": "AsIs"}
 
         return {
             "dns": dns_config,
             "inbounds": inbounds,
             "outbounds": outbounds,
-            "routing": routing_config
+            "routing": routing_config,
         }
 
     def generate_config_json(self, server_config, settings):
@@ -112,32 +107,39 @@ class XrayConfigGenerator(BaseConfigGenerator):
     def _build_routing_config(self, settings):
         """Builds the routing configuration for Xray."""
         rules = []
-        bypass_domains = settings.get("bypass_domains", "").split(',')
-        bypass_ips = settings.get("bypass_ips", "").split(',')
+        bypass_domains = settings.get("bypass_domains", "").split(",")
+        bypass_ips = settings.get("bypass_ips", "").split(",")
 
         # Add bypass rules
         if bypass_domains:
-            rules.append({
-                "type": "field",
-                "domain": [d.strip() for d in bypass_domains if d.strip()],
-                "outboundTag": "direct"
-            })
+            rules.append(
+                {
+                    "type": "field",
+                    "domain": [d.strip() for d in bypass_domains if d.strip()],
+                    "outboundTag": "direct",
+                }
+            )
         if bypass_ips:
-            rules.append({
-                "type": "field",
-                "ip": [i.strip() for i in bypass_ips if i.strip()],
-                "outboundTag": "direct"
-            })
+            rules.append(
+                {
+                    "type": "field",
+                    "ip": [i.strip() for i in bypass_ips if i.strip()],
+                    "outboundTag": "direct",
+                }
+            )
 
         # Add custom rules
         for rule in settings.get("custom_routing_rules", []):
-            outbound_tag = "proxy-out" if rule.get(
-                "action") == "proxy" else rule.get("action")
-            rules.append({
-                "type": "field",
-                rule.get("type"): [rule.get("value")],
-                "outboundTag": outbound_tag
-            })
+            outbound_tag = (
+                "proxy-out" if rule.get("action") == "proxy" else rule.get("action")
+            )
+            rules.append(
+                {
+                    "type": "field",
+                    rule.get("type"): [rule.get("value")],
+                    "outboundTag": outbound_tag,
+                }
+            )
 
         return {"rules": rules}
 
@@ -148,7 +150,7 @@ class XrayConfigGenerator(BaseConfigGenerator):
             "protocol": protocol,
             "tag": tag,
             "settings": {},
-            "streamSettings": {}
+            "streamSettings": {},
         }
 
         # Common server details
@@ -158,18 +160,22 @@ class XrayConfigGenerator(BaseConfigGenerator):
         }
 
         if protocol == "vless":
-            server_details["users"] = [{
-                "id": server_config.get("uuid"),
-                "flow": server_config.get("flow", "xtls-rprx-vision")
-            }]
+            server_details["users"] = [
+                {
+                    "id": server_config.get("uuid"),
+                    "flow": server_config.get("flow", "xtls-rprx-vision"),
+                }
+            ]
             outbound["settings"]["vnext"] = [server_details]
 
         elif protocol == "vmess":
-            server_details["users"] = [{
-                "id": server_config.get("uuid"),
-                "alterId": server_config.get("alter_id", 0),
-                "security": server_config.get("security", "auto")
-            }]
+            server_details["users"] = [
+                {
+                    "id": server_config.get("uuid"),
+                    "alterId": server_config.get("alter_id", 0),
+                    "security": server_config.get("security", "auto"),
+                }
+            ]
             outbound["settings"]["vnext"] = [server_details]
 
         elif protocol == "trojan":
@@ -186,7 +192,7 @@ class XrayConfigGenerator(BaseConfigGenerator):
             outbound["streamSettings"]["security"] = "tls"
             outbound["streamSettings"]["tlsSettings"] = {
                 "serverName": server_config.get("sni") or server_config.get("server"),
-                "allowInsecure": True
+                "allowInsecure": True,
             }
             if fp := server_config.get("fp"):
                 outbound["streamSettings"]["tlsSettings"]["fingerprint"] = fp
@@ -213,18 +219,22 @@ class XrayConfigGenerator(BaseConfigGenerator):
         }
 
         if protocol == "vless":
-            server_details["users"] = [{
-                "id": server_config.get("uuid"),
-                "flow": server_config.get("flow", "xtls-rprx-vision")
-            }]
+            server_details["users"] = [
+                {
+                    "id": server_config.get("uuid"),
+                    "flow": server_config.get("flow", "xtls-rprx-vision"),
+                }
+            ]
             outbound["settings"]["vnext"] = [server_details]
 
         elif protocol == "vmess":
-            server_details["users"] = [{
-                "id": server_config.get("uuid"),
-                "alterId": server_config.get("alter_id", 0),
-                "security": server_config.get("security", "auto")
-            }]
+            server_details["users"] = [
+                {
+                    "id": server_config.get("uuid"),
+                    "alterId": server_config.get("alter_id", 0),
+                    "security": server_config.get("security", "auto"),
+                }
+            ]
             outbound["settings"]["vnext"] = [server_details]
 
         elif protocol == "trojan":
@@ -241,7 +251,7 @@ class XrayConfigGenerator(BaseConfigGenerator):
             outbound["streamSettings"]["security"] = "tls"
             outbound["streamSettings"]["tlsSettings"] = {
                 "serverName": server_config.get("sni") or server_config.get("server"),
-                "allowInsecure": True
+                "allowInsecure": True,
             }
             if fp := server_config.get("fp"):
                 outbound["streamSettings"]["tlsSettings"]["fingerprint"] = fp
@@ -251,7 +261,9 @@ class XrayConfigGenerator(BaseConfigGenerator):
         if transport == "ws":
             outbound["streamSettings"]["wsSettings"] = {
                 "path": server_config.get("ws_path", "/"),
-                "headers": {"Host": server_config.get("ws_host") or server_config.get("sni")}
+                "headers": {
+                    "Host": server_config.get("ws_host") or server_config.get("sni")
+                },
             }
 
         # Mux settings

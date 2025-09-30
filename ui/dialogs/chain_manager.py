@@ -1,7 +1,17 @@
 import uuid
 from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QListWidget, QPushButton,
-    QDialogButtonBox, QLineEdit, QFormLayout, QLabel, QMessageBox, QListWidgetItem, QSizePolicy
+    QDialog,
+    QVBoxLayout,
+    QHBoxLayout,
+    QListWidget,
+    QPushButton,
+    QDialogButtonBox,
+    QLineEdit,
+    QFormLayout,
+    QLabel,
+    QMessageBox,
+    QListWidgetItem,
+    QSizePolicy,
 )
 from PySide6.QtCore import Qt
 
@@ -16,8 +26,7 @@ class ChainEditDialog(QDialog):
         self.chain = chain
         self.all_servers = all_servers
 
-        self.setWindowTitle(self.tr(
-            "Edit Chain") if chain else self.tr("Add Chain"))
+        self.setWindowTitle(self.tr("Edit Chain") if chain else self.tr("Add Chain"))
         self.setMinimumSize(600, 450)
         self.setMaximumSize(1000, 700)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
@@ -71,7 +80,8 @@ class ChainEditDialog(QDialog):
 
         # Dialog Buttons
         self.button_box = QDialogButtonBox(
-            QDialogButtonBox.Save | QDialogButtonBox.Cancel)
+            QDialogButtonBox.Save | QDialogButtonBox.Cancel
+        )
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
         main_layout.addWidget(self.button_box)
@@ -79,8 +89,7 @@ class ChainEditDialog(QDialog):
         self.populate_lists()
 
     def populate_lists(self):
-        chain_server_ids = set(self.chain.get(
-            "servers", [])) if self.chain else set()
+        chain_server_ids = set(self.chain.get("servers", [])) if self.chain else set()
 
         # Populate available servers list
         for server in self.all_servers:
@@ -94,7 +103,13 @@ class ChainEditDialog(QDialog):
             for server_id in self.chain.get("servers", []):
                 # Find the server name from the full list
                 server_name = next(
-                    (s.get("name") for s in self.all_servers if s.get("id") == server_id), "Unknown Server")
+                    (
+                        s.get("name")
+                        for s in self.all_servers
+                        if s.get("id") == server_id
+                    ),
+                    "Unknown Server",
+                )
                 item = QListWidgetItem(server_name)
                 item.setData(Qt.UserRole, server_id)
                 self.chain_list.addItem(item)
@@ -113,20 +128,25 @@ class ChainEditDialog(QDialog):
     def get_chain_data(self):
         name = self.name_edit.text().strip()
         if not name:
-            QMessageBox.warning(self, self.tr("Input Error"), self.tr(
-                "Chain name cannot be empty."))
+            QMessageBox.warning(
+                self, self.tr("Input Error"), self.tr("Chain name cannot be empty.")
+            )
             return None
 
-        server_ids = [self.chain_list.item(i).data(Qt.UserRole)
-                      for i in range(self.chain_list.count())]
+        server_ids = [
+            self.chain_list.item(i).data(Qt.UserRole)
+            for i in range(self.chain_list.count())
+        ]
 
         if len(server_ids) < 2:
-            QMessageBox.warning(self, self.tr("Input Error"), self.tr(
-                "A chain must contain at least two servers."))
+            QMessageBox.warning(
+                self,
+                self.tr("Input Error"),
+                self.tr("A chain must contain at least two servers."),
+            )
             return None
 
-        chain_id = self.chain.get(
-            "id") if self.chain else f"chain_{uuid.uuid4()}"
+        chain_id = self.chain.get("id") if self.chain else f"chain_{uuid.uuid4()}"
 
         return {"id": chain_id, "name": name, "servers": server_ids}
 
@@ -174,7 +194,9 @@ class ChainManagerDialog(QDialog):
         self.chain_list_widget.clear()
         for chain in self.chains:
             # Display name and number of servers
-            display_text = f"{chain.get('name')} ({len(chain.get('servers', []))} servers)"
+            display_text = (
+                f"{chain.get('name')} ({len(chain.get('servers', []))} servers)"
+            )
             self.chain_list_widget.addItem(display_text)
 
     def add_chain(self):
@@ -190,8 +212,7 @@ class ChainManagerDialog(QDialog):
         if not selected_item:
             return
         index = self.chain_list_widget.row(selected_item)
-        dialog = ChainEditDialog(
-            self, self.all_servers, chain=self.chains[index])
+        dialog = ChainEditDialog(self, self.all_servers, chain=self.chains[index])
         if dialog.exec() == QDialog.Accepted:
             updated_chain = dialog.get_chain_data()
             if updated_chain:
@@ -204,8 +225,13 @@ class ChainManagerDialog(QDialog):
             return
         index = self.chain_list_widget.row(selected_item)
         chain_name = self.chains[index].get("name")
-        reply = QMessageBox.question(self, self.tr("Confirm Deletion"),
-                                     self.tr("Are you sure you want to delete the chain '{}'?").format(chain_name))
+        reply = QMessageBox.question(
+            self,
+            self.tr("Confirm Deletion"),
+            self.tr("Are you sure you want to delete the chain '{}'?").format(
+                chain_name
+            ),
+        )
         if reply == QMessageBox.Yes:
             del self.chains[index]
             self.populate_list()

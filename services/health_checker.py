@@ -3,7 +3,14 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Callable, List, Optional
 
-from constants import LogLevel, HEALTH_CHECK_EMA_ALPHA, HEALTH_CHECK_MAX_BACKOFF, HEALTH_CHECK_MIN_BACKOFF, TEST_ENDPOINTS, MAX_CONCURRENT_CORE_TESTS
+from constants import (
+    LogLevel,
+    HEALTH_CHECK_EMA_ALPHA,
+    HEALTH_CHECK_MAX_BACKOFF,
+    HEALTH_CHECK_MIN_BACKOFF,
+    TEST_ENDPOINTS,
+    MAX_CONCURRENT_CORE_TESTS,
+)
 from services.ping_service import direct_tcp, proxy_tcp_connect, url_latency_via_proxy
 
 
@@ -19,8 +26,7 @@ class HealthChecker:
         self._test_core_manager = None
         self._test_callback = None
         self._progress_callback = None
-        self._thread_pool = ThreadPoolExecutor(
-            max_workers=MAX_CONCURRENT_CORE_TESTS)
+        self._thread_pool = ThreadPoolExecutor(max_workers=MAX_CONCURRENT_CORE_TESTS)
         self._cache_duration = 300  # 5 minutes cache for results
         self._result_cache = {}  # server_id -> {result, timestamp}
 
@@ -36,7 +42,12 @@ class HealthChecker:
         """Set callback to report progress (current, total)."""
         self._progress_callback = callback
 
-    def start(self, servers: List[dict], test_types: List[str] = None, interval_seconds: int = 30):
+    def start(
+        self,
+        servers: List[dict],
+        test_types: List[str] = None,
+        interval_seconds: int = 30,
+    ):
         """Start periodic health checking."""
         if self._thread and self._thread.is_alive():
             return
@@ -51,17 +62,20 @@ class HealthChecker:
         if "url" in test_types and self._test_core_manager:
             if not self._test_core_manager.start(servers):
                 self.log(
-                    "Failed to start test core manager for URL testing", LogLevel.ERROR)
+                    "Failed to start test core manager for URL testing", LogLevel.ERROR
+                )
                 return
 
         self._thread = threading.Thread(
             target=self._health_check_loop,
             args=(servers, interval_seconds),
-            daemon=True
+            daemon=True,
         )
         self._thread.start()
         self.log(
-            f"Health checker started for {test_types} with {interval_seconds}s interval", LogLevel.INFO)
+            f"Health checker started for {test_types} with {interval_seconds}s interval",
+            LogLevel.INFO,
+        )
 
     def stop(self):
         """Stop health checking."""
@@ -96,10 +110,7 @@ class HealthChecker:
 
     def _cache_result(self, server_id: str, result: dict):
         """Cache test result."""
-        self._result_cache[server_id] = {
-            "result": result,
-            "timestamp": time.time()
-        }
+        self._result_cache[server_id] = {"result": result, "timestamp": time.time()}
 
     def _health_check_loop(self, servers: List[dict], interval_seconds: int):
         """Main health check loop with parallel testing."""
@@ -142,8 +153,7 @@ class HealthChecker:
             if self._stop_event.is_set():
                 break
             try:
-                future = self._thread_pool.submit(
-                    self._test_single_server, server)
+                future = self._thread_pool.submit(self._test_single_server, server)
                 futures.append(future)
             except RuntimeError:
                 # Thread pool is shutdown, break out of loop
@@ -169,8 +179,9 @@ class HealthChecker:
         last_test = stats.get("last_test", 0)
 
         # Exponential backoff: 1s, 2s, 4s, 8s, 16s, max 60s
-        backoff_seconds = min(HEALTH_CHECK_MAX_BACKOFF,
-                              HEALTH_CHECK_MIN_BACKOFF * (2 ** min(failures, 6)))
+        backoff_seconds = min(
+            HEALTH_CHECK_MAX_BACKOFF, HEALTH_CHECK_MIN_BACKOFF * (2 ** min(failures, 6))
+        )
         return time.time() - last_test > backoff_seconds
 
     def _test_single_server(self, server: dict):
@@ -183,7 +194,7 @@ class HealthChecker:
                 "tcp_ema": None,
                 "url_ema": None,
                 "failures": 0,
-                "last_test": 0
+                "last_test": 0,
             }
 
         # Initialize result variables
@@ -206,8 +217,7 @@ class HealthChecker:
                 tcp_result = self._test_tcp(server)
                 if tcp_result != -1:
                     stats["failures"] = 0  # Reset failure count on success
-                    stats["tcp_ema"] = self._update_ema(
-                        stats["tcp_ema"], tcp_result)
+                    stats["tcp_ema"] = self._update_ema(stats["tcp_ema"], tcp_result)
                 else:
                     stats["failures"] += 1
                     stats["tcp_ema"] = None
@@ -216,8 +226,7 @@ class HealthChecker:
             if "url" in self._test_types:
                 url_result = self._test_url(server)
                 if url_result != -1:
-                    stats["url_ema"] = self._update_ema(
-                        stats["url_ema"], url_result)
+                    stats["url_ema"] = self._update_ema(stats["url_ema"], url_result)
                 else:
                     stats["url_ema"] = None
 
@@ -228,29 +237,32 @@ class HealthChecker:
         failures = stats.get("failures", 0)
         if failures >= 3:
             self.log(
-                f"⚠️ Server '{server.get('name', 'Unknown')}' has {failures} consecutive failures", LogLevel.WARNING)
+                f"⚠️ Server '{server.get('name', 'Unknown')}' has {failures} consecutive failures",
+                LogLevel.WARNING,
+            )
         elif failures > 0:
             self.log(
-                f"Server '{server.get('name', 'Unknown')}' has {failures} failures", LogLevel.INFO)
+                f"Server '{server.get('name', 'Unknown')}' has {failures} failures",
+                LogLevel.INFO,
+            )
 
         # Report results to UI
         if self._test_callback:
             if tcp_result != -1:
-                self._test_callback(server, int(
-                    stats["tcp_ema"] or tcp_result), "tcp")
+                self._test_callback(server, int(stats["tcp_ema"] or tcp_result), "tcp")
             if url_result != -1:
-                self._test_callback(server, int(
-                    stats["url_ema"] or url_result), "url")
+                self._test_callback(server, int(stats["url_ema"] or url_result), "url")
 
     def _test_tcp(self, server: dict) -> int:
         """Test TCP connectivity."""
         if self._test_core_manager:
             # Use proxy-based test
-            proxy_address = self._test_core_manager.get_proxy_address(
-                server.get("id"))
+            proxy_address = self._test_core_manager.get_proxy_address(server.get("id"))
             if proxy_address:
                 tcp_config = TEST_ENDPOINTS["tcp"]
-                return proxy_tcp_connect(proxy_address, tcp_config["host"], tcp_config["port"])
+                return proxy_tcp_connect(
+                    proxy_address, tcp_config["host"], tcp_config["port"]
+                )
 
         # Fallback to direct TCP
         return direct_tcp(server.get("server"), server.get("port"))
@@ -260,8 +272,7 @@ class HealthChecker:
         if not self._test_core_manager:
             return -1
 
-        proxy_address = self._test_core_manager.get_proxy_address(
-            server.get("id"))
+        proxy_address = self._test_core_manager.get_proxy_address(server.get("id"))
         if not proxy_address:
             return -1
 
@@ -269,10 +280,12 @@ class HealthChecker:
         return url_latency_via_proxy(
             proxy_address,
             url=url_config["url"],
-            is_cancelled=lambda: self._stop_event.is_set()
+            is_cancelled=lambda: self._stop_event.is_set(),
         )
 
-    def _update_ema(self, current_ema: Optional[float], new_value: int, alpha: float = None) -> float:
+    def _update_ema(
+        self, current_ema: Optional[float], new_value: int, alpha: float = None
+    ) -> float:
         """Update exponential moving average."""
         if alpha is None:
             alpha = HEALTH_CHECK_EMA_ALPHA

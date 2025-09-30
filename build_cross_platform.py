@@ -13,8 +13,7 @@ from pathlib import Path
 def check_docker():
     """Check if Docker is available"""
     try:
-        result = subprocess.run(["docker", "--version"],
-                                capture_output=True, text=True)
+        result = subprocess.run(["docker", "--version"], capture_output=True, text=True)
         if result.returncode == 0:
             print(f"Docker found: {result.stdout.strip()}")
             return True
@@ -101,12 +100,7 @@ def build_with_docker(platform_name):
 
     # Build Docker image
     image_name = f"onix-builder-{platform_name}"
-    build_cmd = [
-        "docker", "build",
-        "-f", dockerfile,
-        "-t", image_name,
-        "."
-    ]
+    build_cmd = ["docker", "build", "-f", dockerfile, "-t", image_name, "."]
 
     print(f"Building Docker image: {image_name}")
     if not run_command(build_cmd):
@@ -115,10 +109,13 @@ def build_with_docker(platform_name):
     # Run container and copy files
     container_name = f"onix-build-{platform_name}"
     run_cmd = [
-        "docker", "run",
-        "--name", container_name,
+        "docker",
+        "run",
+        "--name",
+        container_name,
         image_name,
-        "python", "build_all.py"
+        "python",
+        "build_all.py",
     ]
 
     print(f"Running build in container: {container_name}")
@@ -127,9 +124,10 @@ def build_with_docker(platform_name):
 
     # Copy built files from container
     copy_cmd = [
-        "docker", "cp",
+        "docker",
+        "cp",
         f"{container_name}:/app/dist/",
-        f"dist-{platform_name}/"
+        f"dist-{platform_name}/",
     ]
 
     print("Copying built files from container...")
@@ -147,8 +145,7 @@ def run_command(cmd):
     """Run a command and handle errors"""
     print(f"Running: {' '.join(cmd)}")
     try:
-        result = subprocess.run(
-            cmd, check=True, capture_output=True, text=True)
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
         if result.stdout:
             print(result.stdout)
         return True

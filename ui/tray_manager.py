@@ -1,4 +1,3 @@
-
 from PySide6.QtWidgets import QSystemTrayIcon, QMenu, QApplication
 from PySide6.QtGui import QIcon, QAction, QPainter, QFont, QColor, QPixmap
 from PySide6.QtCore import QSize, Qt, QRect
@@ -39,7 +38,9 @@ class TrayManager:
         self.main_window.show()
         self.main_window.activateWindow()
 
-    def show_message(self, title, message, icon=QSystemTrayIcon.Information, msecs=2000):
+    def show_message(
+        self, title, message, icon=QSystemTrayIcon.Information, msecs=2000
+    ):
         self.tray_icon.showMessage(title, message, icon, msecs)
 
     def update_tray_icon(self, up_speed, down_speed):

@@ -1,6 +1,14 @@
 from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
-    QRadioButton, QButtonGroup, QFileDialog, QMessageBox, QSizePolicy
+    QDialog,
+    QVBoxLayout,
+    QHBoxLayout,
+    QPushButton,
+    QLabel,
+    QRadioButton,
+    QButtonGroup,
+    QFileDialog,
+    QMessageBox,
+    QSizePolicy,
 )
 from PySide6.QtGui import QIcon
 
@@ -37,14 +45,16 @@ class ExportDialog(QDialog):
         self.button_group.addButton(self.server_list_radio, 0)
         layout.addWidget(self.server_list_radio)
 
-        self.health_stats_radio = QRadioButton(
-            self.tr("Health Check Statistics"))
+        self.health_stats_radio = QRadioButton(self.tr("Health Check Statistics"))
         self.button_group.addButton(self.health_stats_radio, 1)
         layout.addWidget(self.health_stats_radio)
 
         # Description
-        desc_label = QLabel(self.tr(
-            "Server List: Basic server information\nHealth Stats: Includes ping data and health check results"))
+        desc_label = QLabel(
+            self.tr(
+                "Server List: Basic server information\nHealth Stats: Includes ping data and health check results"
+            )
+        )
         desc_label.setStyleSheet("color: #666; font-size: 9pt;")
         layout.addWidget(desc_label)
 
@@ -54,7 +64,8 @@ class ExportDialog(QDialog):
         button_layout = QHBoxLayout()
 
         self.export_button = QPushButton(
-            QIcon(":/icons/file-text.svg"), self.tr("Export"))
+            QIcon(":/icons/file-text.svg"), self.tr("Export")
+        )
         self.export_button.clicked.connect(self.export_data)
         button_layout.addWidget(self.export_button)
 
@@ -70,36 +81,35 @@ class ExportDialog(QDialog):
             # Get file path
             file_filter = "CSV Files (*.csv);;All Files (*)"
             filename, _ = QFileDialog.getSaveFileName(
-                self,
-                self.tr("Save Export File"),
-                "",
-                file_filter
+                self, self.tr("Save Export File"), "", file_filter
             )
 
             if not filename:
                 return
 
             # Ensure .csv extension
-            if not filename.endswith('.csv'):
-                filename += '.csv'
+            if not filename.endswith(".csv"):
+                filename += ".csv"
 
             # Export based on selection
             if self.button_group.checkedId() == 0:
                 # Server list only
                 filepath = ExportService.export_server_list_to_csv(
-                    self.servers, filename)
+                    self.servers, filename
+                )
                 message = self.tr("Server list exported successfully!")
             else:
                 # Health statistics
                 filepath = ExportService.export_health_stats_to_csv(
-                    self.servers, self.health_stats, filename)
+                    self.servers, self.health_stats, filename
+                )
                 message = self.tr("Health statistics exported successfully!")
 
             # Show success message
             QMessageBox.information(
                 self,
                 self.tr("Export Successful"),
-                f"{message}\n\n{self.tr('File saved to:')} {filepath}"
+                f"{message}\n\n{self.tr('File saved to:')} {filepath}",
             )
 
             self.accept()
@@ -108,5 +118,5 @@ class ExportDialog(QDialog):
             QMessageBox.critical(
                 self,
                 self.tr("Export Error"),
-                self.tr("Failed to export data: {}").format(str(e))
+                self.tr("Failed to export data: {}").format(str(e)),
             )

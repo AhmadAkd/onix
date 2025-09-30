@@ -35,7 +35,7 @@ class NetworkDiagnosticsService:
             "routing_table": self._get_routing_table(),
             "port_scan": self._scan_common_ports(),
             "bandwidth_test": self._test_bandwidth(),
-            "latency_test": self._test_latency()
+            "latency_test": self._test_latency(),
         }
 
         self._diagnostics_results = results
@@ -54,22 +54,19 @@ class NetworkDiagnosticsService:
         dns_results = self._diagnostics_results.get("dns_resolution", {})
         if not dns_results.get("success", False):
             issues.append("DNS resolution failed")
-            recommendations.append(
-                "Check DNS server settings and connectivity")
+            recommendations.append("Check DNS server settings and connectivity")
 
         # Check connectivity
         connectivity = self._diagnostics_results.get("connectivity", {})
         if not connectivity.get("internet_accessible", False):
             issues.append("No internet connectivity")
-            recommendations.append(
-                "Check network connection and firewall settings")
+            recommendations.append("Check network connection and firewall settings")
 
         # Check proxy
         proxy_test = self._diagnostics_results.get("proxy_test", {})
         if not proxy_test.get("proxy_working", False):
             issues.append("Proxy connection failed")
-            recommendations.append(
-                "Check proxy server configuration and status")
+            recommendations.append("Check proxy server configuration and status")
 
         # Check latency
         latency = self._diagnostics_results.get("latency_test", {})
@@ -82,18 +79,22 @@ class NetworkDiagnosticsService:
             "issues": issues,
             "recommendations": recommendations,
             "overall_status": "healthy" if not issues else "issues_detected",
-            "timestamp": self._diagnostics_results.get("timestamp")
+            "timestamp": self._diagnostics_results.get("timestamp"),
         }
 
     def _get_system_info(self) -> Dict[str, Any]:
         """Get system information."""
         try:
             return {
-                "platform": psutil.WINDOWS if hasattr(psutil, 'WINDOWS') else "Unknown",
+                "platform": psutil.WINDOWS if hasattr(psutil, "WINDOWS") else "Unknown",
                 "cpu_count": psutil.cpu_count(),
                 "memory_total": psutil.virtual_memory().total,
                 "memory_available": psutil.virtual_memory().available,
-                "disk_usage": psutil.disk_usage('/').percent if hasattr(psutil, 'disk_usage') else 0
+                "disk_usage": (
+                    psutil.disk_usage("/").percent
+                    if hasattr(psutil, "disk_usage")
+                    else 0
+                ),
             }
         except Exception as e:
             return {"error": str(e)}
@@ -103,18 +104,17 @@ class NetworkDiagnosticsService:
         try:
             interfaces = []
             for interface, addrs in psutil.net_if_addrs().items():
-                interface_info = {
-                    "name": interface,
-                    "addresses": []
-                }
+                interface_info = {"name": interface, "addresses": []}
 
                 for addr in addrs:
-                    interface_info["addresses"].append({
-                        "family": str(addr.family),
-                        "address": addr.address,
-                        "netmask": addr.netmask,
-                        "broadcast": addr.broadcast
-                    })
+                    interface_info["addresses"].append(
+                        {
+                            "family": str(addr.family),
+                            "address": addr.address,
+                            "netmask": addr.netmask,
+                            "broadcast": addr.broadcast,
+                        }
+                    )
 
                 interfaces.append(interface_info)
 
@@ -132,8 +132,7 @@ class NetworkDiagnosticsService:
                 socket.gethostbyname(domain)
                 results["domains"][domain] = {"resolved": True}
             except socket.gaierror as e:
-                results["domains"][domain] = {
-                    "resolved": False, "error": str(e)}
+                results["domains"][domain] = {"resolved": False, "error": str(e)}
                 results["success"] = False
 
         return results
@@ -143,7 +142,7 @@ class NetworkDiagnosticsService:
         test_urls = [
             "http://www.google.com",
             "https://www.cloudflare.com",
-            "http://httpbin.org/ip"
+            "http://httpbin.org/ip",
         ]
 
         results = {"internet_accessible": False, "urls": {}}
@@ -151,10 +150,11 @@ class NetworkDiagnosticsService:
         for url in test_urls:
             try:
                 import requests
+
                 response = requests.get(url, timeout=10)
                 results["urls"][url] = {
                     "accessible": response.status_code == 200,
-                    "status_code": response.status_code
+                    "status_code": response.status_code,
                 }
                 if response.status_code == 200:
                     results["internet_accessible"] = True
@@ -163,7 +163,9 @@ class NetworkDiagnosticsService:
 
         return results
 
-    def _test_proxy_connectivity(self, proxy_address: str = "127.0.0.1:2082") -> Dict[str, Any]:
+    def _test_proxy_connectivity(
+        self, proxy_address: str = "127.0.0.1:2082"
+    ) -> Dict[str, Any]:
         """Test proxy connectivity."""
         try:
             host, port = proxy_address.split(":")
@@ -174,13 +176,13 @@ class NetworkDiagnosticsService:
                 return {
                     "proxy_working": result == 0,
                     "proxy_address": proxy_address,
-                    "connection_time": time.time()
+                    "connection_time": time.time(),
                 }
         except Exception as e:
             return {
                 "proxy_working": False,
                 "proxy_address": proxy_address,
-                "error": str(e)
+                "error": str(e),
             }
 
     def _check_firewall_status(self) -> Dict[str, Any]:
@@ -189,12 +191,14 @@ class NetworkDiagnosticsService:
             # Windows firewall check
             result = subprocess.run(
                 ["netsh", "advfirewall", "show", "allprofiles", "state"],
-                capture_output=True, text=True, shell=True
+                capture_output=True,
+                text=True,
+                shell=True,
             )
 
             return {
                 "firewall_enabled": "State" in result.stdout and "ON" in result.stdout,
-                "output": result.stdout
+                "output": result.stdout,
             }
         except Exception as e:
             return {"error": str(e)}
@@ -203,23 +207,24 @@ class NetworkDiagnosticsService:
         """Get routing table."""
         try:
             result = subprocess.run(
-                ["route", "print"],
-                capture_output=True, text=True, shell=True
+                ["route", "print"], capture_output=True, text=True, shell=True
             )
 
             routes = []
-            lines = result.stdout.split('\n')
+            lines = result.stdout.split("\n")
 
             for line in lines:
-                if line.strip() and not line.startswith('='):
+                if line.strip() and not line.startswith("="):
                     parts = line.split()
                     if len(parts) >= 4 and parts[0] != "Network":
-                        routes.append({
-                            "network": parts[0],
-                            "netmask": parts[1],
-                            "gateway": parts[2],
-                            "interface": parts[3] if len(parts) > 3 else ""
-                        })
+                        routes.append(
+                            {
+                                "network": parts[0],
+                                "netmask": parts[1],
+                                "gateway": parts[2],
+                                "interface": parts[3] if len(parts) > 3 else "",
+                            }
+                        )
 
             return routes
         except Exception as e:
@@ -237,7 +242,7 @@ class NetworkDiagnosticsService:
                     result = sock.connect_ex(("127.0.0.1", port))
                     results["ports"][port] = {
                         "open": result == 0,
-                        "service": self._get_port_service(port)
+                        "service": self._get_port_service(port),
                     }
             except Exception as e:
                 results["ports"][port] = {"open": False, "error": str(e)}
@@ -256,7 +261,7 @@ class NetworkDiagnosticsService:
             110: "POP3",
             143: "IMAP",
             993: "IMAPS",
-            995: "POP3S"
+            995: "POP3S",
         }
         return services.get(port, "Unknown")
 
@@ -265,10 +270,12 @@ class NetworkDiagnosticsService:
         try:
             # Simple bandwidth test using requests
             import requests
+
             start_time = time.time()
 
-            response = requests.get("http://speedtest.tele2.net/10MB.zip",
-                                    timeout=30, stream=True)
+            response = requests.get(
+                "http://speedtest.tele2.net/10MB.zip", timeout=30, stream=True
+            )
 
             total_bytes = 0
             for chunk in response.iter_content(chunk_size=8192):
@@ -282,7 +289,7 @@ class NetworkDiagnosticsService:
                 return {
                     "bandwidth_mbps": bandwidth_mbps,
                     "bytes_transferred": total_bytes,
-                    "duration": duration
+                    "duration": duration,
                 }
             else:
                 return {"error": "Test duration too short"}
@@ -295,7 +302,7 @@ class NetworkDiagnosticsService:
         test_servers = [
             ("8.8.8.8", "Google DNS"),
             ("1.1.1.1", "Cloudflare DNS"),
-            ("208.67.222.222", "OpenDNS")
+            ("208.67.222.222", "OpenDNS"),
         ]
 
         results = {"servers": {}, "average_latency": 0}
@@ -310,12 +317,11 @@ class NetworkDiagnosticsService:
                     sock.connect((server, 53))
                 end_time = time.time()
 
-                latency = (end_time - start_time) * \
-                    1000  # Convert to milliseconds
+                latency = (end_time - start_time) * 1000  # Convert to milliseconds
                 results["servers"][name] = {
                     "server": server,
                     "latency_ms": latency,
-                    "success": True
+                    "success": True,
                 }
 
                 total_latency += latency
@@ -326,7 +332,7 @@ class NetworkDiagnosticsService:
                     "server": server,
                     "latency_ms": -1,
                     "success": False,
-                    "error": str(e)
+                    "error": str(e),
                 }
 
         if successful_tests > 0:
@@ -356,8 +362,7 @@ class ConnectionAnalyticsService:
             self._stop_event.clear()
 
             self._monitor_thread = threading.Thread(
-                target=self._monitor_connections,
-                daemon=True
+                target=self._monitor_connections, daemon=True
             )
             self._monitor_thread.start()
 
@@ -365,8 +370,7 @@ class ConnectionAnalyticsService:
             return True
 
         except Exception as e:
-            self.log(
-                f"Failed to start connection monitoring: {e}", LogLevel.ERROR)
+            self.log(f"Failed to start connection monitoring: {e}", LogLevel.ERROR)
             return False
 
     def stop_monitoring(self):
@@ -381,14 +385,15 @@ class ConnectionAnalyticsService:
         self._monitoring = False
         self.log("Connection analytics monitoring stopped", LogLevel.INFO)
 
-    def log_connection_event(self, event_type: str, server_name: str,
-                             details: Dict[str, Any] = None):
+    def log_connection_event(
+        self, event_type: str, server_name: str, details: Dict[str, Any] = None
+    ):
         """Log a connection event."""
         event = {
             "timestamp": datetime.now().isoformat(),
             "event_type": event_type,
             "server_name": server_name,
-            "details": details or {}
+            "details": details or {},
         }
 
         self._connection_log.append(event)
@@ -402,7 +407,8 @@ class ConnectionAnalyticsService:
         cutoff_time = datetime.now() - timedelta(hours=hours)
 
         recent_events = [
-            event for event in self._connection_log
+            event
+            for event in self._connection_log
             if datetime.fromisoformat(event["timestamp"]) >= cutoff_time
         ]
 
@@ -411,11 +417,12 @@ class ConnectionAnalyticsService:
 
         # Analyze events
         total_connections = len(
-            [e for e in recent_events if e["event_type"] == "connected"])
+            [e for e in recent_events if e["event_type"] == "connected"]
+        )
         total_disconnections = len(
-            [e for e in recent_events if e["event_type"] == "disconnected"])
-        total_errors = len(
-            [e for e in recent_events if e["event_type"] == "error"])
+            [e for e in recent_events if e["event_type"] == "disconnected"]
+        )
+        total_errors = len([e for e in recent_events if e["event_type"] == "error"])
 
         # Server usage statistics
         server_usage = {}
@@ -443,12 +450,24 @@ class ConnectionAnalyticsService:
             "total_connections": total_connections,
             "total_disconnections": total_disconnections,
             "total_errors": total_errors,
-            "success_rate": (total_connections / (total_connections + total_errors)) * 100 if (total_connections + total_errors) > 0 else 0,
+            "success_rate": (
+                (total_connections / (total_connections + total_errors)) * 100
+                if (total_connections + total_errors) > 0
+                else 0
+            ),
             "server_usage": server_usage,
-            "average_connection_duration": sum(connection_durations) / len(connection_durations) if connection_durations else 0,
-            "max_connection_duration": max(connection_durations) if connection_durations else 0,
-            "min_connection_duration": min(connection_durations) if connection_durations else 0,
-            "events": recent_events[-50:]  # Last 50 events
+            "average_connection_duration": (
+                sum(connection_durations) / len(connection_durations)
+                if connection_durations
+                else 0
+            ),
+            "max_connection_duration": (
+                max(connection_durations) if connection_durations else 0
+            ),
+            "min_connection_duration": (
+                min(connection_durations) if connection_durations else 0
+            ),
+            "events": recent_events[-50:],  # Last 50 events
         }
 
     def _monitor_connections(self):
@@ -458,11 +477,11 @@ class ConnectionAnalyticsService:
                 # Monitor active connections
                 connections = psutil.net_connections()
                 active_connections = len(
-                    [c for c in connections if c.status == 'ESTABLISHED'])
+                    [c for c in connections if c.status == "ESTABLISHED"]
+                )
 
                 self._analytics_data["active_connections"] = active_connections
-                self._analytics_data["last_update"] = datetime.now(
-                ).isoformat()
+                self._analytics_data["last_update"] = datetime.now().isoformat()
 
                 time.sleep(10)  # Update every 10 seconds
 
@@ -483,8 +502,7 @@ class DebugModeService:
     def enable_debug_mode(self, enabled: bool = True):
         """Enable or disable debug mode."""
         self._debug_mode = enabled
-        self.log(
-            f"Debug mode {'enabled' if enabled else 'disabled'}", LogLevel.INFO)
+        self.log(f"Debug mode {'enabled' if enabled else 'disabled'}", LogLevel.INFO)
 
     def is_debug_mode(self) -> bool:
         """Check if debug mode is enabled."""
@@ -499,7 +517,7 @@ class DebugModeService:
             "timestamp": datetime.now().isoformat(),
             "category": category,
             "message": message,
-            "data": data
+            "data": data,
         }
 
         self._debug_log.append(debug_entry)

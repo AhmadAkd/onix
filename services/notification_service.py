@@ -15,8 +15,11 @@ class NotificationService(QObject):
 
     notification_sent = Signal(str, str)  # title, message
 
-    def __init__(self, log_callback: Callable[[str, LogLevel], None],
-                 tray_icon: Optional[QSystemTrayIcon] = None):
+    def __init__(
+        self,
+        log_callback: Callable[[str, LogLevel], None],
+        tray_icon: Optional[QSystemTrayIcon] = None,
+    ):
         super().__init__()
         self.log = log_callback
         self.tray_icon = tray_icon
@@ -27,16 +30,19 @@ class NotificationService(QObject):
     def enable_notifications(self, enabled: bool = True):
         """Enable or disable notifications."""
         self._notifications_enabled = enabled
-        self.log(
-            f"Notifications {'enabled' if enabled else 'disabled'}", LogLevel.INFO)
+        self.log(f"Notifications {'enabled' if enabled else 'disabled'}", LogLevel.INFO)
 
     def is_notifications_enabled(self) -> bool:
         """Check if notifications are enabled."""
         return self._notifications_enabled
 
-    def send_notification(self, title: str, message: str,
-                          notification_type: str = "info",
-                          duration: int = 5000) -> bool:
+    def send_notification(
+        self,
+        title: str,
+        message: str,
+        notification_type: str = "info",
+        duration: int = 5000,
+    ) -> bool:
         """Send a notification."""
         if not self._notifications_enabled:
             return False
@@ -64,27 +70,16 @@ class NotificationService(QObject):
         """Send connection status notification."""
         if connected:
             self.send_notification(
-                "Connected",
-                f"Successfully connected to {server_name}",
-                "success",
-                3000
+                "Connected", f"Successfully connected to {server_name}", "success", 3000
             )
         else:
             self.send_notification(
-                "Disconnected",
-                f"Disconnected from {server_name}",
-                "warning",
-                3000
+                "Disconnected", f"Disconnected from {server_name}", "warning", 3000
             )
 
     def send_error_notification(self, error_message: str):
         """Send error notification."""
-        self.send_notification(
-            "Error",
-            error_message,
-            "error",
-            5000
-        )
+        self.send_notification("Error", error_message, "error", 5000)
 
     def send_speed_notification(self, download_speed: float, upload_speed: float):
         """Send speed test notification."""
@@ -92,17 +87,12 @@ class NotificationService(QObject):
             "Speed Test Complete",
             f"Download: {download_speed/1024/1024:.2f} MB/s, Upload: {upload_speed/1024/1024:.2f} MB/s",
             "info",
-            4000
+            4000,
         )
 
     def send_security_notification(self, message: str):
         """Send security-related notification."""
-        self.send_notification(
-            "Security Alert",
-            message,
-            "warning",
-            6000
-        )
+        self.send_notification("Security Alert", message, "warning", 6000)
 
     def send_update_notification(self, update_type: str, details: str = ""):
         """Send update notification."""
@@ -110,7 +100,7 @@ class NotificationService(QObject):
             "Update Available",
             f"{update_type} update is available. {details}",
             "info",
-            5000
+            5000,
         )
 
     def get_notification_history(self) -> List[Dict[str, Any]]:
@@ -128,14 +118,16 @@ class NotificationService(QObject):
             "timestamp": time.time(),
             "title": title,
             "message": message,
-            "type": notification_type
+            "type": notification_type,
         }
 
         self._notification_history.append(notification)
 
         # Keep only recent notifications
         if len(self._notification_history) > self._max_history:
-            self._notification_history = self._notification_history[-self._max_history:]
+            self._notification_history = self._notification_history[
+                -self._max_history :
+            ]
 
     def _get_icon_type(self, notification_type: str) -> QSystemTrayIcon.MessageIcon:
         """Get appropriate icon type for notification."""
@@ -143,7 +135,7 @@ class NotificationService(QObject):
             "info": QSystemTrayIcon.Information,
             "success": QSystemTrayIcon.Information,
             "warning": QSystemTrayIcon.Warning,
-            "error": QSystemTrayIcon.Critical
+            "error": QSystemTrayIcon.Critical,
         }
         return icon_map.get(notification_type, QSystemTrayIcon.Information)
 
@@ -156,15 +148,20 @@ class AlertManager:
         self._alerts = {}
         self._alert_callbacks = {}
 
-    def register_alert(self, alert_id: str, condition: Callable[[], bool],
-                       message: str, alert_type: str = "warning",
-                       callback: Optional[Callable[[], None]] = None):
+    def register_alert(
+        self,
+        alert_id: str,
+        condition: Callable[[], bool],
+        message: str,
+        alert_type: str = "warning",
+        callback: Optional[Callable[[], None]] = None,
+    ):
         """Register an alert condition."""
         self._alerts[alert_id] = {
             "condition": condition,
             "message": message,
             "type": alert_type,
-            "active": False
+            "active": False,
         }
 
         if callback:
@@ -189,11 +186,13 @@ class AlertManager:
                 if alert_data["condition"]():
                     if not alert_data["active"]:
                         alert_data["active"] = True
-                        triggered_alerts.append({
-                            "id": alert_id,
-                            "message": alert_data["message"],
-                            "type": alert_data["type"]
-                        })
+                        triggered_alerts.append(
+                            {
+                                "id": alert_id,
+                                "message": alert_data["message"],
+                                "type": alert_data["type"],
+                            }
+                        )
 
                         # Call callback if registered
                         if alert_id in self._alert_callbacks:
@@ -203,8 +202,7 @@ class AlertManager:
                     alert_data["active"] = False
 
             except Exception as e:
-                self.log(
-                    f"Error checking alert {alert_id}: {e}", LogLevel.ERROR)
+                self.log(f"Error checking alert {alert_id}: {e}", LogLevel.ERROR)
 
         return triggered_alerts
 
@@ -225,24 +223,21 @@ class PerformanceDashboard:
 
     def update_metric(self, metric_name: str, value: float):
         """Update a performance metric."""
-        self._metrics[metric_name] = {
-            "value": value,
-            "timestamp": time.time()
-        }
+        self._metrics[metric_name] = {"value": value, "timestamp": time.time()}
 
-    def set_threshold(self, metric_name: str, threshold: float,
-                      condition: str = "greater"):
+    def set_threshold(
+        self, metric_name: str, threshold: float, condition: str = "greater"
+    ):
         """Set threshold for a metric."""
-        self._thresholds[metric_name] = {
-            "threshold": threshold,
-            "condition": condition
-        }
+        self._thresholds[metric_name] = {"threshold": threshold, "condition": condition}
 
     def get_metrics(self) -> Dict[str, Any]:
         """Get current metrics."""
         return self._metrics.copy()
 
-    def get_metric_history(self, metric_name: str, duration: int = 3600) -> List[Dict[str, Any]]:
+    def get_metric_history(
+        self, metric_name: str, duration: int = 3600
+    ) -> List[Dict[str, Any]]:
         """Get metric history for specified duration in seconds."""
         current_time = time.time()
         cutoff_time = current_time - duration
@@ -262,7 +257,7 @@ class PerformanceDashboard:
             "high_cpu",
             lambda: self._metrics.get("cpu_usage", {}).get("value", 0) > 80,
             "High CPU usage detected",
-            "warning"
+            "warning",
         )
 
         # High memory usage alert
@@ -270,16 +265,16 @@ class PerformanceDashboard:
             "high_memory",
             lambda: self._metrics.get("memory_usage", {}).get("value", 0) > 85,
             "High memory usage detected",
-            "warning"
+            "warning",
         )
 
         # Low connection speed alert
         self._alert_manager.register_alert(
             "low_speed",
-            lambda: self._metrics.get("download_speed", {}).get(
-                "value", 0) < 1000000,  # 1 MB/s
+            lambda: self._metrics.get("download_speed", {}).get("value", 0)
+            < 1000000,  # 1 MB/s
             "Low connection speed detected",
-            "info"
+            "info",
         )
 
         # High ping alert
@@ -287,7 +282,7 @@ class PerformanceDashboard:
             "high_ping",
             lambda: self._metrics.get("ping", {}).get("value", 0) > 500,
             "High ping detected",
-            "warning"
+            "warning",
         )
 
     def check_performance_alerts(self) -> List[Dict[str, Any]]:

@@ -6,6 +6,7 @@ class ManagerSignals(QObject):
     A collection of signals to facilitate communication between manager classes (background threads)
     and the main UI thread (PySideUI). This ensures thread-safe UI updates.
     """
+
     # Server testing and updates
     ping_result = Signal(dict, int, str)  # config, ping, test_type
     ping_started = Signal(dict)  # config

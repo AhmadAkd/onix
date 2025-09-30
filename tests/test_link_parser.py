@@ -14,8 +14,7 @@ import os
 import unittest.mock
 import base64
 
-sys.path.insert(0, os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 class TestLinkParser(unittest.TestCase):
@@ -196,10 +195,8 @@ Endpoint = server.com:51820
         self.assertIsNone(
             parse_vless_link("vless://uuid@server:invalid_port")
         )  # Invalid port
-        self.assertIsNone(parse_vless_link(
-            "vless://@server:443"))  # Missing UUID
-        self.assertIsNone(parse_vless_link(
-            "vless://uuid@:443"))  # Missing server
+        self.assertIsNone(parse_vless_link("vless://@server:443"))  # Missing UUID
+        self.assertIsNone(parse_vless_link("vless://uuid@:443"))  # Missing server
 
     # --- Invalid VMESS Links ---
     def test_parse_vmess_link_invalid_format(self):
@@ -225,8 +222,7 @@ Endpoint = server.com:51820
             parse_shadowsocks_link("ss://invalid_base64@server:8443")
         )  # Malformed base64
         self.assertIsNone(
-            parse_shadowsocks_link(
-                "ss://bWV0aG9kOnBhc3N3b3Jk@server:invalid_port")
+            parse_shadowsocks_link("ss://bWV0aG9kOnBhc3N3b3Jk@server:invalid_port")
         )  # Invalid port
 
     # --- Invalid/Edge Case Links for Newer Protocols ---
@@ -242,17 +238,24 @@ Endpoint = server.com:51820
     def test_parse_reality_link_invalid(self):
         """Test invalid REALITY links."""
         # Missing public key
-        self.assertIsNone(parse_vless_link(
-            "vless://uuid@server:443?security=reality&shortId=shortid&sni=sni.com#test"))
+        self.assertIsNone(
+            parse_vless_link(
+                "vless://uuid@server:443?security=reality&shortId=shortid&sni=sni.com#test"
+            )
+        )
         # Missing SNI
-        self.assertIsNone(parse_vless_link(
-            "vless://uuid@server:443?security=reality&publicKey=pubkey&shortId=shortid#test"))
+        self.assertIsNone(
+            parse_vless_link(
+                "vless://uuid@server:443?security=reality&publicKey=pubkey&shortId=shortid#test"
+            )
+        )
 
     def test_parse_hysteria2_link_invalid(self):
         """Test invalid Hysteria2 links."""
         # Missing password
-        self.assertIsNone(parse_hysteria2_link(
-            "hysteria2://@server:443?sni=sni.com#test"))
+        self.assertIsNone(
+            parse_hysteria2_link("hysteria2://@server:443?sni=sni.com#test")
+        )
 
     def test_parse_wireguard_config_invalid(self):
         """Test invalid WireGuard configurations."""

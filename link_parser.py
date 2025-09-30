@@ -54,7 +54,7 @@ def parse_wireguard_config(config_content, filename="WireGuard-Config"):
             "public_key": peer.get("PublicKey", "").strip(),
             "preshared_key": peer.get("PresharedKey", "").strip(),
             # For simplicity, use peer AllowedIPs, default to full tunnel
-            "allowed_ips": peer.get("AllowedIPs", "0.0.0.0/0, ::/0").strip()
+            "allowed_ips": peer.get("AllowedIPs", "0.0.0.0/0, ::/0").strip(),
         }
     except (configparser.Error, ValueError, KeyError) as e:
         print(f"Error parsing WireGuard config: {type(e).__name__}: {e}")
@@ -68,8 +68,7 @@ def parse_vless_link(link):
         if not parsed_url.username or not parsed_url.hostname:
             return None
 
-        remarks = unquote(
-            parsed_url.fragment) if parsed_url.fragment else "Unnamed"
+        remarks = unquote(parsed_url.fragment) if parsed_url.fragment else "Unnamed"
         remarks = re.sub(r"[\U0001F1E6-\U0001F1FF]", "", remarks).strip()
         group = "Default"
         delimiters = ["|", "-", "_", " "]
@@ -81,8 +80,9 @@ def parse_vless_link(link):
 
         security = query_params.get("security", [""])[0]
         is_tls_enabled = security in ("tls", "reality")
-        tls_type = "reality" if security == "reality" else (
-            "tls" if security == "tls" else "")
+        tls_type = (
+            "reality" if security == "reality" else ("tls" if security == "tls" else "")
+        )
 
         # For REALITY, enforce required params (publicKey and sni)
         public_key = query_params.get("publicKey", [""])[0]
@@ -163,8 +163,7 @@ def parse_vmess_link(link):
 def parse_shadowsocks_link(link):
     try:
         parsed_url = urlparse(link)
-        remarks = unquote(
-            parsed_url.fragment) if parsed_url.fragment else "Unnamed"
+        remarks = unquote(parsed_url.fragment) if parsed_url.fragment else "Unnamed"
 
         group = "Default"
         delimiters = ["|", "-", "_", " "]
@@ -199,8 +198,7 @@ def parse_shadowsocks_link(link):
 def parse_trojan_link(link):
     try:
         parsed_url = urlparse(link)
-        remarks = unquote(
-            parsed_url.fragment) if parsed_url.fragment else "Unnamed"
+        remarks = unquote(parsed_url.fragment) if parsed_url.fragment else "Unnamed"
         remarks = re.sub(r"[\U0001F1E6-\U0001F1FF]", "", remarks).strip()
         group = "Default"
         delimiters = ["|", "-", "_", " "]
@@ -244,8 +242,7 @@ def parse_reality_link(link):
 def parse_tuic_link(link):
     try:
         parsed_url = urlparse(link)
-        remarks = unquote(
-            parsed_url.fragment) if parsed_url.fragment else "Unnamed"
+        remarks = unquote(parsed_url.fragment) if parsed_url.fragment else "Unnamed"
         remarks = re.sub(r"[\U0001F1E6-\U0001F1FF]", "", remarks).strip()
         group = "Default"
         delimiters = ["|", "-", "_", " "]
@@ -278,8 +275,7 @@ def parse_tuic_link(link):
 def parse_hysteria2_link(link):
     try:
         parsed_url = urlparse(link)
-        remarks = unquote(
-            parsed_url.fragment) if parsed_url.fragment else "Unnamed"
+        remarks = unquote(parsed_url.fragment) if parsed_url.fragment else "Unnamed"
         remarks = re.sub(r"[\U0001F1E6-\U0001F1FF]", "", remarks).strip()
         group = "Default"
         delimiters = ["|", "-", "_", " "]
@@ -311,8 +307,7 @@ def parse_ssh_link(link):
     """Parses an SSH protocol link."""
     try:
         parsed_url = urlparse(link)
-        remarks = unquote(
-            parsed_url.fragment) if parsed_url.fragment else "Unnamed"
+        remarks = unquote(parsed_url.fragment) if parsed_url.fragment else "Unnamed"
         remarks = re.sub(r"[\U0001F1E6-\U0001F1FF]", "", remarks).strip()
         group = "Default"
         delimiters = ["|", "-", "_", " "]
@@ -413,8 +408,7 @@ def _generate_vmess_link(config):
     }
 
     # Remove empty values to keep the link clean, but keep 'type' even if 'none'
-    vmess_config_cleaned = {k: v for k,
-                            v in vmess_config.items() if v or k == "type"}
+    vmess_config_cleaned = {k: v for k, v in vmess_config.items() if v or k == "type"}
 
     json_str = json.dumps(vmess_config_cleaned, ensure_ascii=False)
     encoded_str = base64.b64encode(json_str.encode("utf-8")).decode("utf-8")
@@ -430,8 +424,7 @@ def _generate_shadowsocks_link(config):
 
     user_info = f"{method}:{password}"
     encoded_user_info = (
-        base64.b64encode(user_info.encode("utf-8")
-                         ).decode("utf-8").replace("=", "")
+        base64.b64encode(user_info.encode("utf-8")).decode("utf-8").replace("=", "")
     )
 
     link = f"ss://{encoded_user_info}@{server}:{port}"

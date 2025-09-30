@@ -31,13 +31,15 @@ class RealTimeStatisticsService:
             "ping": -1,
             "server_load": 0.0,
             "memory_usage": 0.0,
-            "cpu_usage": 0.0
+            "cpu_usage": 0.0,
         }
         self._speed_history = deque(maxlen=60)  # Last 60 seconds
         self._callback = None
         self._start_time = None
 
-    def start_monitoring(self, callback: Optional[Callable[[Dict[str, Any]], None]] = None) -> bool:
+    def start_monitoring(
+        self, callback: Optional[Callable[[Dict[str, Any]], None]] = None
+    ) -> bool:
         """Start real-time statistics monitoring."""
         if self._is_monitoring:
             self.log("Statistics monitoring is already active", LogLevel.WARNING)
@@ -50,8 +52,7 @@ class RealTimeStatisticsService:
             self._start_time = time.time()
 
             self._monitor_thread = threading.Thread(
-                target=self._monitor_statistics,
-                daemon=True
+                target=self._monitor_statistics, daemon=True
             )
             self._monitor_thread.start()
 
@@ -59,8 +60,7 @@ class RealTimeStatisticsService:
             return True
 
         except Exception as e:
-            self.log(
-                f"Failed to start statistics monitoring: {e}", LogLevel.ERROR)
+            self.log(f"Failed to start statistics monitoring: {e}", LogLevel.ERROR)
             return False
 
     def stop_monitoring(self):
@@ -106,31 +106,36 @@ class RealTimeStatisticsService:
                 # Calculate speeds
                 if time_delta > 0:
                     upload_speed = (current_upload - last_upload) / time_delta
-                    download_speed = (current_download -
-                                      last_download) / time_delta
+                    download_speed = (current_download - last_download) / time_delta
                 else:
                     upload_speed = 0
                     download_speed = 0
 
                 # Update statistics
-                self._statistics.update({
-                    "upload_speed": upload_speed,
-                    "download_speed": download_speed,
-                    "total_upload": current_upload,
-                    "total_download": current_download,
-                    "connection_time": current_time - self._start_time if self._start_time else 0,
-                    "packets_sent": net_io.packets_sent,
-                    "packets_received": net_io.packets_recv,
-                    "memory_usage": psutil.virtual_memory().percent,
-                    "cpu_usage": psutil.cpu_percent()
-                })
+                self._statistics.update(
+                    {
+                        "upload_speed": upload_speed,
+                        "download_speed": download_speed,
+                        "total_upload": current_upload,
+                        "total_download": current_download,
+                        "connection_time": (
+                            current_time - self._start_time if self._start_time else 0
+                        ),
+                        "packets_sent": net_io.packets_sent,
+                        "packets_received": net_io.packets_recv,
+                        "memory_usage": psutil.virtual_memory().percent,
+                        "cpu_usage": psutil.cpu_percent(),
+                    }
+                )
 
                 # Add to speed history
-                self._speed_history.append({
-                    "timestamp": current_time,
-                    "upload_speed": upload_speed,
-                    "download_speed": download_speed
-                })
+                self._speed_history.append(
+                    {
+                        "timestamp": current_time,
+                        "upload_speed": upload_speed,
+                        "download_speed": download_speed,
+                    }
+                )
 
                 # Update ping
                 self._update_ping()
@@ -155,11 +160,12 @@ class RealTimeStatisticsService:
         try:
             # Test ping to a reliable server
             import subprocess
+
             result = subprocess.run(
                 ["ping", "-n", "1", "8.8.8.8"],
                 capture_output=True,
                 text=True,
-                timeout=3
+                timeout=3,
             )
 
             if result.returncode == 0:
@@ -189,8 +195,11 @@ class LoadBalancingService:
         self._stop_event = threading.Event()
         self._failover_callback = None
 
-    def start_load_balancing(self, servers: List[Dict[str, Any]],
-                             failover_callback: Optional[Callable[[Dict[str, Any]], None]] = None) -> bool:
+    def start_load_balancing(
+        self,
+        servers: List[Dict[str, Any]],
+        failover_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
+    ) -> bool:
         """Start load balancing between servers."""
         if self._is_active:
             self.log("Load balancing is already active", LogLevel.WARNING)
@@ -203,8 +212,7 @@ class LoadBalancingService:
             self._stop_event.clear()
 
             self._monitor_thread = threading.Thread(
-                target=self._monitor_servers,
-                daemon=True
+                target=self._monitor_servers, daemon=True
             )
             self._monitor_thread.start()
 
@@ -239,7 +247,7 @@ class LoadBalancingService:
         # Sort by ping and server load
         sorted_servers = sorted(
             self._servers,
-            key=lambda s: (s.get("tcp_ping", 999), s.get("server_load", 100))
+            key=lambda s: (s.get("tcp_ping", 999), s.get("server_load", 100)),
         )
 
         return sorted_servers[0] if sorted_servers else None
@@ -251,14 +259,18 @@ class LoadBalancingService:
                 # Test current server
                 if self._current_server:
                     if not self._test_server_health(self._current_server):
-                        self.log(f"Current server {self._current_server.get('name')} failed health check",
-                                 LogLevel.WARNING)
+                        self.log(
+                            f"Current server {self._current_server.get('name')} failed health check",
+                            LogLevel.WARNING,
+                        )
 
                         # Switch to best available server
                         best_server = self.get_best_server()
                         if best_server and best_server != self._current_server:
-                            self.log(f"Switching to server: {best_server.get('name')}",
-                                     LogLevel.INFO)
+                            self.log(
+                                f"Switching to server: {best_server.get('name')}",
+                                LogLevel.INFO,
+                            )
 
                             if self._failover_callback:
                                 self._failover_callback(best_server)
@@ -275,6 +287,7 @@ class LoadBalancingService:
         """Test if a server is healthy."""
         try:
             import socket
+
             host = server.get("server")
             port = server.get("port")
 
@@ -303,7 +316,8 @@ class SmartRoutingService:
         try:
             self._routing_rules.append(rule)
             self.log(
-                f"Added routing rule: {rule.get('name', 'Unnamed')}", LogLevel.SUCCESS)
+                f"Added routing rule: {rule.get('name', 'Unnamed')}", LogLevel.SUCCESS
+            )
             return True
         except Exception as e:
             self.log(f"Failed to add routing rule: {e}", LogLevel.ERROR)
@@ -313,7 +327,8 @@ class SmartRoutingService:
         """Remove a routing rule."""
         try:
             self._routing_rules = [
-                r for r in self._routing_rules if r.get('name') != rule_name]
+                r for r in self._routing_rules if r.get("name") != rule_name
+            ]
             self.log(f"Removed routing rule: {rule_name}", LogLevel.SUCCESS)
             return True
         except Exception as e:
@@ -345,7 +360,7 @@ class GeoBlockingDetectionService:
             "https://www.youtube.com",
             "https://www.facebook.com",
             "https://www.twitter.com",
-            "https://www.instagram.com"
+            "https://www.instagram.com",
         ]
 
     def detect_geo_blocking(self, proxy_address: str) -> Dict[str, Any]:
@@ -361,7 +376,7 @@ class GeoBlockingDetectionService:
                 # Test with proxy
                 proxies = {
                     "http": f"http://{proxy_address}",
-                    "https": f"http://{proxy_address}"
+                    "https": f"http://{proxy_address}",
                 }
                 response_proxy = requests.get(url, proxies=proxies, timeout=10)
                 proxy_accessible = response_proxy.status_code == 200
@@ -369,7 +384,7 @@ class GeoBlockingDetectionService:
                 results[url] = {
                     "direct_accessible": direct_accessible,
                     "proxy_accessible": proxy_accessible,
-                    "blocked": not direct_accessible and proxy_accessible
+                    "blocked": not direct_accessible and proxy_accessible,
                 }
 
             except Exception as e:
@@ -377,7 +392,7 @@ class GeoBlockingDetectionService:
                     "direct_accessible": False,
                     "proxy_accessible": False,
                     "blocked": False,
-                    "error": str(e)
+                    "error": str(e),
                 }
 
         return results

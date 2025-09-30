@@ -40,8 +40,7 @@ def set_system_proxy(enable, settings, log_callback):
         ctypes.windll.Wininet.InternetSetOptionW(
             0, 39, 0, 0
         )  # INTERNET_OPTION_SETTINGS_CHANGED
-        ctypes.windll.Wininet.InternetSetOptionW(
-            0, 37, 0, 0)  # INTERNET_OPTION_REFRESH
+        ctypes.windll.Wininet.InternetSetOptionW(0, 37, 0, 0)  # INTERNET_OPTION_REFRESH
     except (OSError, PermissionError) as e:
         error_msg = f"Failed to set system proxy due to permissions or OS error: {e}"
         if log_callback:

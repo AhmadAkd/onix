@@ -77,7 +77,7 @@ def get_local_core_version(core_path, core_name):
         if core_name == "sing-box":
             # Extract version from "sing-box version 1.9.0-alpha.4"
             for part in parts:
-                if part.count('.') >= 2:  # Version format like 1.9.0-alpha.4
+                if part.count(".") >= 2:  # Version format like 1.9.0-alpha.4
                     return part
             return parts[2] if len(parts) > 2 else "unknown"
         elif core_name == "xray":
@@ -101,12 +101,15 @@ def get_latest_core_version(api_url):
         return None
 
 
-def download_core(asset_url, asset_name, core_path, target_executable_name, callbacks=None):
+def download_core(
+    asset_url, asset_name, core_path, target_executable_name, callbacks=None
+):
     """Downloads and extracts the sing-box executable."""
     # Default to print if no callbacks are provided
     callbacks = callbacks or {}
     show_error = callbacks.get(
-        'show_error', lambda title, msg: print(f"ERROR [{title}]: {msg}"))
+        "show_error", lambda title, msg: print(f"ERROR [{title}]: {msg}")
+    )
 
     try:
         print("INFO: Downloading:", asset_name)
@@ -117,8 +120,7 @@ def download_core(asset_url, asset_name, core_path, target_executable_name, call
         if not download_dir:
             download_dir = os.getcwd()
 
-        print(
-            "INFO: Extracting", target_executable_name, "from", asset_name + "...")
+        print("INFO: Extracting", target_executable_name, "from", asset_name + "...")
         if asset_name.endswith(".zip"):
             with zipfile.ZipFile(io.BytesIO(archive_response.content)) as z:
                 exe_path_in_archive = next(
@@ -134,7 +136,9 @@ def download_core(asset_url, asset_name, core_path, target_executable_name, call
                         f"Could not find {target_executable_name} in the zip file."
                     )
                 # Extract the file directly to the final destination with the correct name
-                with z.open(exe_path_in_archive) as source, open(core_path, "wb") as target:
+                with z.open(exe_path_in_archive) as source, open(
+                    core_path, "wb"
+                ) as target:
                     target.write(source.read())
                 # Since we extracted directly, no rename is needed.
                 # The extracted_path is now just core_path.
@@ -175,17 +179,13 @@ def download_core(asset_url, asset_name, core_path, target_executable_name, call
         return True
 
     except requests.exceptions.RequestException as e:
-        show_error(
-            "Download Error", f"Network error while downloading core: {e}"
-        )
+        show_error("Download Error", f"Network error while downloading core: {e}")
         return False
     except (zipfile.BadZipFile, tarfile.ReadError, FileNotFoundError) as e:
         show_error("Extraction Error", f"Failed to extract core: {e}")
         return False
     except Exception as e:
-        show_error(
-            "Error", f"An unexpected error occurred during download: {e}"
-        )
+        show_error("Error", f"An unexpected error occurred during download: {e}")
         return False
 
 
@@ -212,14 +212,18 @@ def download_core_if_needed(core_name="sing-box", force_update=False, callbacks=
 
     if core_name not in core_details:
         show_error = callbacks.get(
-            'show_error', lambda title, msg: print(f"ERROR [{title}]: {msg}"))
-        show_error("Unsupported Core",
-                   f"The selected core '{core_name}' is not supported for auto-updates.")
+            "show_error", lambda title, msg: print(f"ERROR [{title}]: {msg}")
+        )
+        show_error(
+            "Unsupported Core",
+            f"The selected core '{core_name}' is not supported for auto-updates.",
+        )
         return
 
     details = core_details[core_name]
     show_error = callbacks.get(
-        'show_error', lambda title, msg: print(f"ERROR [{title}]: {msg}"))
+        "show_error", lambda title, msg: print(f"ERROR [{title}]: {msg}")
+    )
 
     platform_name, arch_name = get_singbox_platform_arch()
     if not platform_name or not arch_name:
@@ -256,14 +260,14 @@ def download_core_if_needed(core_name="sing-box", force_update=False, callbacks=
                 return
         except version.InvalidVersion:
             print(
-                f"WARNING: Could not parse local version '{local_version}'. Proceeding with update check.")
+                f"WARNING: Could not parse local version '{local_version}'. Proceeding with update check."
+            )
 
         # For build script, always proceed with download
         print(f"INFO: Proceeding with {core_name} download/update...")
 
     print(f"INFO: Proceeding with {core_name} download/update...")
-    asset_keyword = details["asset_keywords"].get(
-        f"{platform_name}_{arch_name}")
+    asset_keyword = details["asset_keywords"].get(f"{platform_name}_{arch_name}")
 
     if not asset_keyword:
         show_error(
@@ -298,7 +302,7 @@ def download_core_if_needed(core_name="sing-box", force_update=False, callbacks=
             asset["name"],
             core_path,
             target_executable_name,
-            callbacks=callbacks
+            callbacks=callbacks,
         ):
             new_version = get_local_core_version(core_path, core_name)
             print(
@@ -307,6 +311,4 @@ def download_core_if_needed(core_name="sing-box", force_update=False, callbacks=
             )
 
     except requests.exceptions.RequestException as e:
-        show_error(
-            "API Error", f"Failed to get release information from GitHub: {e}"
-        )
+        show_error("API Error", f"Failed to get release information from GitHub: {e}")

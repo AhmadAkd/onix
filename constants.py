@@ -85,7 +85,8 @@ STATUS_CONN_SUCCESS = tr("Connection successful! Latency: {} ms.")
 STATUS_CONN_FAILED = tr("Connection Failed")
 STATUS_DISCONNECTED = tr("Disconnected")
 STATUS_ERROR_CONN_TEST_FAILED = tr(
-    "Error: Connection test failed. Check server config.")
+    "Error: Connection test failed. Check server config."
+)
 # Other
 MSG_SORT_SUCCESS = tr("Servers sorted by ping (fastest first).")
 # Tray
@@ -132,7 +133,8 @@ LBL_GITHUB_RELEASES = tr("GitHub Releases Page")
 BTN_OK = tr("OK")
 
 MSG_RESTART_REQUIRED = tr(
-    "Some settings have been changed that require a restart to take effect. Please restart Onix.")
+    "Some settings have been changed that require a restart to take effect. Please restart Onix."
+)
 
 # --- Languages (for translation extraction) ---
 LANG_ENGLISH = tr("English")
@@ -173,9 +175,7 @@ IRAN_GEOSITE_RULE_SET_URL = "https://raw.githubusercontent.com/Chocolate4U/Iran-
 GITHUB_SINGBOX_RELEASE_API = (
     "https://api.github.com/repos/SagerNet/sing-box/releases/latest"
 )
-GITHUB_XRAY_RELEASE_API = (
-    "https://api.github.com/repos/XTLS/Xray-core/releases/latest"
-)
+GITHUB_XRAY_RELEASE_API = "https://api.github.com/repos/XTLS/Xray-core/releases/latest"
 
 SINGBOX_WINDOWS_ASSET_KEYWORD = "windows-amd64"
 DEFAULT_USER_AGENT = "Mozilla/5.0"
@@ -215,15 +215,8 @@ CONNECTION_CHECK_DELAY = 2000
 # --- Test Configuration Constants ---
 # Test endpoints
 TEST_ENDPOINTS = {
-    "tcp": {
-        "host": "8.8.8.8",
-        "port": 53,
-        "timeout": TCP_PING_TIMEOUT
-    },
-    "url": {
-        "url": URL_TEST_DEFAULT_URL,
-        "timeout": URL_TEST_TIMEOUT
-    }
+    "tcp": {"host": "8.8.8.8", "port": 53, "timeout": TCP_PING_TIMEOUT},
+    "url": {"url": URL_TEST_DEFAULT_URL, "timeout": URL_TEST_TIMEOUT},
 }
 
 # Concurrency limits
