@@ -4,7 +4,6 @@ Cross-platform build script using Docker
 Builds for macOS and Linux from Windows
 """
 
-import os
 import sys
 import subprocess
 import platform
@@ -95,7 +94,7 @@ RUN python build_all.py
 
 def build_with_docker(platform_name):
     """Build using Docker"""
-    print(f"Building for {platform_name} using Docker...")
+    print("Building for", platform_name, "using Docker...")
 
     # Create Dockerfile
     dockerfile = create_dockerfile(platform_name)
@@ -133,7 +132,7 @@ def build_with_docker(platform_name):
         f"dist-{platform_name}/"
     ]
 
-    print(f"Copying built files from container...")
+    print("Copying built files from container...")
     if not run_command(copy_cmd):
         return False
 
@@ -317,12 +316,12 @@ def main():
     platforms = ["linux"]  # macOS requires more complex setup
 
     for platform_name in platforms:
-        print(f"\n--- Building for {platform_name} ---")
+        print("\n--- Building for", platform_name, "---")
         if not build_with_docker(platform_name):
-            print(f"Failed to build for {platform_name}")
+            print("Failed to build for", platform_name)
             continue
 
-        print(f"Successfully built for {platform_name}")
+        print("Successfully built for", platform_name)
 
     print("\n" + "=" * 60)
     print("    Cross-platform build completed!")

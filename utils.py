@@ -107,12 +107,9 @@ def download_core(asset_url, asset_name, core_path, target_executable_name, call
     callbacks = callbacks or {}
     show_error = callbacks.get(
         'show_error', lambda title, msg: print(f"ERROR [{title}]: {msg}"))
-    show_info = callbacks.get(
-        'show_info', lambda title, msg: print(f"INFO [{title}]: {msg}"))
-    ask_yes_no = callbacks.get('ask_yes_no', lambda title, msg: False)
 
     try:
-        print(f"INFO: Downloading: {asset_name}")
+        print("INFO: Downloading:", asset_name)
         archive_response = requests.get(asset_url, timeout=60)
         archive_response.raise_for_status()
 
@@ -121,7 +118,7 @@ def download_core(asset_url, asset_name, core_path, target_executable_name, call
             download_dir = os.getcwd()
 
         print(
-            f"INFO: Extracting {target_executable_name} from {asset_name}...")
+            "INFO: Extracting", target_executable_name, "from", asset_name + "...")
         if asset_name.endswith(".zip"):
             with zipfile.ZipFile(io.BytesIO(archive_response.content)) as z:
                 exe_path_in_archive = next(
@@ -141,7 +138,7 @@ def download_core(asset_url, asset_name, core_path, target_executable_name, call
                     target.write(source.read())
                 # Since we extracted directly, no rename is needed.
                 # The extracted_path is now just core_path.
-                extracted_path = core_path
+                # extracted_path = core_path
                 # We don't need the os.rename part anymore for zip files.
                 if sys.platform != "win32":
                     os.chmod(core_path, 0o755)
@@ -164,8 +161,8 @@ def download_core(asset_url, asset_name, core_path, target_executable_name, call
                         f"Could not find {target_executable_name} in the tar.gz file."
                     )
                 tar.extract(exe_path_in_archive, path=download_dir)
-                extracted_path = os.path.join(
-                    download_dir, exe_path_in_archive)
+                # extracted_path = os.path.join(
+                #     download_dir, exe_path_in_archive)
         else:
             raise ValueError(f"Unsupported archive format: {asset_name}")
 
@@ -223,9 +220,6 @@ def download_core_if_needed(core_name="sing-box", force_update=False, callbacks=
     details = core_details[core_name]
     show_error = callbacks.get(
         'show_error', lambda title, msg: print(f"ERROR [{title}]: {msg}"))
-    show_info = callbacks.get(
-        'show_info', lambda title, msg: print(f"INFO [{title}]: {msg}"))
-    ask_yes_no = callbacks.get('ask_yes_no', lambda title, msg: False)
 
     platform_name, arch_name = get_singbox_platform_arch()
     if not platform_name or not arch_name:
@@ -307,8 +301,8 @@ def download_core_if_needed(core_name="sing-box", force_update=False, callbacks=
             callbacks=callbacks
         ):
             new_version = get_local_core_version(core_path, core_name)
-            show_info(
-                "Update Successful",
+            print(
+                "Update Successful:",
                 f"{core_name} has been successfully updated to version {new_version}.",
             )
 

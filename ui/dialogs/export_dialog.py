@@ -2,7 +2,6 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
     QRadioButton, QButtonGroup, QFileDialog, QMessageBox, QSizePolicy
 )
-from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 
 from services.export_service import ExportService

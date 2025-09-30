@@ -11,8 +11,6 @@ import utils
 from constants import (
     LogLevel,
     PROXY_HOST,
-    PROXY_PORT,
-    PROXY_SERVER_ADDRESS,
     TCP_PING_TIMEOUT,
     URL_TEST_TIMEOUT,
     GET_EXTERNAL_IP_TIMEOUT,

@@ -1,7 +1,7 @@
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Callable, Dict, List, Optional
+from typing import Callable, List, Optional
 
 from constants import LogLevel, HEALTH_CHECK_EMA_ALPHA, HEALTH_CHECK_MAX_BACKOFF, HEALTH_CHECK_MIN_BACKOFF, TEST_ENDPOINTS, MAX_CONCURRENT_CORE_TESTS
 from services.ping_service import direct_tcp, proxy_tcp_connect, url_latency_via_proxy
@@ -176,7 +176,6 @@ class HealthChecker:
     def _test_single_server(self, server: dict):
         """Test a single server and update stats."""
         server_id = server.get("id")
-        server_name = server.get("name", "Unknown")
 
         # Initialize stats if needed
         if server_id not in self._server_stats:
@@ -280,10 +279,6 @@ class HealthChecker:
         if current_ema is None:
             return float(new_value)
         return alpha * new_value + (1 - alpha) * current_ema
-
-    def get_server_stats(self, server_id: str) -> dict:
-        """Get current stats for a server."""
-        return self._server_stats.get(server_id, {})
 
     def reset_server_stats(self, server_id: str):
         """Reset stats for a server."""

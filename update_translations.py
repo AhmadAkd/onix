@@ -45,10 +45,10 @@ def run_command(command):
     result = subprocess.run(command, capture_output=True,
                             text=True, encoding='utf-8')
     if result.returncode != 0:
-        print(f"--- ERROR ---")
+        print("--- ERROR ---")
         print(result.stdout)
         print(result.stderr)
-        print(f"-------------")
+        print("-------------")
         return False
     if result.stdout:
         print(result.stdout)

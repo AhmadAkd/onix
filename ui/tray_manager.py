@@ -1,9 +1,9 @@
 
-import sys
 from PySide6.QtWidgets import QSystemTrayIcon, QMenu, QApplication
 from PySide6.QtGui import QIcon, QAction, QPainter, QFont, QColor, QPixmap
 from PySide6.QtCore import QSize, Qt, QRect
 from constants import TRAY_SHOW, TRAY_QUIT
+
 
 class TrayManager:
     def __init__(self, main_window):

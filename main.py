@@ -1,11 +1,10 @@
 
-import sys
-import threading
 import os
+import sys
 import time
 
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import QTimer, QTranslator, QLocale
+from PySide6.QtCore import QTranslator, QLocale
 from ui.main_window import PySideUI
 from managers.server_manager import ServerManager
 # Import specific core managers
@@ -15,12 +14,11 @@ import settings_manager
 
 
 def main():
-    app_instance = None
     # Load settings
     settings = settings_manager.load_settings()
 
     # Create the Qt Application and the UI instance
-    app = QApplication(sys.argv)
+    app = QApplication([])
 
     # --- Language/Translator Setup ---
     # Default to system language if not set

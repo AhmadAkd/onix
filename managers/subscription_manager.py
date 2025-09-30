@@ -7,11 +7,9 @@ import requests
 import base64
 import binascii
 import threading
-import time
 from typing import Dict, List, Any, Optional, Callable, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from constants import LogLevel
-import link_parser
 
 
 class SubscriptionManager:
@@ -190,7 +188,7 @@ class SubscriptionManager:
 
     def log(self, message: str, level: LogLevel = LogLevel.INFO):
         """Log a message with proper level."""
-        self.callbacks.get("log", lambda m, l: None)(message, level)
+        self.callbacks.get("log", lambda m, level: None)(message, level)
 
     def get_subscription_status(self) -> Dict[str, Any]:
         """Get current subscription status."""

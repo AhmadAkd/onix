@@ -17,15 +17,7 @@ from managers.singbox_generator import SingboxConfigGenerator
 from managers.xray_generator import XrayConfigGenerator
 from managers.test_core_manager import TestCoreManager
 from services.health_checker import HealthChecker
-from services.ping_service import direct_tcp, proxy_tcp_connect, url_latency_via_proxy
-
-
-def get_core_generator(core_name: str):
-    """Get the appropriate config generator for the given core."""
-    if core_name == "xray":
-        return XrayConfigGenerator()
-    else:
-        return SingboxConfigGenerator()
+from services.ping_service import proxy_tcp_connect, url_latency_via_proxy
 
 
 # --- Callback Protocol ---
@@ -423,10 +415,6 @@ class ServerManager:
         """Callback for health check progress updates."""
         self.callbacks.get("on_health_check_progress",
                            lambda c, t: None)(current, total)
-
-    def get_servers_by_group(self, group_name: str) -> List[dict]:
-        """Get all servers in a specific group."""
-        return self.server_groups.get(group_name, [])
 
     def test_all_urls(self, servers: List[dict]) -> None:
         """Test URL latency for specific servers."""

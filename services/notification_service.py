@@ -3,11 +3,10 @@ Notification Service for Onix
 Provides system notifications and alerts
 """
 
-import threading
 import time
 from typing import Callable, Optional, Dict, Any, List
-from PySide6.QtCore import QObject, Signal, QTimer
-from PySide6.QtWidgets import QSystemTrayIcon, QMessageBox, QWidget
+from PySide6.QtCore import QObject, Signal
+from PySide6.QtWidgets import QSystemTrayIcon
 from constants import LogLevel
 
 
@@ -108,7 +107,7 @@ class NotificationService(QObject):
     def send_update_notification(self, update_type: str, details: str = ""):
         """Send update notification."""
         self.send_notification(
-            f"Update Available",
+            "Update Available",
             f"{update_type} update is available. {details}",
             "info",
             5000

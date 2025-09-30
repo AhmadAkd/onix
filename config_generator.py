@@ -29,7 +29,7 @@ def generate_config_json(server_config, settings):
     return {
         "log": {
             "level": "info",
-            "output": constants.SINGBOX_LOG_FILE,
+            "output": "singbox.log",
         },
         "experimental": {
             "cache_file": {"enabled": True, "path": "cache.db", "store_fakeip": True},

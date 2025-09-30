@@ -7,9 +7,7 @@ import threading
 import time
 import psutil
 import requests
-import json
 from typing import Callable, Optional, Dict, Any, List
-from datetime import datetime, timedelta
 from collections import deque
 from constants import LogLevel
 

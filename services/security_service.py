@@ -8,8 +8,7 @@ import time
 import socket
 import subprocess
 import platform
-import psutil
-from typing import Callable, Optional, Dict, Any, List
+from typing import Callable, List
 from constants import LogLevel
 
 
@@ -263,7 +262,7 @@ class DNSLeakProtectionService:
                 for i, dns in enumerate(dns_servers):
                     subprocess.run(
                         ["netsh", "interface", "ip", "set", "dns",
-                         f"name=\"Wi-Fi\"", f"static", dns, f"index={i+1}"],
+                         "name=\"Wi-Fi\"", "static", dns, f"index={i+1}"],
                         shell=True,
                         check=False
                     )

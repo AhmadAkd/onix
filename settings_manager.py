@@ -90,7 +90,6 @@ def load_settings(log_callback=None):
 
                 # Merge loaded settings into defaults to ensure all keys exist
                 settings.update(loaded_settings)
-                settings_version = settings.get("app_version", "0.0.0")
 
                 # --- Migration Logic ---
                 if (

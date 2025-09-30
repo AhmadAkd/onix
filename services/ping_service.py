@@ -5,9 +5,6 @@ from typing import Callable, Optional
 import requests
 
 from constants import (
-    TCP_PING_TIMEOUT,
-    URL_TEST_TIMEOUT,
-    URL_TEST_DEFAULT_URL,
     TEST_RETRY_COUNT,
     TEST_RETRY_DELAY,
     TEST_ENDPOINTS,

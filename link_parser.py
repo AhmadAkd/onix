@@ -3,7 +3,6 @@ import json
 import re
 import binascii
 import configparser
-import io
 from urllib.parse import urlparse, parse_qs, unquote
 import uuid
 

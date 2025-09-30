@@ -1,27 +1,18 @@
-import sys
 import threading
-
-import time
-import webbrowser
 import utils
-import qrcode
-import io
-import base64
 import mss
-import cv2
 import numpy as np
 from pyzbar.pyzbar import decode
 from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QLabel, QWidget, QHBoxLayout, QVBoxLayout, QStyle,
-    QListWidget, QStackedWidget, QListWidgetItem, QComboBox, QLineEdit, QPushButton, QDialogButtonBox, QSystemTrayIcon, QGraphicsOpacityEffect,
-    QMenu, QTextEdit, QMessageBox, QInputDialog, QDialog, QFormLayout, QGroupBox, QCheckBox, QFileDialog, QScrollArea,
-    QTableWidget, QTableWidgetItem, QHeaderView, QSizePolicy
+    QApplication, QMainWindow, QLabel, QWidget, QHBoxLayout, QVBoxLayout,
+    QListWidget, QStackedWidget, QListWidgetItem, QPushButton, QSystemTrayIcon, QGraphicsOpacityEffect,
+    QMenu, QMessageBox, QDialog, QFileDialog,
+    QTableWidgetItem, QSizePolicy
 )
-from PySide6.QtCore import Qt, QSize, QObject, Signal, QPropertyAnimation, QPoint, QEasingCurve, QParallelAnimationGroup, QTimer, QRegularExpression, QByteArray, QRect
+from PySide6.QtCore import Qt, QSize, QPropertyAnimation, QPoint, QEasingCurve, QParallelAnimationGroup, QTimer, QByteArray, QRect
 from PySide6.QtGui import QIcon, QAction, QPixmap, QPalette, QMovie, QPainter, QTextDocument, QTextCursor, QColor, QFont
 import resources_rc  # noqa: F401
-from constants import (APP_VERSION, GITHUB_RELEASES_URL, TRAY_SHOW, TRAY_QUIT, LogLevel,
-                       LBL_THEME_COLOR, THEME_NAME_GREEN, THEME_NAME_BLUE, THEME_NAME_DARK_BLUE)
+from constants import (TRAY_SHOW, TRAY_QUIT, LogLevel, PROXY_HOST, PROXY_PORT)
 from ui.signals import ManagerSignals
 from ui.views.connection_view import create_connection_view
 from ui.views.logs_view import create_logs_view
@@ -32,7 +23,7 @@ from ui.dialogs.qr_code import QRCodeDialog
 from ui.dialogs.routing_rule import RoutingRuleDialog
 from ui.dialogs.server_edit import ServerEditDialog
 from ui.dialogs.chain_manager import ChainManagerDialog
-from ui.dialogs.subscription import SubscriptionEditDialog, SubscriptionManagerDialog
+from ui.dialogs.subscription import SubscriptionManagerDialog
 from managers.subscription_manager import SubscriptionManager
 from ui.dialogs.export_dialog import ExportDialog
 from ui.widgets.server_card import ServerCardWidget

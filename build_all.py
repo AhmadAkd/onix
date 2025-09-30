@@ -119,7 +119,7 @@ def download_geoip():
 
     print("Downloading GeoIP database...")
     if platform.system().lower() == "windows":
-        cmd = f'powershell -Command "Invoke-WebRequest -Uri \'https://github.com/SagerNet/sing-geoip/releases/latest/download/geoip.db\' -OutFile \'geoip.db\'"'
+        cmd = 'powershell -Command "Invoke-WebRequest -Uri \'https://github.com/SagerNet/sing-geoip/releases/latest/download/geoip.db\' -OutFile \'geoip.db\'"'
     else:
         cmd = "curl -L -o geoip.db https://github.com/SagerNet/sing-geoip/releases/latest/download/geoip.db"
 
@@ -131,7 +131,7 @@ def build_executable():
     platform_name, arch_name, ext = get_platform_info()
     executable_name = f"onix{ext}"
 
-    print(f"Building for {platform_name}-{arch_name}...")
+    print("Building for", platform_name + "-" + arch_name + "...")
 
     # Create version.txt
     with open("version.txt", "w") as f:
@@ -215,7 +215,7 @@ def main():
     print("=" * 50)
 
     platform_name, arch_name, ext = get_platform_info()
-    print(f"Building for: {platform_name}-{arch_name}")
+    print("Building for:", platform_name + "-" + arch_name)
     print()
 
     # Check if we're in the right directory
