@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (
     QDialogButtonBox,
     QVBoxLayout,
     QCheckBox,
+    QSizePolicy,
 )
 
 
@@ -13,6 +14,8 @@ class ServerEditDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle(self.tr("Edit Server Configuration"))
         self.setMinimumWidth(500)
+        self.setMaximumWidth(800)
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
 
         self.config = server_config.copy()  # Work on a copy
         self.widgets = {}

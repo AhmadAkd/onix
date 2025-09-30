@@ -29,33 +29,8 @@ class AppLogic:
 
     # ... (existing methods) ...
     def handle_update_subscriptions(self):
-        current_group = self.main_window.group_dropdown.currentText()
-        all_subs = self.settings.get("subscriptions", [])
-
-        sub_to_update = None
-        for sub in all_subs:
-            if sub.get("name") == current_group:
-                sub_to_update = sub
-                break
-
-        subs_to_process = []
-        if sub_to_update:
-            if sub_to_update.get("enabled", True):
-                subs_to_process = [sub_to_update]
-                self.log(f"Updating current subscription group: {current_group}...")
-            else:
-                self.log(
-                    f"Subscription '{current_group}' is disabled. Please enable it in the Subscription Manager.", LogLevel.WARNING)
-                return
-        else:
-            subs_to_process = [sub for sub in all_subs if sub.get("enabled", True)]
-            self.log("Updating all enabled subscriptions...")
-
-        if not subs_to_process:
-            self.log(self.main_window.tr("No enabled subscriptions to update."), LogLevel.WARNING)
-            return
-
-        self.server_manager.update_subscriptions(subs_to_process)
+        """Delegate to main window's subscription manager."""
+        self.main_window.handle_update_subscriptions()
 
     def url_ping_all_servers(self):
         current_group = self.main_window.group_dropdown.currentText()

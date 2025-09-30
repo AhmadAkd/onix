@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
-    QRadioButton, QButtonGroup, QFileDialog, QMessageBox
+    QRadioButton, QButtonGroup, QFileDialog, QMessageBox, QSizePolicy
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
@@ -19,7 +19,9 @@ class ExportDialog(QDialog):
     def setup_ui(self):
         self.setWindowTitle(self.tr("Export Data"))
         self.setModal(True)
-        self.resize(400, 200)
+        self.setMinimumSize(400, 200)
+        self.setMaximumSize(600, 400)
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
 
         layout = QVBoxLayout(self)
 

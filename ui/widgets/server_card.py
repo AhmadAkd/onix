@@ -20,8 +20,8 @@ class ServerCardWidget(QWidget):
         self.server_data = server_data
 
         # Set responsive height
-        self.setMinimumHeight(70)
-        self.setMaximumHeight(100)
+        self.setMinimumHeight(90)
+        self.setMaximumHeight(120)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         self.setStyleSheet("""
             ServerCardWidget {
@@ -38,8 +38,8 @@ class ServerCardWidget(QWidget):
         """)
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(16, 12, 16, 12)
-        layout.setSpacing(12)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(16)
 
         # Server info section
         info_layout = QVBoxLayout()
@@ -56,15 +56,27 @@ class ServerCardWidget(QWidget):
 
         # Server protocol/type info
         protocol = server_data.get("protocol", "Unknown")
-        self.protocol_label = QLabel(protocol.upper())
+        # Fix protocol names
+        protocol_map = {
+            "shadowsocks": "Shadowsocks",
+            "ss": "Shadowsocks",
+            "vless": "VLESS",
+            "vmess": "VMess",
+            "trojan": "Trojan",
+            "hysteria2": "Hysteria2",
+            "tuic": "TUIC",
+            "wireguard": "WireGuard"
+        }
+        display_protocol = protocol_map.get(protocol.lower(), protocol.upper())
+        self.protocol_label = QLabel(display_protocol)
         self.protocol_label.setStyleSheet("""
             font-size: 10px; 
             font-weight: 500; 
             color: #6b7280;
             background-color: #f3f4f6;
-            padding: 2px 6px;
+            padding: 2px 8px;
             border-radius: 4px;
-            max-width: 60px;
+            min-width: 80px;
         """)
         self.protocol_label.setAlignment(Qt.AlignCenter)
 
@@ -73,25 +85,39 @@ class ServerCardWidget(QWidget):
 
         # Ping and stats section
         stats_layout = QVBoxLayout()
-        stats_layout.setSpacing(2)
+        stats_layout.setSpacing(4)
         stats_layout.setAlignment(Qt.AlignRight)
 
-        self.tcp_ping_label = QLabel()
-        self.tcp_ping_label.setStyleSheet("font-size: 12px; font-weight: 500;")
-
-        self.url_ping_label = QLabel()
-        self.url_ping_label.setStyleSheet("font-size: 12px; font-weight: 500;")
-
-        self.health_stats_label = QLabel()
-        self.health_stats_label.setStyleSheet("""
-            font-size: 10px; 
-            color: #6b7280;
-            margin-top: 4px;
+        self.tcp_ping_label = QLabel("TCP: N/A")
+        self.tcp_ping_label.setStyleSheet("""
+            font-size: 13px; 
+            font-weight: 600;
+            color: #ef4444;
+            background-color: #fef2f2;
+            padding: 10px 16px;
+            border-radius: 6px;
+            margin: 2px 0;
+            min-width: 80px;
+            min-height: 20px;
         """)
+
+        self.url_ping_label = QLabel("URI: N/A")
+        self.url_ping_label.setStyleSheet("""
+            font-size: 13px; 
+            font-weight: 600;
+            color: #ef4444;
+            background-color: #fef2f2;
+            padding: 10px 16px;
+            border-radius: 6px;
+            margin: 2px 0;
+            min-width: 80px;
+            min-height: 20px;
+        """)
+
+        # Health stats label removed - using TCP/URI badges instead
 
         stats_layout.addWidget(self.tcp_ping_label)
         stats_layout.addWidget(self.url_ping_label)
-        stats_layout.addWidget(self.health_stats_label)
 
         # Menu button with modern styling
         self.menu_button = QPushButton(
@@ -121,8 +147,8 @@ class ServerCardWidget(QWidget):
         self.setup_menu()
 
         # Initialize ping value from existing data
-        self.update_ping(self.server_data.get("tcp_ping", -1), "direct_tcp")
-        self.update_ping(self.server_data.get("url_ping", -1), "url")
+        self.update_ping("direct_tcp", self.server_data.get("tcp_ping", -1))
+        self.update_ping("url", self.server_data.get("url_ping", -1))
 
     def enterEvent(self, event):
         """Show the menu button when the mouse enters the widget."""
@@ -177,7 +203,7 @@ class ServerCardWidget(QWidget):
         self.menu.addAction(delete_action)
         self.menu_button.setMenu(self.menu)
 
-    def update_ping(self, ping_value, test_type):
+    def update_ping(self, test_type, ping_value):
         """Updates the correct ping label based on the test type."""
         label_to_update = None
         prefix = ""
@@ -195,103 +221,37 @@ class ServerCardWidget(QWidget):
 
         if ping_value == -1 or ping_value is None:
             text = f"{prefix}: N/A"
-            color = "#ef4444"  # Modern red
-            bg_color = "#fef2f2"
+            color = "#ef4444"  # Red
+            bg_color = "#fef2f2"  # Light red background
         elif ping_value == -2:  # Special value for "testing..."
             text = f"{prefix}: Testing..."
-            color = "#6b7280"  # Modern gray
-            bg_color = "#f9fafb"
+            color = "#6b7280"  # Gray
+            bg_color = "#f9fafb"  # Light gray background
         else:
             text = f"{prefix}: {ping_value}ms"
             if ping_value < 100:
-                color = "#10b981"  # Modern green
-                bg_color = "#d1fae5"
+                color = "#10b981"  # Green
+                bg_color = "#d1fae5"  # Light green background
             elif ping_value < 300:
-                color = "#f59e0b"  # Modern amber
-                bg_color = "#fef3c7"
+                color = "#f59e0b"  # Amber
+                bg_color = "#fef3c7"  # Light amber background
             else:
-                color = "#ef4444"  # Modern red
-                bg_color = "#fef2f2"
+                color = "#ef4444"  # Red
+                bg_color = "#fef2f2"  # Light red background
 
         label_to_update.setText(text)
         label_to_update.setStyleSheet(f"""
             color: {color};
             background-color: {bg_color};
-            padding: 4px 8px;
+            padding: 10px 16px;
             border-radius: 6px;
-            font-weight: 500;
-            font-size: 11px;
+            font-weight: 600;
+            font-size: 13px;
+            margin: 2px 0;
+            min-width: 80px;
+            min-height: 20px;
         """)
 
     def update_health_stats(self, stats):
-        """Updates health check statistics display."""
-        if not stats:
-            self.health_stats_label.setText("")
-            return
-
-        tcp_ema = stats.get("tcp_ema")
-        url_ema = stats.get("url_ema")
-        failures = stats.get("failures", 0)
-        last_test = stats.get("last_test", 0)
-
-        if last_test > 0:
-            import time
-            time_ago = int(time.time() - last_test)
-            if time_ago < 60:
-                time_str = f"{time_ago}s ago"
-            elif time_ago < 3600:
-                time_str = f"{time_ago//60}m ago"
-            else:
-                time_str = f"{time_ago//3600}h ago"
-        else:
-            time_str = "Never"
-
-        # Modern status indicator
-        if failures == 0:
-            status_icon = "●"
-            status_color = "#10b981"  # Modern green
-            bg_color = "#d1fae5"
-        elif failures < 3:
-            status_icon = "●"
-            status_color = "#f59e0b"  # Modern amber
-            bg_color = "#fef3c7"
-        else:
-            status_icon = "●"
-            status_color = "#ef4444"  # Modern red
-            bg_color = "#fef2f2"
-
-        # Build stats text with modern styling
-        stats_parts = []
-        if tcp_ema:
-            stats_parts.append(f"TCP: {int(tcp_ema)}ms")
-        if url_ema:
-            stats_parts.append(f"URL: {int(url_ema)}ms")
-        if failures > 0:
-            stats_parts.append(f"Fails: {failures}")
-        stats_parts.append(time_str)
-
-        stats_text = " • ".join(stats_parts)
-        self.health_stats_label.setText(f"{status_icon} {stats_text}")
-
-        # Apply modern styling
-        self.health_stats_label.setStyleSheet(f"""
-            color: {status_color};
-            background-color: {bg_color};
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 10px;
-            font-weight: 500;
-            margin-top: 4px;
-        """)
-
-        # Set detailed tooltip
-        tooltip_parts = []
-        if tcp_ema:
-            tooltip_parts.append(f"TCP EMA: {tcp_ema:.1f}ms")
-        if url_ema:
-            tooltip_parts.append(f"URL EMA: {url_ema:.1f}ms")
-        if failures > 0:
-            tooltip_parts.append(f"Consecutive Failures: {failures}")
-        tooltip_parts.append(f"Last Test: {time_str}")
-
-        self.health_stats_label.setToolTip("\n".join(tooltip_parts))
+        """Health stats removed - using TCP/URI badges instead."""
+        pass

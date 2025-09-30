@@ -6,6 +6,7 @@ from constants import (
     DEFAULT_DNS_SERVERS,
     DEFAULT_BYPASS_DOMAINS,
     DEFAULT_BYPASS_IPS,
+    DEFAULT_LOG_LEVEL,
     LogLevel,
 )
 
@@ -26,6 +27,46 @@ DEFAULT_SETTINGS = {
     "tls_fragment_sleep": "10-100",
     "window_geometry": None,  # To store window position and size
     "window_maximized": False,  # To store if the window was maximized
+    "log_level": DEFAULT_LOG_LEVEL,
+    "mux_padding": False,
+    # Security settings
+    "enable_ipv6": True,
+    "allow_insecure": False,
+    "cert_verification": True,
+    "custom_ca_cert": "",
+    "cipher_suites": "",
+    "security_level": "High",
+    "connection_timeout": 30,
+    "retry_attempts": 3,
+    "keep_alive": True,
+    # Performance settings
+    "connection_pool_size": 10,
+    "thread_pool_size": 5,
+    "buffer_size": 8192,
+    "bandwidth_limit_enabled": False,
+    "upload_speed_limit": 0,
+    "download_speed_limit": 0,
+    "connection_multiplexing": True,
+    "compression_enabled": False,
+    "tcp_fast_open": False,
+    "congestion_control": "Cubic",
+    "enable_statistics": True,
+    "statistics_interval": 5,
+    # Advanced features
+    "auto_failover_enabled": False,
+    # Privacy settings
+    "disable_telemetry": True,
+    "disable_crash_reports": True,
+    "disable_usage_stats": True,
+    "disable_detailed_logging": False,
+    "clear_logs_on_exit": False,
+    "disable_connection_logging": False,
+    "disable_dns_logging": True,
+    "disable_traffic_stats": False,
+    "disable_ip_logging": True,
+    "disable_auto_updates": False,
+    "disable_core_auto_updates": False,
+    "disable_sub_auto_updates": False,
 }
 
 

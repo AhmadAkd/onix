@@ -3,6 +3,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QPushButton,
     QDialog,
+    QSizePolicy,
 )
 from PySide6.QtCore import Qt
 
@@ -14,6 +15,8 @@ class AboutDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle(self.tr("About Onix"))
         self.setMinimumWidth(350)
+        self.setMaximumWidth(500)
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
 
         layout = QVBoxLayout(self)
         layout.setSpacing(15)

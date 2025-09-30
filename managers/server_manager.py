@@ -156,23 +156,20 @@ class ServerManager:
             if "id" not in config or not config.get("id"):
                 config["id"] = str(uuid.uuid4())
 
-            # Check for duplicates across all groups first
-            server_id = config.get("id")
-            for grp, servers in self.server_groups.items():
-                for s_config in servers:
-                    if s_config.get("id") == server_id:
-                        # Use callback if available (from subscription update), otherwise log directly
-                        if callbacks:
-                            callbacks.show_warning(
-                                "Duplicate Server",
-                                f"Server {config.get('name')} already exists in group '{grp}'. Skipping."
-                            )
-                        else:
-                            self.log(
-                                f"Server {config.get('name')} already exists in group '{grp}'. Skipping.",
-                                LogLevel.WARNING
-                            )
-                        return False
+            # Check for duplicates based on content, not just ID
+            if self._is_duplicate_server(config, group_name or config.get("group", "Manual Servers")):
+                # Use callback if available (from subscription update), otherwise log directly
+                if callbacks:
+                    callbacks.show_warning(
+                        "Duplicate Server",
+                        f"Server with same configuration already exists. Skipping '{config.get('name')}'."
+                    )
+                else:
+                    self.log(
+                        f"Server with same configuration already exists. Skipping '{config.get('name')}'.",
+                        LogLevel.WARNING
+                    )
+                return False
 
             # Use provided group_name, else fallback to parsed group, else default
             final_group_name: str = group_name or config.get(
@@ -232,6 +229,63 @@ class ServerManager:
 
     def get_server_link(self, config: Dict[str, Any]) -> Optional[str]:
         return link_parser.generate_server_link(config)
+
+    def _get_server_fingerprint(self, config: Dict[str, Any]) -> str:
+        """Generate a unique fingerprint for a server based on its content."""
+        # Create a fingerprint based on server properties that should be unique
+        key_props = [
+            config.get("server", ""),
+            str(config.get("port", "")),
+            config.get("protocol", ""),
+            config.get("uuid", ""),
+            config.get("password", ""),
+            config.get("sni", ""),
+            config.get("transport", ""),
+            config.get("ws_path", ""),
+            config.get("flow", ""),
+            config.get("fp", ""),
+        ]
+        return "|".join(key_props)
+
+    def _is_duplicate_server(self, config: Dict[str, Any], group_name: str) -> bool:
+        """Check if a server is a duplicate based on content, not just ID."""
+        new_fingerprint = self._get_server_fingerprint(config)
+
+        # Check all groups for duplicates
+        for grp, servers in self.server_groups.items():
+            for existing_server in servers:
+                if self._get_server_fingerprint(existing_server) == new_fingerprint:
+                    return True
+        return False
+
+    def remove_duplicate_servers(self) -> int:
+        """Remove duplicate servers based on content fingerprint. Returns count of removed duplicates."""
+        removed_count = 0
+        seen_fingerprints = set()
+
+        with self._server_lock:
+            for group_name, servers in self.server_groups.items():
+                # Process servers in reverse order to avoid index issues when removing
+                for i in range(len(servers) - 1, -1, -1):
+                    server = servers[i]
+                    fingerprint = self._get_server_fingerprint(server)
+
+                    if fingerprint in seen_fingerprints:
+                        # This is a duplicate, remove it
+                        removed_count += 1
+                        self.log(
+                            f"Removing duplicate server: {server.get('name', 'Unknown')} from group '{group_name}'", LogLevel.INFO)
+                        servers.pop(i)
+                    else:
+                        seen_fingerprints.add(fingerprint)
+
+        if removed_count > 0:
+            self.log(
+                f"Removed {removed_count} duplicate server(s)", LogLevel.SUCCESS)
+            self.save_settings()
+            self.callbacks.get("on_servers_updated", lambda: None)()
+
+        return removed_count
 
     # --- Subscription Update ---
     def update_subscriptions(self, subscriptions: List[Dict[str, Any]], callbacks: Optional[ServerManagerCallbacks] = None) -> None:

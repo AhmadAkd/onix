@@ -25,82 +25,59 @@ def create_connection_view(main_window):
     top_bar = QWidget()
     top_bar.setObjectName("TopBar")
     top_bar_layout = QHBoxLayout(top_bar)
-    top_bar_layout.setContentsMargins(12, 8, 12, 8)
-    top_bar_layout.setSpacing(8)  # Better spacing for responsiveness
+    top_bar_layout.setContentsMargins(16, 12, 16, 12)
+    top_bar_layout.setSpacing(12)  # More spacing for better visibility
     main_window.current_view_mode = "servers"  # "servers" or "chains"
 
     main_window.group_dropdown = QComboBox()
-    main_window.group_dropdown.setMinimumWidth(80)
-    main_window.group_dropdown.setMaximumWidth(150)
+    main_window.group_dropdown.setFixedWidth(140)
     main_window.group_dropdown.setSizePolicy(
-        QSizePolicy.Minimum, QSizePolicy.Fixed)
+        QSizePolicy.Fixed, QSizePolicy.Fixed)
 
-    main_window.sort_combo = QComboBox()
-    main_window.sort_combo.addItems(
-        [main_window.tr("Sort by: Default"), main_window.tr("Name (A-Z)"), main_window.tr("Name (Z-A)"), main_window.tr("Ping (Low to High)")])
-    main_window.sort_combo.setMinimumWidth(80)
-    main_window.sort_combo.setMaximumWidth(140)
-    main_window.sort_combo.setSizePolicy(
-        QSizePolicy.Minimum, QSizePolicy.Fixed)
-    main_window.sort_combo.currentTextChanged.connect(
-        main_window.update_server_list)
+    # Sort combo removed - auto-sort by best ping
 
     main_window.search_field = QLineEdit()
     main_window.search_field.setPlaceholderText(main_window.tr("Search..."))
-    main_window.search_field.setMinimumWidth(100)
-    main_window.search_field.setMaximumWidth(180)
+    main_window.search_field.setFixedWidth(180)
     main_window.search_field.setSizePolicy(
-        QSizePolicy.Minimum, QSizePolicy.Fixed)
+        QSizePolicy.Fixed, QSizePolicy.Fixed)
     main_window.manage_subs_button = QPushButton(
         QIcon(":/icons/list.svg"), main_window.tr("Subscriptions"))
-    main_window.manage_subs_button.setMinimumWidth(80)
-    main_window.manage_subs_button.setMaximumWidth(120)
+    main_window.manage_subs_button.setFixedWidth(140)
     main_window.manage_subs_button.setSizePolicy(
-        QSizePolicy.Minimum, QSizePolicy.Fixed)
+        QSizePolicy.Fixed, QSizePolicy.Fixed)
 
-    main_window.manage_chains_button = QPushButton(
-        QIcon(":/icons/git-merge.svg"), main_window.tr("Manage Chains"))
-    main_window.manage_chains_button.setMinimumWidth(80)
-    main_window.manage_chains_button.setMaximumWidth(120)
-    main_window.manage_chains_button.setSizePolicy(
-        QSizePolicy.Minimum, QSizePolicy.Fixed)
-
-    main_window.update_subs_button = QPushButton(
-        QIcon(":/icons/refresh-cw.svg"), main_window.tr("Update Subs"))
-    main_window.update_subs_button.setMinimumWidth(80)
-    main_window.update_subs_button.setMaximumWidth(120)
-    main_window.update_subs_button.setSizePolicy(
-        QSizePolicy.Minimum, QSizePolicy.Fixed)
+    # Update button moved to subscriptions menu
 
     main_window.health_check_tcp_button = QPushButton(
-        QIcon(":/icons/zap.svg"), main_window.tr("Health Check TCP"))
-    main_window.health_check_tcp_button.setMinimumWidth(100)
-    main_window.health_check_tcp_button.setMaximumWidth(140)
+        QIcon(":/icons/zap.svg"), main_window.tr("TCP"))
+    main_window.health_check_tcp_button.setFixedWidth(60)
     main_window.health_check_tcp_button.setSizePolicy(
-        QSizePolicy.Minimum, QSizePolicy.Fixed)
+        QSizePolicy.Fixed, QSizePolicy.Fixed)
+    main_window.health_check_tcp_button.setToolTip(
+        main_window.tr("Test TCP Ping"))
+    main_window.health_check_tcp_button.setCheckable(True)
 
     main_window.health_check_url_button = QPushButton(
-        QIcon(":/icons/activity.svg"), main_window.tr("Health Check URL"))
-    main_window.health_check_url_button.setMinimumWidth(100)
-    main_window.health_check_url_button.setMaximumWidth(140)
+        QIcon(":/icons/activity.svg"), main_window.tr("URL"))
+    main_window.health_check_url_button.setFixedWidth(60)
     main_window.health_check_url_button.setSizePolicy(
-        QSizePolicy.Minimum, QSizePolicy.Fixed)
-    main_window.health_check_tcp_button.setToolTip(
-        main_window.tr("Start/Stop periodic TCP health checking with exponential backoff"))
+        QSizePolicy.Fixed, QSizePolicy.Fixed)
     main_window.health_check_url_button.setToolTip(
-        main_window.tr("Start/Stop periodic URL health checking with exponential backoff"))
-    main_window.health_check_tcp_button.setCheckable(True)
+        main_window.tr("Test URL Ping"))
     main_window.health_check_url_button.setCheckable(True)
 
-    # Export button
-    main_window.export_button = QPushButton(
-        QIcon(":/icons/file-text.svg"), main_window.tr("Export"))
-    main_window.export_button.setMinimumWidth(60)
-    main_window.export_button.setMaximumWidth(100)
-    main_window.export_button.setSizePolicy(
-        QSizePolicy.Minimum, QSizePolicy.Fixed)
-    main_window.export_button.setToolTip(main_window.tr(
-        "Export server data and health statistics"))
+    # Speed Test Button
+    main_window.speed_test_button = QPushButton(
+        QIcon(":/icons/zap.svg"), main_window.tr("Speed"))
+    main_window.speed_test_button.setFixedWidth(60)
+    main_window.speed_test_button.setSizePolicy(
+        QSizePolicy.Fixed, QSizePolicy.Fixed)
+    main_window.speed_test_button.setToolTip(
+        main_window.tr("Speed Test"))
+    main_window.speed_test_button.setCheckable(True)
+
+    # Export button removed - now in more menu
 
     # Health Check Progress Bar with modern styling
     main_window.health_check_progress = QProgressBar()
@@ -165,11 +142,37 @@ def create_connection_view(main_window):
 
     more_menu.addSeparator()
 
+    # Add update subscriptions to menu
+    update_subs_action = QAction(
+        QIcon(":/icons/refresh-cw.svg"), main_window.tr("Update Subscriptions"), main_window)
+    update_subs_action.triggered.connect(
+        main_window.handle_update_subscriptions)
+    more_menu.addAction(update_subs_action)
+
+    # Add export and manage chains to menu
+    export_action = QAction(
+        QIcon(":/icons/file-text.svg"), main_window.tr("Export Data"), main_window)
+    export_action.triggered.connect(main_window.show_export_dialog)
+    more_menu.addAction(export_action)
+
+    manage_chains_action = QAction(
+        QIcon(":/icons/git-merge.svg"), main_window.tr("Manage Chains"), main_window)
+    manage_chains_action.triggered.connect(main_window.show_chain_manager)
+    more_menu.addAction(manage_chains_action)
+
+    more_menu.addSeparator()
+
     copy_links_action = QAction(
         QIcon(":/icons/copy.svg"), main_window.tr("Copy Group Links"), main_window)
     copy_links_action.triggered.connect(
         main_window.copy_group_links_to_clipboard)
     more_menu.addAction(copy_links_action)
+
+    remove_duplicates_action = QAction(
+        QIcon(":/icons/refresh-cw.svg"), main_window.tr("Remove Duplicates"), main_window)
+    remove_duplicates_action.triggered.connect(
+        main_window.remove_duplicate_servers)
+    more_menu.addAction(remove_duplicates_action)
 
     delete_group_action = QAction(
         QIcon(":/icons/trash-2.svg"), main_window.tr("Delete Current Group"), main_window)
@@ -178,21 +181,14 @@ def create_connection_view(main_window):
 
     main_window.more_actions_button.setMenu(more_menu)
 
-    # Add widgets with proper spacing and stretch
+    # Simple and clean header layout
     top_bar_layout.addWidget(main_window.group_dropdown)
     top_bar_layout.addWidget(main_window.search_field)
-    top_bar_layout.addStretch()  # This will push everything to the sides
-    top_bar_layout.addWidget(main_window.sort_combo)
+    top_bar_layout.addStretch()
     top_bar_layout.addWidget(main_window.health_check_tcp_button)
     top_bar_layout.addWidget(main_window.health_check_url_button)
-    top_bar_layout.addWidget(main_window.export_button)
-    top_bar_layout.addWidget(main_window.health_check_progress)
-    top_bar_layout.addWidget(main_window.sorting_spinner_label)
-    top_bar_layout.addStretch()  # This will push management buttons to the right
-    top_bar_layout.addWidget(main_window.manage_chains_button)
+    top_bar_layout.addWidget(main_window.speed_test_button)
     top_bar_layout.addWidget(main_window.manage_subs_button)
-    top_bar_layout.addWidget(main_window.update_spinner_label)
-    top_bar_layout.addWidget(main_window.update_subs_button)
     top_bar_layout.addWidget(main_window.more_actions_button)
 
     # --- Left Panel (List) ---
@@ -230,17 +226,15 @@ def create_connection_view(main_window):
         main_window.update_server_list)
     main_window.search_field.textChanged.connect(
         main_window.update_server_list)
+    # Sort combo removed - auto-sort by best ping
     main_window.health_check_tcp_button.clicked.connect(
         main_window.toggle_health_check_tcp)
     main_window.health_check_url_button.clicked.connect(
         main_window.toggle_health_check_url)
-    main_window.export_button.clicked.connect(
-        main_window.show_export_dialog)
+    main_window.speed_test_button.clicked.connect(
+        main_window.toggle_speed_test)
     main_window.manage_subs_button.clicked.connect(
         main_window.show_subscription_manager)
-    main_window.manage_chains_button.clicked.connect(
-        main_window.show_chain_manager)  # This was already connected
-    main_window.update_subs_button.clicked.connect(
-        main_window.handle_update_subscriptions)
+    # Update button moved to more menu
 
     return widget

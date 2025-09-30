@@ -33,9 +33,11 @@ from ui.dialogs.routing_rule import RoutingRuleDialog
 from ui.dialogs.server_edit import ServerEditDialog
 from ui.dialogs.chain_manager import ChainManagerDialog
 from ui.dialogs.subscription import SubscriptionEditDialog, SubscriptionManagerDialog
+from managers.subscription_manager import SubscriptionManager
 from ui.dialogs.export_dialog import ExportDialog
 from ui.widgets.server_card import ServerCardWidget
 from ui.styles import THEMES, get_dark_stylesheet, get_light_stylesheet
+from services.speed_test_service import SpeedTestService, AutoFailoverService
 
 
 class PySideUI(QMainWindow):
@@ -62,6 +64,22 @@ class PySideUI(QMainWindow):
 
         self.settings = self.server_manager.settings if self.server_manager else {}
         self.server_widgets = {}  # Map server name to its card widget
+
+        # Initialize subscription manager
+        subscription_callbacks = {
+            "log": self.log,
+            "on_update_start": self.signals.update_started.emit,
+            "on_update_finish": self.signals.update_finished.emit,
+            "show_info": lambda title, msg: self.log(msg, LogLevel.INFO),
+            "show_warning": lambda title, msg: self.log(msg, LogLevel.WARNING),
+            "show_error": self.signals.show_error_message.emit,
+        }
+        self.subscription_manager = SubscriptionManager(
+            server_manager, self.settings, subscription_callbacks)
+
+        # Initialize speed test and auto-failover services
+        self.speed_test_service = SpeedTestService(self.log)
+        self.auto_failover_service = AutoFailoverService(self.log)
         # Connect signals to slots
         self.signals.ping_result.connect(
             self.on_ping_result, Qt.QueuedConnection)
@@ -77,7 +95,7 @@ class PySideUI(QMainWindow):
         self.signals.ip_updated.connect(self.on_ip_update)
         self.signals.speed_updated.connect(self.on_speed_update)
         self.signals.update_finished.connect(self.on_update_finished)
-        self.signals.servers_updated.connect(self.update_server_list)
+        self.signals.servers_updated.connect(self.on_servers_updated)
         self.signals.save_requested.connect(self._request_save_settings)
         # Connect message box signals
         self.signals.show_info_message.connect(self.show_info_message_box)
@@ -131,10 +149,8 @@ class PySideUI(QMainWindow):
 
         self.nav_rail = QListWidget()
         self.nav_rail.setObjectName("NavRail")
-        self.nav_rail.setMinimumWidth(100)
-        self.nav_rail.setMaximumWidth(150)
-        self.nav_rail.setSizePolicy(
-            QSizePolicy.Preferred, QSizePolicy.Expanding)
+        self.nav_rail.setFixedWidth(160)  # Fixed width for stability
+        self.nav_rail.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         main_layout.addWidget(self.nav_rail)
 
         content_container = QWidget()
@@ -415,6 +431,7 @@ This action cannot be undone.""").format(log_file_path),
         self.settings["connection_mode"] = self.connection_mode_combo.currentText()
         self.settings["dns_servers"] = self.dns_entry.text()
         self.settings["bypass_domains"] = self.bypass_domains_entry.text()
+        self.settings["bypass_ips"] = self.bypass_ips_entry.text()
         self.settings["tun_enabled"] = self.tun_checkbox.isChecked()
 
         # Health Check Settings
@@ -432,6 +449,9 @@ This action cannot be undone.""").format(log_file_path),
                 backoff_text.split()[0])
         if hasattr(self, 'health_check_auto_start'):
             self.settings["health_check_auto_start"] = self.health_check_auto_start.isChecked(
+            )
+        if hasattr(self, 'auto_failover_checkbox'):
+            self.settings["auto_failover_enabled"] = self.auto_failover_checkbox.isChecked(
             )
         self.settings["appearance_mode"] = {self.tr("System"): "System", self.tr("Light"): "Light", self.tr("Dark"): "Dark"}.get(
             self.appearance_mode_combo.currentText(), "System")
@@ -465,6 +485,121 @@ This action cannot be undone.""").format(log_file_path),
         self.settings["tls_fragment_enabled"] = self.tls_fragment_checkbox.isChecked()
         self.settings["mux_enabled"] = self.mux_enabled_checkbox.isChecked()
         self.settings["mux_protocol"] = self.mux_protocol_combo.currentText()
+        self.settings["mux_padding"] = self.mux_padding_checkbox.isChecked()
+
+        # Save log level
+        if hasattr(self, 'log_level_combo'):
+            log_level_map = {
+                self.tr("Debug"): "Debug",
+                self.tr("Info"): "Info",
+                self.tr("Warning"): "Warning",
+                self.tr("Error"): "Error"
+            }
+            self.settings["log_level"] = log_level_map.get(
+                self.log_level_combo.currentText(), "Info")
+
+        # Save security settings
+        if hasattr(self, 'enable_ipv6_checkbox'):
+            self.settings["enable_ipv6"] = self.enable_ipv6_checkbox.isChecked()
+        if hasattr(self, 'allow_insecure_checkbox'):
+            self.settings["allow_insecure"] = self.allow_insecure_checkbox.isChecked()
+        if hasattr(self, 'cert_verification_checkbox'):
+            self.settings["cert_verification"] = self.cert_verification_checkbox.isChecked(
+            )
+        if hasattr(self, 'custom_ca_entry'):
+            self.settings["custom_ca_cert"] = self.custom_ca_entry.text()
+        if hasattr(self, 'cipher_suites_entry'):
+            self.settings["cipher_suites"] = self.cipher_suites_entry.text()
+        if hasattr(self, 'security_level_combo'):
+            security_level_map = {
+                self.tr("High"): "High",
+                self.tr("Medium"): "Medium",
+                self.tr("Low"): "Low"
+            }
+            self.settings["security_level"] = security_level_map.get(
+                self.security_level_combo.currentText(), "High")
+        if hasattr(self, 'connection_timeout_entry'):
+            self.settings["connection_timeout"] = int(
+                self.connection_timeout_entry.text())
+        if hasattr(self, 'retry_attempts_entry'):
+            self.settings["retry_attempts"] = int(
+                self.retry_attempts_entry.text())
+        if hasattr(self, 'keep_alive_checkbox'):
+            self.settings["keep_alive"] = self.keep_alive_checkbox.isChecked()
+
+        # Save performance settings
+        if hasattr(self, 'connection_pool_size_entry'):
+            self.settings["connection_pool_size"] = int(
+                self.connection_pool_size_entry.text())
+        if hasattr(self, 'thread_pool_size_entry'):
+            self.settings["thread_pool_size"] = int(
+                self.thread_pool_size_entry.text())
+        if hasattr(self, 'buffer_size_entry'):
+            self.settings["buffer_size"] = int(self.buffer_size_entry.text())
+        if hasattr(self, 'bandwidth_limit_checkbox'):
+            self.settings["bandwidth_limit_enabled"] = self.bandwidth_limit_checkbox.isChecked(
+            )
+        if hasattr(self, 'upload_speed_limit_entry'):
+            self.settings["upload_speed_limit"] = int(
+                self.upload_speed_limit_entry.text())
+        if hasattr(self, 'download_speed_limit_entry'):
+            self.settings["download_speed_limit"] = int(
+                self.download_speed_limit_entry.text())
+        if hasattr(self, 'connection_multiplexing_checkbox'):
+            self.settings["connection_multiplexing"] = self.connection_multiplexing_checkbox.isChecked()
+        if hasattr(self, 'compression_checkbox'):
+            self.settings["compression_enabled"] = self.compression_checkbox.isChecked()
+        if hasattr(self, 'fast_open_checkbox'):
+            self.settings["tcp_fast_open"] = self.fast_open_checkbox.isChecked()
+        if hasattr(self, 'congestion_control_combo'):
+            congestion_map = {
+                self.tr("Cubic"): "Cubic",
+                self.tr("BBR"): "BBR",
+                self.tr("BBR2"): "BBR2",
+                self.tr("Reno"): "Reno"
+            }
+            self.settings["congestion_control"] = congestion_map.get(
+                self.congestion_control_combo.currentText(), "Cubic")
+        if hasattr(self, 'enable_statistics_checkbox'):
+            self.settings["enable_statistics"] = self.enable_statistics_checkbox.isChecked(
+            )
+        if hasattr(self, 'statistics_interval_entry'):
+            self.settings["statistics_interval"] = int(
+                self.statistics_interval_entry.text())
+
+        # Save privacy settings
+        if hasattr(self, 'disable_telemetry_checkbox'):
+            self.settings["disable_telemetry"] = self.disable_telemetry_checkbox.isChecked(
+            )
+        if hasattr(self, 'disable_crash_reports_checkbox'):
+            self.settings["disable_crash_reports"] = self.disable_crash_reports_checkbox.isChecked(
+            )
+        if hasattr(self, 'disable_usage_stats_checkbox'):
+            self.settings["disable_usage_stats"] = self.disable_usage_stats_checkbox.isChecked(
+            )
+        if hasattr(self, 'disable_detailed_logging_checkbox'):
+            self.settings["disable_detailed_logging"] = self.disable_detailed_logging_checkbox.isChecked()
+        if hasattr(self, 'clear_logs_on_exit_checkbox'):
+            self.settings["clear_logs_on_exit"] = self.clear_logs_on_exit_checkbox.isChecked(
+            )
+        if hasattr(self, 'disable_connection_logging_checkbox'):
+            self.settings["disable_connection_logging"] = self.disable_connection_logging_checkbox.isChecked()
+        if hasattr(self, 'disable_dns_logging_checkbox'):
+            self.settings["disable_dns_logging"] = self.disable_dns_logging_checkbox.isChecked(
+            )
+        if hasattr(self, 'disable_traffic_stats_checkbox'):
+            self.settings["disable_traffic_stats"] = self.disable_traffic_stats_checkbox.isChecked(
+            )
+        if hasattr(self, 'disable_ip_logging_checkbox'):
+            self.settings["disable_ip_logging"] = self.disable_ip_logging_checkbox.isChecked(
+            )
+        if hasattr(self, 'disable_auto_updates_checkbox'):
+            self.settings["disable_auto_updates"] = self.disable_auto_updates_checkbox.isChecked(
+            )
+        if hasattr(self, 'disable_core_auto_updates_checkbox'):
+            self.settings["disable_core_auto_updates"] = self.disable_core_auto_updates_checkbox.isChecked()
+        if hasattr(self, 'disable_sub_auto_updates_checkbox'):
+            self.settings["disable_sub_auto_updates"] = self.disable_sub_auto_updates_checkbox.isChecked()
 
         self.server_manager.save_settings()
         self.log(self.tr("Settings saved."))
@@ -711,6 +846,12 @@ This action cannot be undone.""").format(log_file_path),
             self.server_manager.delete_group(current_group)
 
     def handle_update_subscriptions(self):
+        """Handle subscription update using the new subscription manager."""
+        if self.subscription_manager.is_update_in_progress():
+            self.log(
+                "Subscription update is already in progress. Please wait...", LogLevel.WARNING)
+            return
+
         current_group = self.group_dropdown.currentText()
         all_subs = self.settings.get("subscriptions", [])
 
@@ -744,20 +885,8 @@ This action cannot be undone.""").format(log_file_path),
                      LogLevel.WARNING)
             return
 
-        # Define thread-safe callbacks.
-        # For subscription updates, we want info and warnings to go to the log panel,
-        # not pop up as message boxes, to avoid message storms.
-        # Errors should still pop up.
-        update_callbacks = {
-            'show_info': lambda title, msg: self.log(msg, LogLevel.INFO),
-            'show_warning': lambda title, msg: self.log(msg, LogLevel.WARNING),
-            'show_error': self.signals.show_error_message.emit,
-            'ask_yes_no': self.ask_yes_no_from_thread,
-        }
-
-        threading.Thread(target=self.server_manager.update_subscriptions,
-                         args=(subs_to_process, update_callbacks),
-                         daemon=True).start()
+        # Use the new subscription manager
+        self.subscription_manager.update_subscriptions(subs_to_process)
 
     # --- Message Box Handlers (Slots) ---
     def show_info_message_box(self, title, message):
@@ -923,6 +1052,48 @@ This action cannot be undone.""").format(log_file_path),
             self.health_check_url_button.setStyleSheet("")
             self.health_check_progress.setVisible(False)
             self.log("Stopped URL health checking", LogLevel.INFO)
+
+    def toggle_speed_test(self):
+        """Toggle speed test on/off."""
+        if self.speed_test_button.isChecked():
+            # Start speed test
+            if not self.selected_config:
+                self.speed_test_button.setChecked(False)
+                self.log("No server selected for speed test", LogLevel.WARNING)
+                return
+
+            if not self.singbox_manager.is_running:
+                self.speed_test_button.setChecked(False)
+                self.log("Please connect to a server first", LogLevel.WARNING)
+                return
+
+            self.speed_test_button.setText(self.tr("Stop Speed Test"))
+            self.speed_test_button.setStyleSheet("background-color: #F44336;")
+
+            # Start speed test
+            proxy_address = f"{PROXY_HOST}:{PROXY_PORT}"
+            self.speed_test_service.start_speed_test(
+                proxy_address,
+                duration=10,
+                callback=self.on_speed_test_result
+            )
+            self.log(
+                f"Started speed test for server: {self.selected_config.get('name')}", LogLevel.INFO)
+        else:
+            # Stop speed test
+            self.speed_test_service.stop_speed_test()
+            self.speed_test_button.setText(self.tr("Speed Test"))
+            self.speed_test_button.setStyleSheet("")
+            self.log("Stopped speed test", LogLevel.INFO)
+
+    def on_speed_test_result(self, download_speed: float, upload_speed: float):
+        """Handle speed test results."""
+        # Update speed labels in status bar
+        self.on_speed_update(upload_speed, download_speed)
+
+        # Log the results
+        self.log(f"Speed test: {download_speed/1024/1024:.2f} MB/s download, "
+                 f"{upload_speed/1024/1024:.2f} MB/s upload", LogLevel.SUCCESS)
 
     def show_export_dialog(self):
         """Show export dialog for current group."""
@@ -1171,27 +1342,21 @@ This action cannot be undone.""").format(log_file_path),
         if selected_group == "⛓️ Chains":
             self.current_view_mode = "chains"
             items_to_display = self.settings.get("outbound_chains", [])
-            # Disable ping-related sorting for chains
-            self.sort_combo.model().item(3).setEnabled(False)
+            # Chains don't need sorting
         else:
             self.current_view_mode = "servers"
             items_to_display = self.server_manager.get_servers_by_group(
                 selected_group)
-            # Re-enable ping-related sorting
-            self.sort_combo.model().item(3).setEnabled(True)
 
-        # --- Sorting Logic ---
-        sort_key = self.sort_combo.currentText()
-        if sort_key == self.tr("Name (A-Z)"):
-            items_to_display.sort(key=lambda s: s.get("name", "").lower())
-        elif sort_key == self.tr("Name (Z-A)"):
-            items_to_display.sort(key=lambda s: s.get(
-                "name", "").lower(), reverse=True)
-        elif sort_key == self.tr("Ping (Low to High)"):
-            if self.current_view_mode == "servers":
-                # Treat N/A (-1 or None) as a very high ping for sorting
-                items_to_display.sort(key=lambda s: s.get("ping") if (
-                    s.get("ping") is not None and s.get("ping") != -1) else float('inf'))
+        # --- Manual Sorting ---
+        if self.current_view_mode == "servers":
+            # Auto-sort by best ping (lowest first), with N/A at the end
+            def ping_sort_key(server):
+                tcp_ping = server.get("tcp_ping")
+                if tcp_ping is None or tcp_ping == -1:
+                    return 9999  # Put N/A at the end
+                return tcp_ping
+            items_to_display.sort(key=ping_sort_key)
 
         # --- Filtering and Display ---
         for item_data in items_to_display:
@@ -1255,7 +1420,7 @@ This action cannot be undone.""").format(log_file_path),
         if card:
             self.log(
                 self.tr("Found card for server ID {}. Updating {} ping value.").format(server_id, test_type), LogLevel.DEBUG)
-            card.update_ping(ping, test_type)
+            card.update_ping(test_type, ping)
 
             # Update health stats if this is from health checker
             if hasattr(self.server_manager, '_health_checker'):
@@ -1274,23 +1439,94 @@ This action cannot be undone.""").format(log_file_path),
         card = self.server_widgets.get(server_id)
         if card:
             # Reset both labels to '...'
-            card.update_ping(-2, "direct_tcp")
-            card.update_ping(-2, "url")
+            card.update_ping("direct_tcp", -2)
+            card.update_ping("url", -2)
 
     def on_update_started(self):
-        self.update_subs_button.setEnabled(False)
-        self.update_subs_button.hide()
+        self.manage_subs_button.setEnabled(False)
+        self.manage_subs_button.hide()
         self.update_spinner_label.show()
         self.update_spinner_label.movie().start()
 
     def on_update_finished(self, error):
-        self.update_subs_button.setEnabled(True)
+        self.manage_subs_button.setEnabled(True)
         self.update_spinner_label.hide()
-        self.update_subs_button.show()
+        self.manage_subs_button.show()
         self.update_spinner_label.movie().stop()
         self.log(self.tr("Subscription update finished."))
         self.update_group_dropdown()
         self.update_server_list()
+
+    def on_servers_loaded(self):
+        """Called when servers are initially loaded."""
+        self.update_group_dropdown()
+        self.update_server_list()
+
+    def on_servers_updated(self):
+        """Called when servers are updated (e.g., after subscription update)."""
+        self.update_group_dropdown()
+        self.update_server_list()
+
+    def update_single_subscription(self, sub):
+        """Update a single subscription."""
+        if self.subscription_manager.is_update_in_progress():
+            self.log(
+                "Subscription update is already in progress. Please wait...", LogLevel.WARNING)
+            return
+
+        if not sub.get("enabled", True):
+            self.log(
+                f"Subscription '{sub.get('name', 'Unknown')}' is disabled. Please enable it first.", LogLevel.WARNING)
+            return
+
+        self.log(f"Updating subscription: {sub.get('name', 'Unknown')}...")
+        self.subscription_manager.update_subscriptions([sub])
+
+    def update_all_subscriptions(self):
+        """Update all enabled subscriptions."""
+        if self.subscription_manager.is_update_in_progress():
+            self.log(
+                "Subscription update is already in progress. Please wait...", LogLevel.WARNING)
+            return
+
+        all_subs = self.settings.get("subscriptions", [])
+        enabled_subs = [sub for sub in all_subs if sub.get("enabled", True)]
+
+        if not enabled_subs:
+            self.log("No enabled subscriptions to update.", LogLevel.WARNING)
+            return
+
+        self.log(f"Updating {len(enabled_subs)} subscription(s)...")
+        self.subscription_manager.update_subscriptions(enabled_subs)
+
+    def remove_duplicate_servers(self):
+        """Remove duplicate servers from all groups."""
+        reply = QMessageBox.question(
+            self,
+            self.tr("Remove Duplicates"),
+            self.tr(
+                "This will remove all duplicate servers based on their configuration. Continue?"),
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+
+        if reply == QMessageBox.Yes:
+            self.log("Scanning for duplicate servers...", LogLevel.INFO)
+            removed_count = self.server_manager.remove_duplicate_servers()
+
+            if removed_count > 0:
+                QMessageBox.information(
+                    self,
+                    self.tr("Duplicates Removed"),
+                    self.tr("Removed {} duplicate server(s).").format(
+                        removed_count)
+                )
+            else:
+                QMessageBox.information(
+                    self,
+                    self.tr("No Duplicates"),
+                    self.tr("No duplicate servers found.")
+                )
 
     def show_chain_manager(self):
         """Shows the dialog to manage outbound chains."""

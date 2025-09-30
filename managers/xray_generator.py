@@ -23,15 +23,44 @@ class XrayConfigGenerator(BaseConfigGenerator):
             port = 11000 + i
             inbound_tag = f"http-in-{i}"
             outbound_tag = f"proxy-out-{i}"
-            inbounds.append(
-                {"protocol": "http", "tag": inbound_tag, "listen": "127.0.0.1", "port": port, "sniffing": {"enabled": False}})
+
+            # Create proper inbound configuration for Xray
+            inbound_config = {
+                "protocol": "http",
+                "tag": inbound_tag,
+                "listen": "127.0.0.1",
+                "port": port,
+                "settings": {
+                    "allowTransparent": False
+                },
+                "sniffing": {
+                    "enabled": False
+                }
+            }
+
+            inbounds.append(inbound_config)
             outbounds.append(self._build_test_outbound_config(
                 server_config, settings, tag=outbound_tag))
 
-        route_rules = [{"inboundTag": [f"http-in-{i}"],
-                        "outboundTag": f"proxy-out-{i}"} for i in range(len(servers))]
-        routing_config = {"rules": route_rules}
-        return {"dns": dns_config, "inbounds": inbounds, "outbounds": outbounds, "routing": routing_config}
+        # Create routing rules
+        route_rules = []
+        for i in range(len(servers)):
+            route_rules.append({
+                "inboundTag": [f"http-in-{i}"],
+                "outboundTag": f"proxy-out-{i}"
+            })
+
+        routing_config = {
+            "rules": route_rules,
+            "domainStrategy": "AsIs"
+        }
+
+        return {
+            "dns": dns_config,
+            "inbounds": inbounds,
+            "outbounds": outbounds,
+            "routing": routing_config
+        }
 
     def generate_config_json(self, server_config, settings):
         """Generates the complete Xray configuration JSON."""

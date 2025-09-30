@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (
     QDialog,
     QFormLayout,
     QHBoxLayout,
+    QSizePolicy,
 )
 
 
@@ -15,6 +16,8 @@ class RoutingRuleDialog(QDialog):
         self.setWindowTitle(self.tr("Edit Rule")
                             if rule else self.tr("Add Rule"))
         self.setMinimumWidth(400)
+        self.setMaximumWidth(600)
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
 
         self.layout = QFormLayout(self)
 

@@ -1,7 +1,7 @@
 import uuid
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QListWidget, QPushButton,
-    QDialogButtonBox, QLineEdit, QFormLayout, QLabel, QMessageBox, QListWidgetItem
+    QDialogButtonBox, QLineEdit, QFormLayout, QLabel, QMessageBox, QListWidgetItem, QSizePolicy
 )
 from PySide6.QtCore import Qt
 
@@ -19,6 +19,8 @@ class ChainEditDialog(QDialog):
         self.setWindowTitle(self.tr(
             "Edit Chain") if chain else self.tr("Add Chain"))
         self.setMinimumSize(600, 450)
+        self.setMaximumSize(1000, 700)
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
 
         main_layout = QVBoxLayout(self)
 
@@ -138,6 +140,8 @@ class ChainManagerDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle(self.tr("Chain Manager"))
         self.setMinimumSize(600, 400)
+        self.setMaximumSize(1000, 700)
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
 
         self.chains = chains
         self.all_servers = all_servers

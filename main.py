@@ -54,8 +54,8 @@ def main():
     # Define and connect callbacks
     server_manager_callbacks = {
         "log": pyside_ui.log,
-        "on_servers_loaded": pyside_ui.update_group_dropdown,
-        "on_servers_updated": pyside_ui.signals.servers_updated.emit,
+        "on_servers_loaded": pyside_ui.on_servers_loaded,
+        "on_servers_updated": pyside_ui.on_servers_updated,
         "on_ping_result": lambda config, ping, test_type: pyside_ui.signals.ping_result.emit(config, ping, test_type),
         "on_ping_started": lambda config: pyside_ui.signals.ping_started.emit(config),
         "on_health_check_progress": lambda current, total: pyside_ui.signals.health_check_progress.emit(current, total),

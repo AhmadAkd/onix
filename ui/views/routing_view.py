@@ -6,12 +6,14 @@ from PySide6.QtWidgets import (
     QPushButton,
     QTableWidget,
     QHeaderView,
+    QSizePolicy,
 )
 from PySide6.QtCore import Qt
 
 
 def create_routing_view(main_window):
     widget = QWidget()
+    widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     layout = QVBoxLayout(widget)
     layout.setContentsMargins(20, 20, 20, 20)
 

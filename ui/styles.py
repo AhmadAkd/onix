@@ -171,8 +171,7 @@ QGroupBox::title {{
     background-color: #f8f9fa;
     border-right: 1px solid #dee2e6;
     padding: 16px 0;
-    min-width: 100px;
-    max-width: 150px;
+    width: 160px;
 }}
 #NavRail::item {{ 
     border: none; 
@@ -235,12 +234,10 @@ QPushButton:disabled {{
     background-color: #f8f9fa;
     color: #374151;
     border: 1px solid #dee2e6;
-    padding: 6px 12px;
-    border-radius: 4px;
+    padding: 8px 12px;
+    border-radius: 6px;
     font-size: 12px;
     font-weight: 500;
-    min-width: 80px;
-    max-width: 140px;
 }}
 #TopBar QPushButton:hover, #StatusBar QPushButton:hover {{ 
     background-color: #e9ecef;
@@ -577,12 +574,10 @@ QPushButton:disabled {{
     background-color: #334155;
     color: #cbd5e1;
     border: 1px solid #475569;
-    padding: 6px 12px;
-    border-radius: 4px;
+    padding: 8px 12px;
+    border-radius: 6px;
     font-size: 12px;
     font-weight: 500;
-    min-width: 80px;
-    max-width: 140px;
 }}
 #TopBar QPushButton:hover, #StatusBar QPushButton:hover {{ 
     background-color: #475569;
