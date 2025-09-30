@@ -25,7 +25,7 @@ jobs:
     
     - name: Run tests
       run: |
-        pytest tests/ -v
+        pytest tests/ -v --cov=. --cov-report=xml
     
     - name: Run linting
       run: |

@@ -44,7 +44,7 @@ jobs:
         pytest tests/ -v --cov=. --cov-report=xml
     
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         file: ./coverage.xml
         flags: unittests
@@ -71,13 +71,14 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pyinstaller
+        pip install -r requirements-dev.txt
     
     - name: Build application
       run: |
         python build_all.py
     
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: onix-${{ matrix.os }}-${{ matrix.python-version }}
         path: dist/

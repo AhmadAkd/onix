@@ -1,12 +1,14 @@
-name: Release
+name: Build
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
 
 jobs:
-  release:
+  build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -25,24 +27,15 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install -r requirements-dev.txt
         pip install pyinstaller
     
     - name: Build application
       run: |
         python build_all.py
     
-    - name: Create release archive
-      run: |
-        if [ "${{ matrix.os }}" == "windows-latest" ]; then
-          cd dist && zip -r onix-${{ github.ref_name }}-windows-amd64.zip onix-windows-amd64/
-        elif [ "${{ matrix.os }}" == "macos-latest" ]; then
-          cd dist && zip -r onix-${{ github.ref_name }}-macos-amd64.zip onix-macos-amd64/
-        else
-          cd dist && tar -czf onix-${{ github.ref_name }}-linux-amd64.tar.gz onix-linux-amd64/
-        fi
-    
-    - name: Upload release assets
+    - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: onix-${{ github.ref_name }}-${{ matrix.os }}
-        path: dist/*.zip dist/*.tar.gz
+        name: onix-${{ matrix.os }}-${{ matrix.python-version }}
+        path: dist/

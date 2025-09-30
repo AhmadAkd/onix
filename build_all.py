@@ -67,6 +67,13 @@ def ensure_dependencies():
         if not run_command([sys.executable, "-m", "pip", "install", "pyinstaller"]):
             return False
 
+    # Install all requirements
+    print("Installing all requirements...")
+    if not run_command([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"]):
+        return False
+    if not run_command([sys.executable, "-m", "pip", "install", "-r", "requirements-dev.txt"]):
+        return False
+
     # Check other dependencies
     try:
         import PySide6
