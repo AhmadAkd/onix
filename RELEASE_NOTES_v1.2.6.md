@@ -1,6 +1,6 @@
-# Onix v1.2.5 Release Notes
+# Onix v1.2.6 Release Notes
 
-## 🚀 What's New in v1.2.5
+## 🚀 What's New in v1.2.6
 
 ### 🔧 **Bug Fixes & Improvements**
 
@@ -99,7 +99,7 @@
 
 Thank you for using Onix! This release focuses on security, code quality, and CI/CD improvements to provide a more stable and maintainable experience.
 
-**Download**: [GitHub Releases](https://github.com/AhmadAkd/onix-client/releases/tag/v1.2.5)
+**Download**: [GitHub Releases](https://github.com/AhmadAkd/onix-client/releases/tag/v1.2.6)
 
 **Report Issues**: [GitHub Issues](https://github.com/AhmadAkd/onix-client/issues)
 
