@@ -6,14 +6,11 @@ Provides UI for managing plugins and extensions
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QListWidget, QListWidgetItem, QTextEdit, QGroupBox,
-    QSplitter, QScrollArea, QFrame, QSizePolicy, QMessageBox,
-    QProgressBar, QCheckBox, QLineEdit, QComboBox
+    QSplitter, QFrame, QSizePolicy, QMessageBox
 )
-from PySide6.QtCore import Qt, QTimer, Signal, QThread
-from PySide6.QtGui import QFont, QIcon, QPixmap
-from services.plugin_system import PluginManager, PluginInfo, PluginInterface
+from PySide6.QtCore import Qt, Signal, QThread
+from services.plugin_system import PluginManager, PluginInfo
 from constants import LogLevel
-import os
 
 
 class PluginDiscoveryThread(QThread):
@@ -327,7 +324,7 @@ def refresh_plugins(main_window, plugin_list: QListWidget, available_list: QList
         try:
             discovered_plugins = main_window.plugin_manager.discover_plugins()
             load_available_plugins(
-                discovered_plugins, available_list, loaded_plugins)
+                discovered_plugins, available_list, loaded_plugins, main_window, plugin_list)
         except Exception as e:
             main_window.log(
                 f"Error discovering plugins: {e}", LogLevel.WARNING)
@@ -336,7 +333,7 @@ def refresh_plugins(main_window, plugin_list: QListWidget, available_list: QList
         main_window.log(f"Error refreshing plugins: {e}", LogLevel.ERROR)
 
 
-def load_available_plugins(discovered_plugins, available_list: QListWidget, loaded_plugins):
+def load_available_plugins(discovered_plugins, available_list: QListWidget, loaded_plugins, main_window, plugin_list):
     """Load available plugins into the list."""
     try:
         loaded_names = {p.name for p in loaded_plugins}
@@ -346,7 +343,7 @@ def load_available_plugins(discovered_plugins, available_list: QListWidget, load
                 item = QListWidgetItem()
                 widget = PluginItemWidget(plugin_info, is_loaded=False)
                 widget.plugin_toggle_requested.connect(
-                    lambda name, enabled: load_plugin(main_window, name, enabled, plugin_list, available_list))
+                    lambda name, enabled: toggle_plugin(main_window, name, enabled, plugin_list, available_list))
 
                 item.setSizeHint(widget.sizeHint())
                 available_list.addItem(item)

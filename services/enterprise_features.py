@@ -5,11 +5,9 @@ Provides multi-tenant support, RBAC, audit logging, and compliance reporting
 
 import time
 import threading
-import json
-import hashlib
 import uuid
 from typing import Dict, Any, List, Optional, Callable, Set
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from enum import Enum
 from constants import LogLevel
 

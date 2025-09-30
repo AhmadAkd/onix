@@ -5,20 +5,18 @@ Protocol Extensions View
 
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QTabWidget, QGroupBox, QScrollArea, QFrame, QSizePolicy,
-    QGridLayout, QProgressBar, QTextEdit, QComboBox, QSpinBox,
-    QCheckBox, QSlider, QLineEdit, QTableWidget, QTableWidgetItem,
-    QHeaderView, QSplitter, QMessageBox
+    QTabWidget, QGroupBox, QGridLayout, QTextEdit, QComboBox, QSpinBox,
+    QLineEdit, QTableWidget, QTableWidgetItem,
+    QHeaderView
 )
-from PySide6.QtCore import Qt, QTimer, Signal, QThread, QObject
-from PySide6.QtGui import QPainter, QPen, QBrush, QColor, QFont, QFontMetrics
+from PySide6.QtCore import Qt, QTimer, Signal, QThread
+from PySide6.QtGui import QPainter, QPen, QColor, QFont
 from services.protocol_extensions import (
     get_protocol_manager, ProtocolType, ProtocolConfig, ConnectionMetrics
 )
 from constants import LogLevel
 import time
-import json
-from typing import Dict, Any, List, Optional
+from typing import List
 from collections import deque
 
 
@@ -621,7 +619,6 @@ def send_websocket_message(main_window, message: str):
         return
 
     try:
-        manager = get_protocol_manager()
         # شبیه‌سازی ارسال پیام
         main_window.protocol_view.websocket_tab.message_log.append(
             f"Sent: {message}")

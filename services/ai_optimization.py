@@ -5,14 +5,11 @@ Provides intelligent optimization, predictive failover, and traffic analysis
 
 import time
 import threading
-import json
 import statistics
-import math
-from typing import Dict, Any, List, Optional, Callable, Tuple
+from typing import Dict, Any, List, Optional, Callable
 from dataclasses import dataclass
 from collections import deque, defaultdict
 from constants import LogLevel
-import numpy as np
 
 
 @dataclass
@@ -124,7 +121,6 @@ class AIPerformanceAnalyzer:
                 # Calculate Z-scores for key metrics
                 pings = [m.ping for m in server_data]
                 speeds = [m.download_speed for m in server_data]
-                packet_losses = [m.packet_loss for m in server_data]
 
                 ping_mean = statistics.mean(pings)
                 ping_std = statistics.stdev(pings) if len(pings) > 1 else 0
@@ -470,9 +466,9 @@ class AIPerformanceAnalyzer:
                 if len(metrics) < 5:
                     continue
 
-                avg_ping = statistics.mean([m.ping for m in metrics])
-                avg_speed = statistics.mean(
-                    [m.download_speed for m in metrics])
+                # Calculate average metrics for analysis
+                statistics.mean([m.ping for m in metrics])
+                statistics.mean([m.download_speed for m in metrics])
 
                 # Update hourly pattern
                 if f"hour_{hour}" not in self.patterns:

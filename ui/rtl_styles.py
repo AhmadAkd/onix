@@ -3,7 +3,6 @@ RTL (Right-to-Left) Styles for Onix
 Provides comprehensive RTL support for Persian, Arabic, Hebrew, and Urdu
 """
 
-from typing import Dict, Any
 
 
 def get_rtl_stylesheet() -> str:

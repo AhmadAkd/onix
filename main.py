@@ -84,7 +84,7 @@ def main():
                 app.installTranslator(translator)
 
         # --- RTL Support Setup ---
-        from ui.rtl_styles import is_rtl_language, apply_rtl_styles, get_rtl_font_family
+        from ui.rtl_styles import is_rtl_language, apply_rtl_styles
 
         # Check if language is RTL
         is_rtl = safe_execute(

@@ -5,14 +5,12 @@ Provides a comprehensive performance monitoring dashboard
 
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QGroupBox,
-    QProgressBar, QTableWidget, QTableWidgetItem, QTextEdit, QSplitter,
-    QTabWidget, QScrollArea, QFrame, QGridLayout, QSizePolicy
+    QProgressBar, QTableWidget, QTableWidgetItem, QTextEdit, QTabWidget
 )
-from PySide6.QtCore import Qt, QTimer, QThread, Signal, QObject
-from PySide6.QtGui import QFont, QPalette, QColor
-from typing import Dict, Any, List
+from PySide6.QtCore import Qt, QTimer, Signal, QObject
+from PySide6.QtGui import QFont
+from typing import Dict, Any
 from utils.performance_monitor import get_global_performance_monitor, PerformanceOptimizer
-from constants import LogLevel
 
 
 class PerformanceDataWorker(QObject):
@@ -264,7 +262,7 @@ def optimize_memory(main_window):
         result = optimizer.optimize_memory()
         
         if result.get("success", False):
-            message = f"Memory optimization successful!\n"
+            message = "Memory optimization successful!\n"
             message += f"Objects collected: {result.get('objects_collected', 0)}\n"
             message += f"Memory freed: {result.get('memory_freed_mb', 0):.2f} MB"
         else:
@@ -282,7 +280,7 @@ def optimize_threads(main_window):
         optimizer = PerformanceOptimizer()
         result = optimizer.optimize_threads()
         
-        message = f"Thread optimization result:\n"
+        message = "Thread optimization result:\n"
         message += f"Current threads: {result.get('current_threads', 0)}\n"
         message += f"Message: {result.get('message', 'No message')}"
         

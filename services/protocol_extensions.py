@@ -5,17 +5,11 @@ Protocol Extensions Service
 
 import threading
 import time
-import json
 import asyncio
-import ssl
-import socket
-from typing import Dict, Any, List, Optional, Callable, Tuple
+from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 from enum import Enum
 from constants import LogLevel
-import subprocess
-import platform
-import os
 
 
 class ProtocolType(Enum):
@@ -278,8 +272,6 @@ class CustomProtocolManager:
             with self._lock:
                 if protocol_name not in self.protocols:
                     return None
-
-                config = self.protocols[protocol_name]
 
             connection_id = f"custom_{protocol_name}_{int(time.time())}"
 

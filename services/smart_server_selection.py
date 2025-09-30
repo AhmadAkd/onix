@@ -6,8 +6,7 @@ Provides intelligent server selection based on multiple criteria
 import time
 import threading
 import statistics
-import math
-from typing import Dict, Any, List, Optional, Callable, Tuple
+from typing import Dict, Any, List, Optional, Callable
 from dataclasses import dataclass
 from collections import defaultdict, deque
 from constants import LogLevel
@@ -314,7 +313,6 @@ class SmartServerSelector:
             if len(scores) < 2:
                 return success_rate
 
-            mean_score = statistics.mean(scores)
             variance = statistics.variance(scores)
             # Lower variance = higher consistency
             consistency = max(0.5, 1.0 - (variance / 100))

@@ -4,14 +4,12 @@ Provides modern, customizable UI components with advanced features
 """
 
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QSlider, QProgressBar, QFrame, QScrollArea, QSizePolicy,
-    QGraphicsDropShadowEffect, QGraphicsEffect, QSpacerItem
+    QWidget, QVBoxLayout, QLabel, QPushButton,
+    QSlider, QProgressBar, QFrame, QSizePolicy,
+    QGraphicsDropShadowEffect
 )
-from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QRect, QTimer, Signal, QSize
-from PySide6.QtGui import QPainter, QPen, QBrush, QColor, QFont, QLinearGradient, QRadialGradient, QFontMetrics
-from typing import Optional, Dict, Any, List, Callable
-import math
+from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QTimer
+from PySide6.QtGui import QPainter, QPen, QBrush, QColor, QFont, QLinearGradient, QFontMetrics
 
 
 class ModernCard(QFrame):

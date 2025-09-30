@@ -5,9 +5,8 @@ Traffic Management Service
 
 import threading
 import time
-import json
 import statistics
-from typing import Dict, Any, List, Optional, Callable, Tuple
+from typing import Dict, Any, List, Optional, Callable
 from dataclasses import dataclass
 from enum import Enum
 from collections import deque, defaultdict

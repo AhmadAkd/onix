@@ -5,14 +5,12 @@ Provides extensibility through third-party plugins and add-ons
 
 import os
 import sys
-import json
 import importlib
 import inspect
 import threading
 import time
 from typing import Dict, Any, List, Optional, Callable, Type
 from dataclasses import dataclass
-from pathlib import Path
 from constants import LogLevel
 
 

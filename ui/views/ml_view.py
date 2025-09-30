@@ -5,21 +5,20 @@ Machine Learning Dashboard View
 
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QTabWidget, QGroupBox, QScrollArea, QFrame, QSizePolicy,
-    QGridLayout, QProgressBar, QTextEdit, QComboBox, QSpinBox,
-    QCheckBox, QSlider, QLineEdit, QTableWidget, QTableWidgetItem,
-    QHeaderView, QSplitter, QMessageBox, QDialog, QDialogButtonBox,
+    QTabWidget, QGroupBox, QGridLayout, QProgressBar, QTextEdit, QComboBox, QSpinBox,
+    QLineEdit, QTableWidget, QTableWidgetItem,
+    QHeaderView, QMessageBox, QDialog, QDialogButtonBox,
     QFormLayout, QDoubleSpinBox, QListWidget, QListWidgetItem
 )
-from PySide6.QtCore import Qt, QTimer, Signal, QThread, QObject
-from PySide6.QtGui import QPainter, QPen, QBrush, QColor, QFont, QFontMetrics
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QPainter, QPen, QBrush, QColor, QFont
 from services.ml_optimization import (
-    get_ml_service, MLModel, TrainingData, PredictionResult
+    get_ml_service
 )
 from constants import LogLevel
 import time
 import json
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any
 from collections import deque
 
 class ModelTrainingDialog(QDialog):
@@ -601,7 +600,6 @@ def make_prediction(main_window, widget):
         }
         
         # انجام پیش‌بینی
-        model_name = widget.model_combo.currentText()
         result = service.predict_performance(features)
         
         if result:

@@ -6,22 +6,18 @@ Traffic Management View
 from PySide6.QtWidgets import QInputDialog
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QTabWidget, QGroupBox, QScrollArea, QFrame, QSizePolicy,
-    QGridLayout, QProgressBar, QTextEdit, QComboBox, QSpinBox,
-    QCheckBox, QSlider, QLineEdit, QTableWidget, QTableWidgetItem,
-    QHeaderView, QSplitter, QMessageBox, QDialog, QDialogButtonBox,
-    QFormLayout, QDoubleSpinBox
+    QTabWidget, QGroupBox, QGridLayout, QComboBox, QSpinBox,
+    QCheckBox, QLineEdit, QTableWidget, QTableWidgetItem,
+    QHeaderView, QMessageBox, QDialog, QDialogButtonBox,
+    QFormLayout
 )
-from PySide6.QtCore import Qt, QTimer, Signal, QThread, QObject
-from PySide6.QtGui import QPainter, QPen, QBrush, QColor, QFont, QFontMetrics
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QPainter, QPen, QBrush, QColor, QFont
 from services.traffic_management import (
-    get_traffic_service, TrafficRule, TrafficPriority, LoadBalancingStrategy,
-    ServerStats, TrafficMetrics
+    get_traffic_service, TrafficRule, TrafficPriority, LoadBalancingStrategy
 )
 from constants import LogLevel
 import time
-import json
-from typing import Dict, Any, List, Optional
 from collections import deque
 
 

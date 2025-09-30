@@ -4,7 +4,6 @@ Provides comprehensive error handling and logging
 """
 
 import traceback
-import logging
 import functools
 from typing import Callable, Any, Optional, Dict
 from constants import LogLevel

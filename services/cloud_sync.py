@@ -11,7 +11,6 @@ import requests
 from typing import Dict, Any, List, Optional, Callable
 from dataclasses import dataclass, asdict
 from constants import LogLevel
-import os
 import base64
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes

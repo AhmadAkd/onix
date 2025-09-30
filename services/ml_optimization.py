@@ -5,14 +5,12 @@ Machine Learning Optimization Service
 
 import threading
 import time
-import json
 import numpy as np
 from typing import Dict, Any, List, Optional, Callable, Tuple
 from dataclasses import dataclass
 from collections import deque, defaultdict
 from constants import LogLevel
 import random
-import math
 
 @dataclass
 class MLModel:

@@ -4,16 +4,12 @@ Provides comprehensive security features including Kill Switch, DNS Leak Protect
 """
 
 import os
-import sys
 import time
 import threading
 import subprocess
 import platform
 import socket
-import psutil
-import hashlib
-import secrets
-from typing import Dict, Any, List, Optional, Callable, Tuple
+from typing import Dict, Any, List, Optional, Callable
 from dataclasses import dataclass
 from enum import Enum
 from constants import LogLevel
@@ -206,9 +202,9 @@ class KillSwitchManager:
                 f"name={rule_name}",
                 "dir=out",
                 "action=block",
-                f"remoteip=any",
-                f"localport=any",
-                f"remoteport=any",
+                "remoteip=any",
+                "localport=any",
+                "remoteport=any",
                 "protocol=any"
             ]
 

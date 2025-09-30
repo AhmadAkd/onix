@@ -5,18 +5,14 @@ Provides comprehensive analytics, charts, and insights
 
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QTabWidget, QGroupBox, QScrollArea, QFrame, QSizePolicy,
-    QGridLayout, QProgressBar, QTextEdit, QComboBox, QSpinBox,
-    QCheckBox, QSlider, QDateTimeEdit, QCalendarWidget
+    QTabWidget, QGroupBox, QFrame, QSizePolicy,
+    QGridLayout, QProgressBar, QTextEdit
 )
-from PySide6.QtCore import Qt, QTimer, Signal, QDateTime, QDate
-from PySide6.QtGui import QPainter, QPen, QBrush, QColor, QFont, QLinearGradient
-from services.ai_optimization import AIPerformanceAnalyzer, PerformanceMetrics, OptimizationRecommendation
-from services.statistics_service import RealTimeStatisticsService
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QPainter, QPen, QBrush, QColor, QFont
 from constants import LogLevel
 import time
-import json
-from typing import Dict, Any, List, Optional
+from typing import Dict
 from collections import deque
 import math
 

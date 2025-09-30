@@ -5,9 +5,6 @@ Zero-Trust Security Service
 
 import threading
 import time
-import json
-import hashlib
-import hmac
 import secrets
 from typing import Dict, Any, List, Optional, Callable, Tuple
 from dataclasses import dataclass
@@ -15,9 +12,6 @@ from enum import Enum
 from collections import deque, defaultdict
 from constants import LogLevel
 import ipaddress
-import socket
-import ssl
-import requests
 
 class TrustLevel(Enum):
     """سطوح اعتماد"""
@@ -331,7 +325,7 @@ class ThreatDetector:
         with self._lock:
             total_activities = sum(len(activities) for activities in self.suspicious_activities.values())
             suspicious_identities = len([
-                identity for activities in self.suspicious_activities.values()
+                activities for activities in self.suspicious_activities.values()
                 if len(activities) > 10
             ])
             

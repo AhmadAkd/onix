@@ -7,7 +7,6 @@ import threading
 import time
 import psutil
 import requests
-import weakref
 import gc
 from typing import Callable, Optional, Dict, Any, List
 from collections import deque

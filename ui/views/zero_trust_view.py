@@ -5,23 +5,18 @@ Zero-Trust Security Dashboard View
 
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QTabWidget, QGroupBox, QScrollArea, QFrame, QSizePolicy,
-    QGridLayout, QProgressBar, QTextEdit, QComboBox, QSpinBox,
-    QCheckBox, QSlider, QLineEdit, QTableWidget, QTableWidgetItem,
-    QHeaderView, QSplitter, QMessageBox, QDialog, QDialogButtonBox,
-    QFormLayout, QDoubleSpinBox, QListWidget, QListWidgetItem,
-    QInputDialog, QTreeWidget, QTreeWidgetItem
+    QTabWidget, QGroupBox, QGridLayout, QTextEdit, QComboBox, QLineEdit, QTableWidget, QTableWidgetItem,
+    QHeaderView, QMessageBox, QDialog, QDialogButtonBox,
+    QFormLayout, QInputDialog
 )
-from PySide6.QtCore import Qt, QTimer, Signal, QThread, QObject
-from PySide6.QtGui import QPainter, QPen, QBrush, QColor, QFont, QFontMetrics
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QPainter, QPen, QBrush, QColor, QFont
 from services.zero_trust_security import (
-    get_zero_trust_service, Identity, TrustLevel, SecurityPolicy,
-    AccessRequest, SecurityEvent
+    get_zero_trust_service, Identity, TrustLevel
 )
 from constants import LogLevel
 import time
-import json
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any
 from collections import deque
 
 class IdentityDialog(QDialog):
