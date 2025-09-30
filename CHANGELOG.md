@@ -2,6 +2,67 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2025-09-30
+
+### Added
+
+- **Enhanced Settings UI**: New Security, Performance, and Privacy tabs
+- **Speed Test Service**: Real-time speed testing with detailed analytics
+- **Auto-failover**: Automatic server switching on connection failure
+- **Settings Search**: Quick search functionality across all settings
+- **Settings Presets**: Pre-configured settings (Balanced, Performance, Security, Privacy)
+- **Advanced Security Features**:
+  - Kill Switch for connection protection
+  - DNS Leak Protection
+  - Certificate Pinning
+  - IPv6 Leak Protection
+- **Real-time Statistics**: Live monitoring of connection performance
+- **Custom Themes**: Enhanced theming system with RTL support
+- **Privacy Controls**: Comprehensive data protection and privacy settings
+- **Performance Analytics**: Detailed performance monitoring and diagnostics
+- **Browser Integration**: Seamless browser integration capabilities
+- **Keyboard Shortcuts**: Quick access to common functions
+- **Multi-user Support**: User management and profile system
+- **Auto-backup**: Automatic configuration backup and restore
+- **Network Diagnostics**: Advanced network troubleshooting tools
+- **Notification Service**: System notifications for important events
+
+### Changed
+
+- **UI/UX Improvements**: Enhanced layout, styling, and responsiveness
+- **Settings Management**: Comprehensive settings system with better organization
+- **Health Check**: Improved health checking with EMA smoothing and exponential backoff
+- **Xray Integration**: Fixed configuration issues for URL testing
+- **Error Handling**: Better error handling and user feedback
+- **Performance**: Optimized memory usage and response times
+
+### Fixed
+
+- Fixed Xray configuration issues causing test core failures
+- Resolved UI layout problems in settings view
+- Fixed selected tab text readability issues
+- Improved error handling in core management
+- Enhanced stability and reliability
+
+### Technical Improvements
+
+- Added 9 new service modules for advanced features
+- Enhanced settings management system
+- Improved Xray/Sing-box integration
+- Better error handling and diagnostics
+- Enhanced UI responsiveness and theming
+- Improved code organization and maintainability
+
+### Files Changed
+
+- 30 files modified
+- 5,617 lines added
+- 312 lines removed
+- 10 new service modules created
+- Enhanced UI components and styling
+
+---
+
 ## [1.0.0] - 2025-09-29
 
 ### Added
