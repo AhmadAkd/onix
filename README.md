@@ -14,6 +14,7 @@ Onix is a graphical user interface (GUI) client for Sing-box, designed to simpli
 
 ## ✨ Features
 
+### 🚀 Core Features
 - **Extensive Protocol Support:**
   - **Standard Protocols:** VLESS, VMess, Shadowsocks, Trojan.
   - **Modern Protocols:** **TUIC (v5)**, **Hysteria2**, and **WireGuard**.
@@ -22,31 +23,65 @@ Onix is a graphical user interface (GUI) client for Sing-box, designed to simpli
   - Add, edit, and delete multiple subscription links.
   - Enable or disable individual subscriptions.
   - Update all subscriptions with a single click to fetch the latest servers.
+
+### 🖥️ Server Management
 - **Powerful Server Management:**
   - Add servers from subscription links.
   - Add servers manually via share links.
   - Add servers by scanning QR codes directly from your screen.
   - **Import WireGuard configs** directly from `.conf` files.
   - Organize servers into groups for better management.
-- **Enhanced UI & UX:**
-  - **Search Bar:** Instantly filter your server list by name.
-  - **Sortable Columns:** Sort servers by name or ping latency with a single click.
-  - **Interactive Log Panel:** Filter logs by level (Info, Warning, Error, etc.) to easily debug issues.
-  - **Visual Feedback:** See "..." indicators next to servers during latency tests.
 - **Connection Testing & Analysis:**
   - Perform TCP pings and URL tests for your servers to check their performance.
+  - **Real-time Speed Test** with detailed analytics and monitoring.
   - Sort servers by ping results to easily find the fastest one.
+  - **Auto-failover** for automatic server switching on connection failure.
+
+### 🎨 Enhanced UI & UX
+- **Modern Interface:** Clean, responsive design with RTL support.
+- **Search & Filter:** Instantly filter your server list by name.
+- **Sortable Columns:** Sort servers by name or ping latency with a single click.
+- **Interactive Log Panel:** Filter logs by level (Info, Warning, Error, etc.) to easily debug issues.
+- **Visual Feedback:** See "..." indicators next to servers during latency tests.
+- **Custom Themes:** Multiple themes with dark/light mode support.
+- **Settings Search:** Quick search functionality across all settings.
+- **Settings Presets:** Pre-configured settings (Balanced, Performance, Security, Privacy).
+
+### 🔒 Advanced Security & Privacy
+- **Kill Switch:** Automatic connection protection on proxy failure.
+- **DNS Leak Protection:** Prevent DNS leaks and ensure privacy.
+- **Certificate Pinning:** Enhanced security for TLS connections.
+- **IPv6 Leak Protection:** Comprehensive IPv6 leak prevention.
+- **Privacy Controls:** Comprehensive data protection and privacy settings.
+- **Data Collection Controls:** Disable telemetry, crash reports, and usage statistics.
+
+### ⚡ Performance & Monitoring
+- **Real-time Statistics:** Live monitoring of connection performance.
+- **Performance Analytics:** Detailed performance monitoring and diagnostics.
+- **Connection Multiplexing:** Advanced multiplexing for improved performance.
+- **Bandwidth Limiting:** Upload/download speed controls.
+- **Performance Dashboard:** Visual performance metrics and analytics.
+
+### 🔧 Advanced Configuration
+- **Connection Mode:** Switch between Rule-Based and Global proxy modes.
+- **Configurable Muxing:** Enable and configure multiplexing (h2mux, smux, yamux) to improve performance.
+- **Hysteria2 Bandwidth:** Set default upload and download speeds for Hysteria2 connections.
+- **Custom DNS:** Set custom DNS servers.
+- **Bypass Rules:** Configure domains and IPs to bypass the proxy.
+- **Custom Routing:** Define advanced, custom rules to control how network traffic is routed (e.g., by domain, IP, process, geosite, or geoip).
+
+### 🌐 System Integration
 - **System Integration (Windows):**
   - Easily enable or disable the system-wide proxy.
   - Run the application in the system tray for discreet operation.
   - **TUN Mode:** Enable system-wide proxying for all applications.
-- **Advanced Configuration:**
-  - **Connection Mode:** Switch between Rule-Based and Global proxy modes.
-  - **Configurable Muxing:** Enable and configure multiplexing (h2mux, smux, yamux) to improve performance.
-  - **Hysteria2 Bandwidth:** Set default upload and download speeds for Hysteria2 connections.
-  - **Custom DNS:** Set custom DNS servers.
-  - **Bypass Rules:** Configure domains and IPs to bypass the proxy.
-  - **Custom Routing:** Define advanced, custom rules to control how network traffic is routed (e.g., by domain, IP, process, geosite, or geoip).
+- **Browser Integration:** Seamless browser integration capabilities.
+- **Keyboard Shortcuts:** Quick access to common functions.
+- **System Notifications:** Important event notifications.
+
+### 👥 Multi-User & Backup
+- **Multi-user Support:** User management and profile system.
+- **Auto-backup:** Automatic configuration backup and restore.
 - **Profile Management:**
   - **Import/Export:** Easily import and export your entire application profile (including servers, subscriptions, and settings) as a single JSON file.
 
