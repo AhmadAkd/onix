@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release (e.g., v1.2.5)'
+        description: 'Version to release (e.g., v1.2.6)'
         required: true
         type: string
 
@@ -45,6 +45,8 @@ jobs:
   build-windows:
     runs-on: windows-latest
     needs: create-release
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@v4
     
@@ -74,6 +76,8 @@ jobs:
   build-macos:
     runs-on: macos-latest
     needs: build-windows
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@v4
     
@@ -103,6 +107,8 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     needs: build-macos
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@v4
     
@@ -132,6 +138,8 @@ jobs:
   build-source:
     runs-on: ubuntu-latest
     needs: build-linux
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@v4
     
