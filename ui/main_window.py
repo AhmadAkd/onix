@@ -64,6 +64,11 @@ from ui.dialogs.export_dialog import ExportDialog
 from ui.widgets.server_card import ServerCardWidget
 from ui.styles import THEMES, get_dark_stylesheet, get_light_stylesheet
 from services.speed_test_service import SpeedTestService, AutoFailoverService
+from services.smart_server_selection import SmartServerSelector, SelectionCriteria
+from services.advanced_security import AdvancedSecuritySuite, SecurityConfig, SecurityLevel
+from services.plugin_system import PluginManager, PluginInterface
+from services.ai_optimization import AIPerformanceAnalyzer, PredictiveFailover, PerformanceMetrics
+from services.enterprise_features import EnterpriseManager, UserRole, Permission
 
 
 class PySideUI(QMainWindow):
@@ -107,6 +112,56 @@ class PySideUI(QMainWindow):
         # Initialize speed test and auto-failover services
         self.speed_test_service = SpeedTestService(self.log)
         self.auto_failover_service = AutoFailoverService(self.log)
+
+        # Initialize smart server selection
+        self.smart_selector = SmartServerSelector(self.log)
+        self.smart_selector.start_learning()
+
+        # Initialize advanced security suite
+        self.security_suite = AdvancedSecuritySuite(self.log)
+
+        # Initialize protocol extensions manager
+        from services.protocol_extensions import get_protocol_manager
+        self.protocol_manager = get_protocol_manager()
+        self.protocol_manager.start_monitoring()
+
+        # Initialize traffic management service
+        from services.traffic_management import get_traffic_service
+        self.traffic_service = get_traffic_service()
+        self.traffic_service.start()
+
+        # Initialize ML optimization service
+        from services.ml_optimization import get_ml_service
+        self.ml_service = get_ml_service()
+        self.ml_service.start()
+
+        # Initialize Zero-Trust security service
+        from services.zero_trust_security import get_zero_trust_service
+        self.zero_trust_service = get_zero_trust_service()
+        self.zero_trust_service.start()
+
+        # Initialize plugin manager
+        self.plugin_manager = PluginManager(self.log)
+        self.plugin_manager.set_app_context({
+            'log_callback': self.log,
+            'server_manager': self.server_manager,
+            'singbox_manager': self.singbox_manager,
+            'main_window': self
+        })
+        self.plugin_manager.add_plugin_directory("plugins")
+        self.plugin_manager.start_event_processing()
+
+        # Initialize AI analyzer
+        self.ai_analyzer = AIPerformanceAnalyzer(self.log)
+        self.ai_analyzer.start_analysis()
+
+        # Initialize predictive failover
+        self.predictive_failover = PredictiveFailover(self.log)
+
+        # Initialize enterprise features
+        self.enterprise_manager = EnterpriseManager(self.log)
+        self.enterprise_manager.initialize_enterprise()
+        self.security_config = SecurityConfig()
         # Connect signals to slots
         self.signals.ping_result.connect(
             self.on_ping_result, Qt.QueuedConnection)
@@ -150,6 +205,11 @@ class PySideUI(QMainWindow):
         self.nav_rail.currentRowChanged.connect(self.animate_tab_transition)
         self.nav_rail.setCurrentRow(0)
 
+        # Connect smart connect button
+        if hasattr(self, 'smart_connect_button'):
+            self.smart_connect_button.clicked.connect(
+                self.handle_smart_connect)
+
         # Apply initial theme
         self.apply_theme(self.settings.get("appearance_mode", "System"))
 
@@ -161,68 +221,66 @@ class PySideUI(QMainWindow):
             rtl_languages = ["fa", "ar", "he", "ur"]
             if self.settings.get("language") in rtl_languages:
                 app.setLayoutDirection(Qt.RightToLeft)
-                app.setAttribute(Qt.WA_RightToLeft, True)
                 # Apply RTL-specific styling to the entire application
                 app.setStyleSheet(app.styleSheet() + """
                     QWidget {
-                        direction: rtl;
+                        
                     }
                     QMainWindow {
-                        direction: rtl;
+                        
                     }
                     QLabel {
-                        direction: rtl;
+                        
                     }
                     QPushButton {
-                        direction: rtl;
+                        
                     }
                     QComboBox {
-                        direction: rtl;
+                        
                     }
                     QLineEdit {
-                        direction: rtl;
+                        
                     }
                     QTextEdit {
-                        direction: rtl;
+                        
                     }
                     QListWidget {
-                        direction: rtl;
+                        
                     }
                     QTableWidget {
-                        direction: rtl;
+                        
                     }
                 """)
             else:
                 app.setLayoutDirection(Qt.LeftToRight)
-                app.setAttribute(Qt.WA_RightToLeft, False)
                 # Apply LTR-specific styling to the entire application
                 app.setStyleSheet(app.styleSheet() + """
                     QWidget {
-                        direction: ltr;
+                        
                     }
                     QMainWindow {
-                        direction: ltr;
+                        
                     }
                     QLabel {
-                        direction: ltr;
+                        
                     }
                     QPushButton {
-                        direction: ltr;
+                        
                     }
                     QComboBox {
-                        direction: ltr;
+                        
                     }
                     QLineEdit {
-                        direction: ltr;
+                        
                     }
                     QTextEdit {
-                        direction: ltr;
+                        
                     }
                     QListWidget {
-                        direction: ltr;
+                        
                     }
                     QTableWidget {
-                        direction: ltr;
+                        
                     }
                 """)
 
@@ -247,9 +305,9 @@ class PySideUI(QMainWindow):
 
         self.nav_rail = QListWidget()
         self.nav_rail.setObjectName("NavRail")
-        self.nav_rail.setFixedWidth(160)  # Fixed width for stability
+        # Increased width for better RTL support
+        self.nav_rail.setFixedWidth(200)
         self.nav_rail.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
-        main_layout.addWidget(self.nav_rail)
 
         content_container = QWidget()
         content_container.setSizePolicy(
@@ -262,7 +320,28 @@ class PySideUI(QMainWindow):
         content_layout.addWidget(self.stacked_widget)
         content_layout.addWidget(self.create_status_bar())
 
-        main_layout.addWidget(content_container)
+        # Add widgets based on language direction
+        current_lang = self.settings.get("language", "en")
+        rtl_languages = ["fa", "ar", "he", "ur"]
+
+        # Set layout direction
+        if current_lang in rtl_languages:
+            main_layout.setDirection(QHBoxLayout.RightToLeft)
+            print(f"Initial RTL layout direction set for {current_lang}")
+        else:
+            main_layout.setDirection(QHBoxLayout.LeftToRight)
+            print(f"Initial LTR layout direction set for {current_lang}")
+
+        if current_lang in rtl_languages:
+            # RTL: Content first, then navigation rail
+            main_layout.addWidget(content_container)
+            main_layout.addWidget(self.nav_rail)
+            print("RTL: Content -> NavRail")
+        else:
+            # LTR: Navigation rail first, then content
+            main_layout.addWidget(self.nav_rail)
+            main_layout.addWidget(content_container)
+            print("LTR: NavRail -> Content")
 
     def create_status_bar(self):
         status_bar = QWidget()
@@ -423,6 +502,13 @@ class PySideUI(QMainWindow):
             (self.tr("Connection"), ":/icons/link.svg"),
             (self.tr("Routing"), ":/icons/git-merge.svg"),
             (self.tr("Logs"), ":/icons/file-text.svg"),
+            (self.tr("Performance"), ":/icons/activity.svg"),
+            (self.tr("Analytics"), ":/icons/bar-chart.svg"),
+            (self.tr("Plugins"), ":/icons/zap.svg"),
+            (self.tr("Protocols"), ":/icons/globe.svg"),
+            (self.tr("Traffic"), ":/icons/sliders.svg"),
+            (self.tr("ML"), ":/icons/activity.svg"),
+            (self.tr("Zero-Trust"), ":/icons/shield.svg"),
             (self.tr("Settings"), ":/icons/settings.svg"),
         ]
         for name, icon_name in nav_items:
@@ -434,6 +520,35 @@ class PySideUI(QMainWindow):
         self.stacked_widget.addWidget(create_connection_view(self))
         self.stacked_widget.addWidget(create_routing_view(self))
         self.stacked_widget.addWidget(create_logs_view(self))
+
+        # Add performance view
+        from ui.views.performance_view import create_performance_view
+        self.stacked_widget.addWidget(create_performance_view(self))
+
+        # Add analytics view
+        from ui.views.analytics_view import create_analytics_view
+        self.stacked_widget.addWidget(create_analytics_view(self))
+
+        # Add plugin view
+        from ui.views.plugin_view import create_plugin_view
+        self.stacked_widget.addWidget(create_plugin_view(self))
+
+        # Add protocol view
+        from ui.views.protocol_view import create_protocol_view
+        self.stacked_widget.addWidget(create_protocol_view(self))
+
+        # Add traffic view
+        from ui.views.traffic_view import create_traffic_view
+        self.stacked_widget.addWidget(create_traffic_view(self))
+
+        # Add ML view
+        from ui.views.ml_view import create_ml_view
+        self.stacked_widget.addWidget(create_ml_view(self))
+
+        # Add Zero-Trust view
+        from ui.views.zero_trust_view import create_zero_trust_view
+        self.stacked_widget.addWidget(create_zero_trust_view(self))
+
         self.stacked_widget.addWidget(create_settings_view(self))
 
     def show_about_dialog(self):
@@ -540,73 +655,128 @@ This action cannot be undone."""
                 rtl_languages = ["fa", "ar", "he", "ur"]
                 if lang_code in rtl_languages:
                     app.setLayoutDirection(Qt.RightToLeft)
-                    app.setAttribute(Qt.WA_RightToLeft, True)
                     # Apply RTL-specific styling to the entire application
                     rtl_styles = """
                         QWidget {
-                            direction: rtl;
+                            
                         }
                         QMainWindow {
-                            direction: rtl;
+                            
                         }
                         QLabel {
-                            direction: rtl;
+                            
                         }
                         QPushButton {
-                            direction: rtl;
+                            
                         }
                         QComboBox {
-                            direction: rtl;
+                            
                         }
                         QLineEdit {
-                            direction: rtl;
+                            
                         }
                         QTextEdit {
-                            direction: rtl;
+                            
                         }
                         QListWidget {
-                            direction: rtl;
+                            
                         }
                         QTableWidget {
-                            direction: rtl;
+                            
                         }
                     """
                     app.setStyleSheet(app.styleSheet() + rtl_styles)
                 else:
                     app.setLayoutDirection(Qt.LeftToRight)
-                    app.setAttribute(Qt.WA_RightToLeft, False)
                     # Apply LTR-specific styling to the entire application
                     ltr_styles = """
                         QWidget {
-                            direction: ltr;
+                            
                         }
                         QMainWindow {
-                            direction: ltr;
+                            
                         }
                         QLabel {
-                            direction: ltr;
+                            
                         }
                         QPushButton {
-                            direction: ltr;
+                            
                         }
                         QComboBox {
-                            direction: ltr;
+                            
                         }
                         QLineEdit {
-                            direction: ltr;
+                            
                         }
                         QTextEdit {
-                            direction: ltr;
+                            
                         }
                         QListWidget {
-                            direction: ltr;
+                            
                         }
                         QTableWidget {
-                            direction: ltr;
+                            
                         }
                     """
                     app.setStyleSheet(app.styleSheet() + ltr_styles)
+
+            # Recreate layout for new language direction immediately
+            self._recreate_layout_immediately(lang_code)
             self.restart_button.show()
+
+    def _recreate_layout_immediately(self, lang_code):
+        """Immediately recreate the main layout based on language direction."""
+        try:
+            print(f"Recreating layout for language: {lang_code}")
+
+            # Get the current central widget
+            central_widget = self.centralWidget()
+            if central_widget:
+                # Store current widgets
+                nav_rail = self.nav_rail
+                content_container = self.stacked_widget.parent()
+
+                # Create a new layout
+                from PySide6.QtWidgets import QHBoxLayout
+                new_layout = QHBoxLayout(central_widget)
+                new_layout.setContentsMargins(0, 0, 0, 0)
+                new_layout.setSpacing(0)
+
+                # Set layout direction
+                rtl_languages = ["fa", "ar", "he", "ur"]
+                if lang_code in rtl_languages:
+                    new_layout.setDirection(QHBoxLayout.RightToLeft)
+                    print("RTL Layout direction set")
+                else:
+                    new_layout.setDirection(QHBoxLayout.LeftToRight)
+                    print("LTR Layout direction set")
+
+                # Add widgets in the correct order
+                if lang_code in rtl_languages:
+                    # RTL: Content first, then navigation rail (راست)
+                    new_layout.addWidget(content_container)
+                    new_layout.addWidget(nav_rail)
+                    print("RTL Layout applied: Content -> NavRail")
+                else:
+                    # LTR: Navigation rail first, then content (چپ)
+                    new_layout.addWidget(nav_rail)
+                    new_layout.addWidget(content_container)
+                    print("LTR Layout applied: NavRail -> Content")
+
+                # Set the new layout
+                central_widget.setLayout(new_layout)
+
+                # Force layout update
+                new_layout.update()
+                self.update()
+                central_widget.update()
+
+                print("Layout recreation completed successfully")
+
+        except Exception as e:
+            print(f"Layout recreation error: {e}")
+            import traceback
+            traceback.print_exc()
 
     def on_core_change(self, core_name):
         """Handles core change from the settings dropdown."""
@@ -690,68 +860,66 @@ This action cannot be undone."""
             rtl_languages = ["fa", "ar", "he", "ur"]
             if self.settings.get("language") in rtl_languages:
                 app.setLayoutDirection(Qt.RightToLeft)
-                app.setAttribute(Qt.WA_RightToLeft, True)
                 # Apply RTL-specific styling to the entire application
                 app.setStyleSheet(app.styleSheet() + """
                     QWidget {
-                        direction: rtl;
+                        
                     }
                     QMainWindow {
-                        direction: rtl;
+                        
                     }
                     QLabel {
-                        direction: rtl;
+                        
                     }
                     QPushButton {
-                        direction: rtl;
+                        
                     }
                     QComboBox {
-                        direction: rtl;
+                        
                     }
                     QLineEdit {
-                        direction: rtl;
+                        
                     }
                     QTextEdit {
-                        direction: rtl;
+                        
                     }
                     QListWidget {
-                        direction: rtl;
+                        
                     }
                     QTableWidget {
-                        direction: rtl;
+                        
                     }
                 """)
             else:
                 app.setLayoutDirection(Qt.LeftToRight)
-                app.setAttribute(Qt.WA_RightToLeft, False)
                 # Apply LTR-specific styling to the entire application
                 app.setStyleSheet(app.styleSheet() + """
                     QWidget {
-                        direction: ltr;
+                        
                     }
                     QMainWindow {
-                        direction: ltr;
+                        
                     }
                     QLabel {
-                        direction: ltr;
+                        
                     }
                     QPushButton {
-                        direction: ltr;
+                        
                     }
                     QComboBox {
-                        direction: ltr;
+                        
                     }
                     QLineEdit {
-                        direction: ltr;
+                        
                     }
                     QTextEdit {
-                        direction: ltr;
+                        
                     }
                     QListWidget {
-                        direction: ltr;
+                        
                     }
                     QTableWidget {
-                        direction: ltr;
+                        
                     }
                 """)
 
@@ -974,70 +1142,122 @@ This action cannot be undone."""
             rtl_languages = ["fa", "ar", "he", "ur"]
             if self.settings.get("language") in rtl_languages:
                 app.setLayoutDirection(Qt.RightToLeft)
-                app.setAttribute(Qt.WA_RightToLeft, True)
                 # Apply RTL-specific styling to the entire application
                 app.setStyleSheet(app.styleSheet() + """
                     QWidget {
-                        direction: rtl;
+                        
                     }
                     QMainWindow {
-                        direction: rtl;
+                        
                     }
                     QLabel {
-                        direction: rtl;
+                        
                     }
                     QPushButton {
-                        direction: rtl;
+                        
                     }
                     QComboBox {
-                        direction: rtl;
+                        
                     }
                     QLineEdit {
-                        direction: rtl;
+                        
                     }
                     QTextEdit {
-                        direction: rtl;
+                        
                     }
                     QListWidget {
-                        direction: rtl;
+                        
                     }
                     QTableWidget {
-                        direction: rtl;
+                        
                     }
                 """)
             else:
                 app.setLayoutDirection(Qt.LeftToRight)
-                app.setAttribute(Qt.WA_RightToLeft, False)
                 # Apply LTR-specific styling to the entire application
                 app.setStyleSheet(app.styleSheet() + """
                     QWidget {
-                        direction: ltr;
+                        
                     }
                     QMainWindow {
-                        direction: ltr;
+                        
                     }
                     QLabel {
-                        direction: ltr;
+                        
                     }
                     QPushButton {
-                        direction: ltr;
+                        
                     }
                     QComboBox {
-                        direction: ltr;
+                        
                     }
                     QLineEdit {
-                        direction: ltr;
+                        
                     }
                     QTextEdit {
-                        direction: ltr;
+                        
                     }
                     QListWidget {
-                        direction: ltr;
+                        
                     }
                     QTableWidget {
-                        direction: ltr;
+                        
                     }
                 """)
+
+    def recreate_layout_for_language(self, lang_code):
+        """Recreate the main layout based on language direction."""
+        print(f"recreate_layout_for_language called with: {lang_code}")
+        # Use a more efficient approach with QTimer to avoid blocking
+        QTimer.singleShot(50, lambda: self._do_layout_recreation(lang_code))
+
+    def _do_layout_recreation(self, lang_code):
+        """Actually perform the layout recreation."""
+        try:
+            # Get the current central widget
+            central_widget = self.centralWidget()
+            if central_widget:
+                # Get the main layout
+                main_layout = central_widget.layout()
+                if main_layout:
+                    # Store current widgets
+                    nav_rail = self.nav_rail
+                    content_container = self.stacked_widget.parent()
+
+                    # Temporarily hide widgets to avoid flickering
+                    nav_rail.hide()
+                    content_container.hide()
+
+                    # Remove all widgets from layout
+                    while main_layout.count():
+                        child = main_layout.takeAt(0)
+                        if child.widget():
+                            child.widget().setParent(None)
+
+                    # Re-add widgets based on language direction
+                    rtl_languages = ["fa", "ar", "he", "ur"]
+
+                    if lang_code in rtl_languages:
+                        # RTL: Content first, then navigation rail (راست)
+                        main_layout.addWidget(content_container)
+                        main_layout.addWidget(nav_rail)
+                        print("RTL Layout: Content -> NavRail")
+                    else:
+                        # LTR: Navigation rail first, then content (چپ)
+                        main_layout.addWidget(nav_rail)
+                        main_layout.addWidget(content_container)
+                        print("LTR Layout: NavRail -> Content")
+
+                    # Show widgets again
+                    nav_rail.show()
+                    content_container.show()
+
+                    # Force layout update
+                    main_layout.update()
+                    self.update()
+
+        except Exception as e:
+            print(f"Layout recreation error: {e}")
 
     def apply_rtl_support(self):
         """Apply RTL support based on current language setting."""
@@ -1047,38 +1267,37 @@ This action cannot be undone."""
 
         if current_lang in rtl_languages:
             self.setLayoutDirection(Qt.RightToLeft)
-            self.setAttribute(Qt.WA_RightToLeft, True)
             # Apply RTL-specific styling
             rtl_styles = """
                 QWidget[dir="rtl"] {
-                    direction: rtl;
+                    
                 }
                 QMainWindow {
-                    direction: rtl;
+                    
                 }
                 QWidget {
-                    direction: rtl;
+                    
                 }
                 QLabel {
-                    direction: rtl;
+                    
                 }
                 QPushButton {
-                    direction: rtl;
+                    
                 }
                 QComboBox {
-                    direction: rtl;
+                    
                 }
                 QLineEdit {
-                    direction: rtl;
+                    
                 }
                 QTextEdit {
-                    direction: rtl;
+                    
                 }
                 QListWidget {
-                    direction: rtl;
+                    
                 }
                 QTableWidget {
-                    direction: rtl;
+                    
                 }
             """
             # Get current stylesheet and add RTL styles
@@ -1086,38 +1305,37 @@ This action cannot be undone."""
             self.setStyleSheet(current_style + rtl_styles)
         else:
             self.setLayoutDirection(Qt.LeftToRight)
-            self.setAttribute(Qt.WA_RightToLeft, False)
             # Reset to LTR styling
             ltr_styles = """
                 QWidget[dir="rtl"] {
-                    direction: ltr;
+                    
                 }
                 QMainWindow {
-                    direction: ltr;
+                    
                 }
                 QWidget {
-                    direction: ltr;
+                    
                 }
                 QLabel {
-                    direction: ltr;
+                    
                 }
                 QPushButton {
-                    direction: ltr;
+                    
                 }
                 QComboBox {
-                    direction: ltr;
+                    
                 }
                 QLineEdit {
-                    direction: ltr;
+                    
                 }
                 QTextEdit {
-                    direction: ltr;
+                    
                 }
                 QListWidget {
-                    direction: ltr;
+                    
                 }
                 QTableWidget {
-                    direction: ltr;
+                    
                 }
             """
             # Get current stylesheet and add LTR styles
@@ -1267,6 +1485,78 @@ This action cannot be undone."""
                     self.tr("Import Error"),
                     self.tr("Could not import the WireGuard file:\n{}").format(e),
                 )
+
+    def handle_smart_connect(self):
+        """Handle smart connect to best server."""
+        try:
+            self.log("Starting smart server selection...", LogLevel.INFO)
+
+            # Get all available servers
+            all_servers = []
+            for group_name, servers in self.server_manager.server_groups.items():
+                for server in servers:
+                    server_copy = server.copy()
+                    server_copy['group'] = group_name
+                    all_servers.append(server_copy)
+
+            if not all_servers:
+                self.log("No servers available for smart selection",
+                         LogLevel.WARNING)
+                return
+
+            # Use smart selector to find best server
+            best_server = self.smart_selector.select_best_server(all_servers)
+
+            if not best_server:
+                self.log("No suitable server found", LogLevel.WARNING)
+                return
+
+            # Update server metrics based on current ping results
+            for server in all_servers:
+                server_id = server.get('id', server.get('name', ''))
+                if hasattr(self.server_manager, 'ping_results') and server_id in self.server_manager.ping_results:
+                    ping_result = self.server_manager.ping_results[server_id]
+                    metrics = {
+                        'ping': ping_result.get('ping', 0),
+                        'success': ping_result.get('success', False)
+                    }
+                    self.smart_selector.update_server_metrics(
+                        server_id, metrics)
+
+            # Connect to the best server
+            self.log(
+                f"Connecting to best server: {best_server.get('name', 'Unknown')}", LogLevel.INFO)
+
+            # Find the server in the UI and select it
+            for i in range(self.server_list.count()):
+                item = self.server_list.item(i)
+                if item and hasattr(item, 'server_data'):
+                    if item.server_data == best_server:
+                        self.server_list.setCurrentItem(item)
+                        break
+
+            # Trigger connection
+            if hasattr(self, 'connect_button') and self.connect_button.isEnabled():
+                self.connect_button.click()
+
+            # Update selection result after a delay
+            import threading
+
+            def update_result():
+                import time
+                time.sleep(5)  # Wait 5 seconds
+                # Check if connection was successful
+                success = self.singbox_manager.is_running if hasattr(
+                    self.singbox_manager, 'is_running') else False
+                self.smart_selector.update_selection_result(
+                    best_server.get('id', best_server.get('name', '')),
+                    success
+                )
+
+            threading.Thread(target=update_result, daemon=True).start()
+
+        except Exception as e:
+            self.log(f"Error in smart connect: {e}", LogLevel.ERROR)
 
     def handle_scan_qr_from_screen(self):
         """Hides the window, takes a screenshot, and scans for a QR code."""
@@ -2446,6 +2736,26 @@ This action cannot be undone."""
 
         if self.server_manager:
             self.server_manager.force_save_settings()
+
+        # Cleanup plugin manager
+        if hasattr(self, 'plugin_manager'):
+            self.plugin_manager.cleanup_all()
+
+        # Cleanup protocol manager
+        if hasattr(self, 'protocol_manager'):
+            self.protocol_manager.cleanup()
+
+        # Cleanup traffic service
+        if hasattr(self, 'traffic_service'):
+            self.traffic_service.cleanup()
+
+        # Cleanup ML service
+        if hasattr(self, 'ml_service'):
+            self.ml_service.cleanup()
+
+        # Cleanup Zero-Trust service
+        if hasattr(self, 'zero_trust_service'):
+            self.zero_trust_service.cleanup()
 
         self.save_window_geometry()
         event.ignore()

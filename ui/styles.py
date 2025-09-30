@@ -41,58 +41,99 @@ def get_light_stylesheet(theme):
 QWidget {{
     background-color: #fafafa; /* Modern light background */
     color: #1f2937; /* Modern dark text */
-    font-family: "Inter", "Segoe UI", "SF Pro Display", system-ui, sans-serif;
+    font-family: "Vazirmatn", "Tahoma", "Inter", "Segoe UI", "SF Pro Display", system-ui, sans-serif;
     font-size: 14px;
     font-weight: 400;
 }}
 
 /* --- RTL Support --- */
-[dir="rtl"] QHBoxLayout {{
-    direction: rtl;
-}}
-[dir="rtl"] QVBoxLayout {{
-    direction: rtl;
-}}
+/* Note: Qt doesn't support CSS direction property, using layout direction instead */
 [dir="rtl"] QLabel {{
     text-align: right;
     min-width: 80px;
+    padding-right: 8px;
+    padding-left: 0px;
 }}
 [dir="rtl"] QLineEdit {{
     text-align: right;
     min-width: 120px;
+    padding-right: 12px;
+    padding-left: 8px;
 }}
 [dir="rtl"] QTextEdit {{
     text-align: right;
     min-width: 200px;
+    padding-right: 12px;
+    padding-left: 8px;
 }}
 [dir="rtl"] QComboBox {{
     text-align: right;
     min-width: 120px;
+    padding-right: 12px;
+    padding-left: 8px;
+}}
+[dir="rtl"] QComboBox::drop-down {{
+    subcontrol-origin: padding;
+    subcontrol-position: left top;
+    left: 0px;
+    right: auto;
+    width: 20px;
+    border-left: 1px solid #d1d5db;
+    border-right: none;
+}}
+[dir="rtl"] QComboBox::down-arrow {{
+    image: none;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid #6b7280;
+    border-bottom: none;
+    margin-right: 6px;
+    margin-left: 0px;
 }}
 [dir="rtl"] QPushButton {{
     text-align: right;
     min-width: 80px;
+    padding-right: 16px;
+    padding-left: 8px;
 }}
 [dir="rtl"] QListWidget {{
     text-align: right;
     min-width: 200px;
 }}
+[dir="rtl"] QListWidget::item {{
+    text-align: right;
+    padding-right: 12px;
+    padding-left: 8px;
+}}
 [dir="rtl"] QGroupBox {{
     text-align: right;
     min-width: 200px;
+    padding-right: 16px;
+    padding-left: 8px;
 }}
 [dir="rtl"] QGroupBox::title {{
     right: 16px;
     left: auto;
+    padding-right: 8px;
+    padding-left: 0px;
 }}
 [dir="rtl"] QMenu {{
     text-align: right;
     min-width: 120px;
+    padding-right: 8px;
+    padding-left: 0px;
+}}
+[dir="rtl"] QMenu::item {{
+    text-align: right;
+    padding-right: 16px;
+    padding-left: 8px;
 }}
 [dir="rtl"] QHeaderView::section {{
     text-align: right;
     min-width: 100px;
     min-height: 32px;
+    padding-right: 16px;
+    padding-left: 8px;
 }}
 [dir="rtl"] QProgressBar {{
     text-align: right;
@@ -103,27 +144,66 @@ QWidget {{
     text-align: right;
     min-width: 120px;
     min-height: 24px;
+    padding-right: 8px;
+    padding-left: 0px;
+}}
+[dir="rtl"] QCheckBox::indicator {{
+    margin-right: 8px;
+    margin-left: 0px;
 }}
 [dir="rtl"] QRadioButton {{
     text-align: right;
     min-width: 120px;
     min-height: 24px;
+    padding-right: 8px;
+    padding-left: 0px;
+}}
+[dir="rtl"] QRadioButton::indicator {{
+    margin-right: 8px;
+    margin-left: 0px;
+}}
+[dir="rtl"] QTableWidget {{
+    text-align: right;
+}}
+[dir="rtl"] QTableWidget::item {{
+    text-align: right;
+    padding-right: 12px;
+    padding-left: 8px;
+}}
+[dir="rtl"] QScrollBar:vertical {{
+    right: 0px;
+    left: auto;
+    width: 12px;
+}}
+[dir="rtl"] QScrollBar:horizontal {{
+    bottom: 0px;
+    top: auto;
+    height: 12px;
 }}
 
 /* --- RTL Layout Support --- */
 [dir="rtl"] #NavRail {{
-    border-right: none;
-    border-left: 1px solid #dee2e6;
+    border-right: 1px solid #dee2e6;
+    border-left: none;
+    width: 200px;
+    padding: 16px 0;
+}}
+[dir="rtl"] #NavRail::item {{
+    text-align: right;
+    padding: 12px 30px 12px 16px;
+    margin: 4px 15px 4px 8px;
+    min-height: 40px;
+    direction: rtl;
 }}
 [dir="rtl"] #ServerDetailsPanel {{
-    border-left: none;
-    border-right: 1px solid #e9ecef;
+    border-left: 1px solid #e9ecef;
+    border-right: none;
 }}
 [dir="rtl"] #TopBar {{
-    direction: rtl;
+    
 }}
 [dir="rtl"] #StatusBar {{
-    direction: rtl;
+    
 }}
 QLabel {{ background-color: transparent; }}
 QMainWindow, #CentralWidget {{ background-color: #fafafa; }}
@@ -171,14 +251,16 @@ QGroupBox::title {{
     background-color: #f8f9fa;
     border-right: 1px solid #dee2e6;
     padding: 16px 0;
-    width: 160px;
+    width: 200px;
 }}
 #NavRail::item {{ 
     border: none; 
-    padding: 12px 16px; 
-    margin: 4px 8px;
+    padding: 12px 30px 12px 16px; 
+    margin: 4px 15px 4px 8px;
     color: #6b7280;
     border-radius: 6px;
+    text-align: right;
+    min-height: 40px;
 }}
 #NavRail::item:selected {{ 
     background-color: {primary};
@@ -382,58 +464,104 @@ def get_dark_stylesheet(theme):
 QWidget {{
     background-color: #0f172a; /* Modern dark background */
     color: #f1f5f9; /* Modern light text */
-    font-family: "Inter", "Segoe UI", "SF Pro Display", system-ui, sans-serif;
+    font-family: "Vazirmatn", "Tahoma", "Inter", "Segoe UI", "SF Pro Display", system-ui, sans-serif;
     font-size: 14px;
     font-weight: 400;
 }}
 
 /* --- RTL Support for Dark Mode --- */
 [dir="rtl"] QHBoxLayout {{
-    direction: rtl;
+    
 }}
 [dir="rtl"] QVBoxLayout {{
-    direction: rtl;
+    
 }}
 [dir="rtl"] QLabel {{
     text-align: right;
     min-width: 80px;
+    padding-right: 8px;
+    padding-left: 0px;
 }}
 [dir="rtl"] QLineEdit {{
     text-align: right;
     min-width: 120px;
+    padding-right: 12px;
+    padding-left: 8px;
 }}
 [dir="rtl"] QTextEdit {{
     text-align: right;
     min-width: 200px;
+    padding-right: 12px;
+    padding-left: 8px;
 }}
 [dir="rtl"] QComboBox {{
     text-align: right;
     min-width: 120px;
+    padding-right: 12px;
+    padding-left: 8px;
+}}
+[dir="rtl"] QComboBox::drop-down {{
+    subcontrol-origin: padding;
+    subcontrol-position: left top;
+    left: 0px;
+    right: auto;
+    width: 20px;
+    border-left: 1px solid #334155;
+    border-right: none;
+}}
+[dir="rtl"] QComboBox::down-arrow {{
+    image: none;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid #94a3b8;
+    border-bottom: none;
+    margin-right: 6px;
+    margin-left: 0px;
 }}
 [dir="rtl"] QPushButton {{
     text-align: right;
     min-width: 80px;
+    padding-right: 16px;
+    padding-left: 8px;
 }}
 [dir="rtl"] QListWidget {{
     text-align: right;
     min-width: 200px;
 }}
+[dir="rtl"] QListWidget::item {{
+    text-align: right;
+    padding-right: 12px;
+    padding-left: 8px;
+}}
 [dir="rtl"] QGroupBox {{
     text-align: right;
     min-width: 200px;
+    padding-right: 16px;
+    padding-left: 8px;
 }}
 [dir="rtl"] QGroupBox::title {{
     right: 16px;
     left: auto;
+    padding-right: 8px;
+    padding-left: 0px;
 }}
 [dir="rtl"] QMenu {{
     text-align: right;
     min-width: 120px;
+    padding-right: 8px;
+    padding-left: 0px;
+}}
+[dir="rtl"] QMenu::item {{
+    text-align: right;
+    padding-right: 16px;
+    padding-left: 8px;
 }}
 [dir="rtl"] QHeaderView::section {{
     text-align: right;
     min-width: 100px;
     min-height: 32px;
+    padding-right: 16px;
+    padding-left: 8px;
 }}
 [dir="rtl"] QProgressBar {{
     text-align: right;
@@ -444,27 +572,66 @@ QWidget {{
     text-align: right;
     min-width: 120px;
     min-height: 24px;
+    padding-right: 8px;
+    padding-left: 0px;
+}}
+[dir="rtl"] QCheckBox::indicator {{
+    margin-right: 8px;
+    margin-left: 0px;
 }}
 [dir="rtl"] QRadioButton {{
     text-align: right;
     min-width: 120px;
     min-height: 24px;
+    padding-right: 8px;
+    padding-left: 0px;
+}}
+[dir="rtl"] QRadioButton::indicator {{
+    margin-right: 8px;
+    margin-left: 0px;
+}}
+[dir="rtl"] QTableWidget {{
+    text-align: right;
+}}
+[dir="rtl"] QTableWidget::item {{
+    text-align: right;
+    padding-right: 12px;
+    padding-left: 8px;
+}}
+[dir="rtl"] QScrollBar:vertical {{
+    right: 0px;
+    left: auto;
+    width: 12px;
+}}
+[dir="rtl"] QScrollBar:horizontal {{
+    bottom: 0px;
+    top: auto;
+    height: 12px;
 }}
 
 /* --- RTL Layout Support for Dark Mode --- */
 [dir="rtl"] #NavRail {{
-    border-right: none;
-    border-left: 1px solid #475569;
+    border-right: 1px solid #475569;
+    border-left: none;
+    width: 200px;
+    padding: 16px 0;
+}}
+[dir="rtl"] #NavRail::item {{
+    text-align: right;
+    padding: 12px 30px 12px 16px;
+    margin: 4px 15px 4px 8px;
+    min-height: 40px;
+    direction: rtl;
 }}
 [dir="rtl"] #ServerDetailsPanel {{
-    border-left: none;
-    border-right: 1px solid #495057;
+    border-left: 1px solid #495057;
+    border-right: none;
 }}
 [dir="rtl"] #TopBar {{
-    direction: rtl;
+    
 }}
 [dir="rtl"] #StatusBar {{
-    direction: rtl;
+    
 }}
 QLabel {{ background-color: transparent; }}
 QMainWindow, #CentralWidget {{ background-color: #0f172a; }}
@@ -512,13 +679,16 @@ QGroupBox::title {{
     background-color: #1e293b;
     border-right: 1px solid #334155;
     padding: 16px 0;
+    width: 200px;
 }}
 #NavRail::item {{ 
     border: none; 
-    padding: 12px 16px; 
-    margin: 4px 8px;
+    padding: 12px 30px 12px 16px; 
+    margin: 4px 15px 4px 8px;
     color: #94a3b8;
     border-radius: 6px;
+    text-align: right;
+    min-height: 40px;
 }}
 #NavRail::item:selected {{ 
     background-color: {primary};

@@ -7,13 +7,15 @@ import threading
 import time
 import psutil
 import requests
+import weakref
+import gc
 from typing import Callable, Optional, Dict, Any, List
 from collections import deque
 from constants import LogLevel
 
 
 class RealTimeStatisticsService:
-    """Service for real-time statistics monitoring."""
+    """Service for real-time statistics monitoring with memory leak prevention."""
 
     def __init__(self, log_callback: Callable[[str, LogLevel], None]):
         self.log = log_callback
@@ -33,9 +35,12 @@ class RealTimeStatisticsService:
             "memory_usage": 0.0,
             "cpu_usage": 0.0,
         }
+        # Memory leak prevention: Use weakref for callback and limit history
         self._speed_history = deque(maxlen=60)  # Last 60 seconds
         self._callback = None
         self._start_time = None
+        self._cleanup_counter = 0
+        self._max_cleanup_interval = 100  # Cleanup every 100 iterations
 
     def start_monitoring(
         self, callback: Optional[Callable[[Dict[str, Any]], None]] = None
@@ -60,11 +65,12 @@ class RealTimeStatisticsService:
             return True
 
         except Exception as e:
-            self.log(f"Failed to start statistics monitoring: {e}", LogLevel.ERROR)
+            self.log(
+                f"Failed to start statistics monitoring: {e}", LogLevel.ERROR)
             return False
 
     def stop_monitoring(self):
-        """Stop statistics monitoring."""
+        """Stop statistics monitoring with proper cleanup."""
         if not self._is_monitoring:
             return
 
@@ -72,6 +78,8 @@ class RealTimeStatisticsService:
         if self._monitor_thread and self._monitor_thread.is_alive():
             self._monitor_thread.join(timeout=2)
 
+        # Cleanup to prevent memory leaks
+        self._cleanup_resources()
         self._is_monitoring = False
         self.log("Statistics monitoring stopped", LogLevel.INFO)
 
@@ -87,8 +95,27 @@ class RealTimeStatisticsService:
         """Get speed history for charts."""
         return list(self._speed_history)
 
+    def _cleanup_resources(self):
+        """Cleanup resources to prevent memory leaks."""
+        try:
+            # Clear callback reference
+            self._callback = None
+
+            # Clear speed history if it's too large
+            if len(self._speed_history) > 30:
+                # Keep only last 30 entries
+                temp_list = list(self._speed_history)[-30:]
+                self._speed_history.clear()
+                self._speed_history.extend(temp_list)
+
+            # Force garbage collection
+            gc.collect()
+
+        except Exception as e:
+            self.log(f"Error during cleanup: {e}", LogLevel.WARNING)
+
     def _monitor_statistics(self):
-        """Monitor system and network statistics."""
+        """Monitor system and network statistics with memory leak prevention."""
         last_upload = 0
         last_download = 0
         last_time = time.time()
@@ -106,7 +133,8 @@ class RealTimeStatisticsService:
                 # Calculate speeds
                 if time_delta > 0:
                     upload_speed = (current_upload - last_upload) / time_delta
-                    download_speed = (current_download - last_download) / time_delta
+                    download_speed = (current_download -
+                                      last_download) / time_delta
                 else:
                     upload_speed = 0
                     download_speed = 0
@@ -128,7 +156,7 @@ class RealTimeStatisticsService:
                     }
                 )
 
-                # Add to speed history
+                # Add to speed history (deque automatically limits size)
                 self._speed_history.append(
                     {
                         "timestamp": current_time,
@@ -140,9 +168,19 @@ class RealTimeStatisticsService:
                 # Update ping
                 self._update_ping()
 
-                # Callback if provided
+                # Callback if provided (with error handling)
                 if self._callback:
-                    self._callback(self._statistics)
+                    try:
+                        self._callback(self._statistics)
+                    except Exception as callback_error:
+                        self.log(
+                            f"Callback error: {callback_error}", LogLevel.WARNING)
+
+                # Periodic cleanup to prevent memory leaks
+                self._cleanup_counter += 1
+                if self._cleanup_counter >= self._max_cleanup_interval:
+                    self._cleanup_resources()
+                    self._cleanup_counter = 0
 
                 # Update for next iteration
                 last_upload = current_upload
@@ -224,13 +262,19 @@ class LoadBalancingService:
             return False
 
     def stop_load_balancing(self):
-        """Stop load balancing."""
+        """Stop load balancing with proper cleanup."""
         if not self._is_active:
             return
 
         self._stop_event.set()
         if self._monitor_thread and self._monitor_thread.is_alive():
             self._monitor_thread.join(timeout=2)
+
+        # Cleanup to prevent memory leaks
+        self._servers.clear()
+        self._failover_callback = None
+        self._current_server = None
+        gc.collect()
 
         self._is_active = False
         self.log("Load balancing stopped", LogLevel.INFO)

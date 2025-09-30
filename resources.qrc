@@ -26,5 +26,6 @@
     <file alias="icons/globe.svg">assets/icons/globe.svg</file>
     <file alias="icons/sliders.svg">assets/icons/sliders.svg</file>
     <file alias="icons/shield.svg">assets/icons/shield.svg</file>
+    <file alias="icons/bar-chart.svg">assets/icons/bar-chart.svg</file>
 </qresource>
 </RCC>
