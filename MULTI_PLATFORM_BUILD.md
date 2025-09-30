@@ -2,6 +2,19 @@
 
 This guide explains how to build Onix for Windows, macOS, and Linux.
 
+## 🆕 What's New in v1.1.0
+
+- Enhanced Settings UI with Security, Performance, and Privacy tabs
+- Real-time Speed Test functionality
+- Auto-failover and improved Health Check
+- Advanced Security features (Kill Switch, DNS Leak Protection)
+- Real-time Statistics and Monitoring
+- Custom Themes and improved RTL support
+- Comprehensive Privacy Controls
+- Performance Analytics and Diagnostics
+- Browser Integration and Keyboard Shortcuts
+- Multi-user Support and Auto-backup
+
 ## 🚀 Quick Start
 
 ### Method 1: GitHub Actions (Recommended)
