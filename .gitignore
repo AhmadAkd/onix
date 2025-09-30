@@ -130,6 +130,10 @@ dummy_config.json
 settings.json
 temp_*.json
 sing-box.exe
+xray.exe
+geoip.db
+*.core
+*.log
 
 # Build artifacts
 *.zip
