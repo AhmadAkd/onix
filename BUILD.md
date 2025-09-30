@@ -8,6 +8,20 @@ This document explains how to build Onix for different platforms.
 - pip (Python package manager)
 - Git
 
+## New Features in v1.1.0
+
+- Enhanced Settings UI with Security, Performance, and Privacy tabs
+- Real-time Speed Test functionality
+- Auto-failover and improved Health Check
+- Settings Search and Presets
+- Advanced Security features (Kill Switch, DNS Leak Protection)
+- Real-time Statistics and Monitoring
+- Custom Themes and improved RTL support
+- Comprehensive Privacy Controls
+- Performance Analytics and Diagnostics
+- Browser Integration and Keyboard Shortcuts
+- Multi-user Support and Auto-backup
+
 ### Platform-specific requirements
 
 #### Windows
