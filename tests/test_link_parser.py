@@ -1,3 +1,12 @@
+import unittest
+import sys
+import os
+import unittest.mock
+import base64
+
+# Add parent directory to path before importing
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from link_parser import (
     parse_vless_link,
     parse_vmess_link,
@@ -8,13 +17,6 @@ from link_parser import (
     parse_wireguard_config,
     parse_ssh_link,
 )
-import unittest
-import sys
-import os
-import unittest.mock
-import base64
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 class TestLinkParser(unittest.TestCase):

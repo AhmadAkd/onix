@@ -1,9 +1,11 @@
-from config_generator import generate_config_json
 import unittest
 import sys
 import os
 
+# Add parent directory to path before importing
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from config_generator import generate_config_json
 
 
 class TestConfigGenerator(unittest.TestCase):
