@@ -10,7 +10,7 @@ CONFIG_FILENAME = "temp_config.json"
 SETTINGS_FILE = "settings.json"
 XRAY_LOG_FILE = "xray_core.log"
 SINGBOX_LOG_FILE = "singbox_core.log"
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.1.0"
 
 # --- Settings that require a restart to apply ---
 RESTART_REQUIRED_SETTINGS = {"appearance_mode", "theme_color"}

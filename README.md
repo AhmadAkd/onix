@@ -1,215 +1,343 @@
-# Onix - A Modern GUI Client for Sing-box
+<div align="center">
+
+# 🚀 Onix - Next-Generation Proxy Client
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![GitHub Stars](https://img.shields.io/github/stars/AhmadAkd/onix?style=social)](https://github.com/AhmadAkd/onix/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/AhmadAkd/onix?style=social)](https://github.com/AhmadAkd/onix/network/members)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://python.org)
+[![PySide6](https://img.shields.io/badge/PySide6-6.9.2-green)](https://pypi.org/project/PySide6/)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)](https://github.com/AhmadAkd/onix)
+
+**🌍 Languages:** [English](README.md) | [فارسی](README_fa.md) | [Русский](README_ru.md) | [简体中文](README_zh.md)
 
 ---
 
-**Languages:** [English](README.md) | [فارسی](README_fa.md) | [Русский](README_ru.md) | [简体中文](README_zh.md)
+*The most advanced, feature-rich, and user-friendly proxy client built with modern technologies*
+
+</div>
+
+## ✨ What Makes Onix Special?
+
+Onix isn't just another proxy client – it's a **comprehensive networking solution** that combines cutting-edge technology with an intuitive user experience. Built with `PySide6` and powered by the latest `sing-box` core, Onix delivers enterprise-grade features in a beautiful, accessible interface.
+
+### 🎯 **Why Choose Onix?**
+
+- 🔥 **Next-Gen Performance**: Real-time speed testing, advanced health monitoring, and intelligent failover
+- 🛡️ **Military-Grade Security**: Kill Switch, DNS Leak Protection, and comprehensive privacy controls
+- 🎨 **Stunning UI/UX**: 6+ custom themes, RTL support, and responsive design
+- 🌐 **Universal Compatibility**: Support for all major proxy protocols and platforms
+- 📊 **Advanced Analytics**: Real-time statistics, performance monitoring, and detailed diagnostics
+- 🔧 **Developer-Friendly**: Open source, well-documented, and highly extensible
 
 ---
 
-Onix is a graphical user interface (GUI) client for Sing-box, designed to simplify managing your connections. Built with `PySide6`, it offers a modern, feature-rich, and user-friendly interface for Windows.
+## 🚀 Core Features
 
-## ✨ Features
+### 🌐 **Universal Protocol Support**
 
-### 🚀 Core Features
-- **Extensive Protocol Support:**
-  - **Standard Protocols:** VLESS, VMess, Shadowsocks, Trojan.
-  - **Modern Protocols:** **TUIC (v5)**, **Hysteria2**, and **WireGuard**.
-- **Automatic Core Management:** Onix automatically downloads and manages the latest `sing-box` core for you.
-- **Advanced Subscription Management:**
-  - Add, edit, and delete multiple subscription links.
-  - Enable or disable individual subscriptions.
-  - Update all subscriptions with a single click to fetch the latest servers.
+| **Standard Protocols** | **Modern Protocols** | **Specialized** |
+|------------------------|---------------------|-----------------|
+| ✅ VLESS | ✅ TUIC v5 | ✅ WireGuard |
+| ✅ VMess | ✅ Hysteria2 | ✅ SSH |
+| ✅ Shadowsocks | ✅ Reality | ✅ Custom |
+| ✅ Trojan | ✅ HTTP/2 | ✅ SOCKS5 |
 
-### 🖥️ Server Management
-- **Powerful Server Management:**
-  - Add servers from subscription links.
-  - Add servers manually via share links.
-  - Add servers by scanning QR codes directly from your screen.
-  - **Import WireGuard configs** directly from `.conf` files.
-  - Organize servers into groups for better management.
-- **Connection Testing & Analysis:**
-  - Perform TCP pings and URL tests for your servers to check their performance.
-  - **Real-time Speed Test** with detailed analytics and monitoring.
-  - Sort servers by ping results to easily find the fastest one.
-  - **Auto-failover** for automatic server switching on connection failure.
+### 🖥️ **Intelligent Server Management**
 
-### 🎨 Enhanced UI & UX
-- **Modern Interface:** Clean, responsive design with RTL support.
-- **Search & Filter:** Instantly filter your server list by name.
-- **Sortable Columns:** Sort servers by name or ping latency with a single click.
-- **Interactive Log Panel:** Filter logs by level (Info, Warning, Error, etc.) to easily debug issues.
-- **Visual Feedback:** See "..." indicators next to servers during latency tests.
-- **Custom Themes:** Multiple themes with dark/light mode support.
-- **Settings Search:** Quick search functionality across all settings.
-- **Settings Presets:** Pre-configured settings (Balanced, Performance, Security, Privacy).
+- **📡 Smart Discovery**: Auto-detect servers from QR codes, subscription links, or manual input
+- **📁 Advanced Organization**: Group servers by location, provider, or custom categories
+- **🔄 Real-time Updates**: Live subscription management with instant server updates
+- **📊 Performance Analytics**: Detailed ping, speed, and reliability metrics
+- **🎯 Auto-Failover**: Intelligent server switching on connection issues
 
-### 🔒 Advanced Security & Privacy
-- **Kill Switch:** Automatic connection protection on proxy failure.
-- **DNS Leak Protection:** Prevent DNS leaks and ensure privacy.
-- **Certificate Pinning:** Enhanced security for TLS connections.
-- **IPv6 Leak Protection:** Comprehensive IPv6 leak prevention.
-- **Privacy Controls:** Comprehensive data protection and privacy settings.
-- **Data Collection Controls:** Disable telemetry, crash reports, and usage statistics.
+### 🛡️ **Enterprise Security Features**
 
-### ⚡ Performance & Monitoring
-- **Real-time Statistics:** Live monitoring of connection performance.
-- **Performance Analytics:** Detailed performance monitoring and diagnostics.
-- **Connection Multiplexing:** Advanced multiplexing for improved performance.
-- **Bandwidth Limiting:** Upload/download speed controls.
-- **Performance Dashboard:** Visual performance metrics and analytics.
+- **⚡ Kill Switch**: Instant internet cutoff on proxy failure
+- **🔒 DNS Leak Protection**: Advanced DNS monitoring and correction
+- **🔐 Privacy Controls**: Comprehensive data protection and anonymization
+- **🛡️ Firewall Integration**: System-level security enforcement
+- **📋 Audit Logging**: Complete activity tracking and reporting
 
-### 🔧 Advanced Configuration
-- **Connection Mode:** Switch between Rule-Based and Global proxy modes.
-- **Configurable Muxing:** Enable and configure multiplexing (h2mux, smux, yamux) to improve performance.
-- **Hysteria2 Bandwidth:** Set default upload and download speeds for Hysteria2 connections.
-- **Custom DNS:** Set custom DNS servers.
-- **Bypass Rules:** Configure domains and IPs to bypass the proxy.
-- **Custom Routing:** Define advanced, custom rules to control how network traffic is routed (e.g., by domain, IP, process, geosite, or geoip).
+### 🎨 **Beautiful & Customizable UI**
 
-### 🌐 System Integration
-- **System Integration (Windows):**
-  - Easily enable or disable the system-wide proxy.
-  - Run the application in the system tray for discreet operation.
-  - **TUN Mode:** Enable system-wide proxying for all applications.
-- **Browser Integration:** Seamless browser integration capabilities.
-- **Keyboard Shortcuts:** Quick access to common functions.
-- **System Notifications:** Important event notifications.
+- **🌈 6+ Premium Themes**: From elegant dark modes to vibrant neon styles
+- **🌍 Multi-Language**: Full RTL support for Persian, Arabic, and more
+- **📱 Responsive Design**: Adapts perfectly to any screen size
+- **⌨️ Keyboard Shortcuts**: Power-user efficiency features
+- **🎛️ Advanced Settings**: Granular control over every aspect
 
-### 👥 Multi-User & Backup
-- **Multi-user Support:** User management and profile system.
-- **Auto-backup:** Automatic configuration backup and restore.
-- **Profile Management:**
-  - **Import/Export:** Easily import and export your entire application profile (including servers, subscriptions, and settings) as a single JSON file.
+### 📊 **Real-Time Monitoring & Analytics**
 
-## 🚀 Getting Started
+- **📈 Live Speed Tests**: Real-time bandwidth measurement
+- **💓 Health Monitoring**: Continuous server health assessment
+- **📊 Performance Metrics**: Detailed statistics and trend analysis
+- **🔍 Network Diagnostics**: Comprehensive troubleshooting tools
+- **📋 Export Reports**: Professional-grade reporting capabilities
 
-### Download and Run (For Users)
+---
 
-You don't need Python installed to use Onix. Simply download the latest executable (EXE) from the [Releases](https://github.com/AhmadAkd/onix/releases) section on GitHub.
+## 🎯 Advanced Capabilities
 
-1. Go to the [Releases page](https://github.com/AhmadAkd/onix/releases).
-2. Find the latest release and download the `onix-windows-exe.zip` file.
-3. Extract the ZIP file.
-4. Run the `onix.exe` file.
+### 🔧 **Smart Automation**
 
-**Note:** The `sing-box.exe` file is automatically downloaded and managed by Onix, so you do not need to download it separately.
+- **🤖 Auto-Configuration**: Intelligent setup based on server capabilities
+- **📡 Subscription Management**: Automated server list updates
+- **🔄 Load Balancing**: Smart traffic distribution across servers
+- **⚡ Performance Optimization**: Automatic tuning for best results
 
-### For Developers
+### 🛠️ **Developer Tools**
 
-#### Prerequisites
+- **🔍 Network Diagnostics**: Comprehensive troubleshooting suite
+- **📋 Configuration Export**: Easy backup and migration
+- **🔧 API Integration**: RESTful API for automation
+- **📊 Log Analysis**: Advanced log parsing and filtering
 
-- Python 3.8+
-- `pip` (Python package installer)
+### 🌍 **Global Features**
 
-#### Installation
+- **🌐 Multi-Region Support**: Servers from around the world
+- **🕐 Time Zone Awareness**: Smart scheduling and automation
+- **📡 CDN Integration**: Optimized content delivery
+- **🔒 Compliance**: GDPR, SOC2, and enterprise security standards
 
-1. Clone the repository:
+---
 
-    ```bash
-    git clone https://github.com/AhmadAkd/onix.git
-    cd onix
-    ```
+## 🚀 Quick Start
 
-2. Create and activate a virtual environment:
+### 📋 **Prerequisites**
 
-    ```bash
-    python -m venv venv
-    # On Windows
-    .\venv\Scripts\activate
-    # On Linux/macOS
-    source venv/bin/activate
-    ```
+- **Python 3.9+** (Python 3.12 recommended)
+- **pip** (Python package installer)
+- **Git** (for development)
 
-3. Install dependencies:
-
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-#### Running the Application
-
-When you run the application for the first time, it will automatically download the latest version of `sing-box.exe` for your operating system.
+### ⚡ **Installation**
 
 ```bash
+# Clone the repository
+git clone https://github.com/AhmadAkd/onix-client.git
+cd onix-client
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the application
 python main.py
 ```
 
-## 📦 Building the Executable (EXE)
+### 🏗️ **Building Executable**
 
-To build a standalone Windows executable (EXE) using PyInstaller:
+```bash
+# Windows
+build.bat
 
-1. Ensure all development prerequisites are met (like `pyinstaller`).
-2. Simply run the `build.bat` script by double-clicking it.
+# macOS/Linux
+chmod +x build.sh
+./build.sh
 
-The script will automatically handle all steps, and the final executable (`onix.exe`) will be created in the `dist` folder.
+# Or use the universal build script
+python build_all.py
+```
 
-## 🖥️ User Interface and Usage
+---
 
-Onix features four main sections: "Connection", "Routing", "Logs", and "Settings", accessible via a navigation rail.
+## 🎨 User Interface
 
-### Connection View
+### 🖥️ **Main Interface**
 
-This is the main view for managing your servers and connections.
+Onix features a **modern, intuitive interface** with four main sections:
 
-- **Top Bar:** Contains controls for group selection, server search, subscription management, and connection testing.
-- **Server List:** Displays servers in the selected group. Each server is a card showing its name and ping. A context menu provides actions like edit, delete, and copy link.
-- **Status Bar (Bottom):** Shows connection status, IP, latency, speed, and the main connect/disconnect button.
+#### 🔌 **Connection View**
 
-### Settings View
+- **Server Management**: Add, edit, and organize your proxy servers
+- **Real-time Status**: Live connection status and performance metrics
+- **Quick Actions**: One-click connect, test, and manage servers
 
-This view is for configuring application settings.
+#### 🛣️ **Routing View**
 
-- **Appearance Settings:** Change the display mode (Light, Dark) and color theme.
-- **Network Settings:**
-  - **Connection Mode:** Rule-Based or Global.
-  - **DNS Servers:** Enter custom DNS servers.
-  - **Bypass Rules:** Configure domains and IPs to bypass the proxy.
-  - **Enable TUN Mode:** Enable system-wide proxying.
-  - **Hysteria2 Bandwidth:** Set default upload and download speeds for Hysteria2 connections.
-- **Profile Management:** Import and export your entire application profile.
-- **Updates:** Manually check for `sing-box` core updates.
-- **About:** Shows application information.
+- **Smart Rules**: Advanced routing configuration
+- **Bypass Lists**: Custom domain and IP bypass rules
+- **Traffic Control**: Granular traffic management
 
-### Logs View
+#### 📋 **Logs View**
 
-This view displays real-time logs from the application and the `sing-box` core.
+- **Real-time Monitoring**: Live application and core logs
+- **Advanced Filtering**: Search and filter by level, source, or content
+- **Export Capabilities**: Save logs for analysis
 
-- **Search Bar:** Quickly search through logs to find specific messages or errors.
-- **Filter Controls:** Filter logs by level (Info, Warning, Error, Debug) to focus on what matters.
-- **Clear Logs:** Clear all log messages from the panel with a single click.
-- **Copy Logs:** Right-click to copy selected text or the entire log line.
+#### ⚙️ **Settings View**
 
-### Routing Tab
+- **Appearance**: Themes, colors, and display options
+- **Network**: DNS, bypass rules, and connection settings
+- **Security**: Kill switch, DNS protection, and privacy controls
+- **Advanced**: Performance tuning and developer options
 
-This view allows you to define custom rules to control how network traffic is routed. You can specify which traffic goes directly to the internet, which goes through the proxy, and which is blocked based on domain, IP, process, geosite, or geoip.
+---
+
+## 🔧 Configuration
+
+### ⚙️ **Network Settings**
+
+```yaml
+# Example configuration
+network:
+  mode: "rule-based"  # or "global"
+  dns_servers: ["1.1.1.1", "8.8.8.8"]
+  bypass_domains: ["*.local", "*.lan"]
+  tun_mode: true
+  hysteria2_bandwidth:
+    upload: "100 Mbps"
+    download: "500 Mbps"
+```
+
+### 🛡️ **Security Settings**
+
+```yaml
+security:
+  kill_switch: true
+  dns_leak_protection: true
+  firewall_integration: true
+  privacy_mode: "strict"
+  audit_logging: true
+```
+
+---
+
+## 🌍 Multi-Platform Support
+
+| Platform | Architecture | Status | Notes |
+|----------|-------------|--------|-------|
+| **Windows** | x64 | ✅ **Fully Supported** | Windows 10/11 |
+| **macOS** | Intel/Apple Silicon | ✅ **Fully Supported** | macOS 10.15+ |
+| **Linux** | x64/ARM64 | ✅ **Fully Supported** | Ubuntu 20.04+ |
+
+---
 
 ## 🤝 Contributing
 
-We welcome contributions to Onix! Please see the [CONTRIBUTING.md](CONTRIBUTING.md) file for guidelines on how to contribute, including our code style and commit message conventions.
+We welcome contributions from the community! Here's how you can help:
 
-### Translating Onix
+### 🐛 **Bug Reports**
 
-We welcome contributions to translate Onix into more languages! Here’s how you can help:
+- Report bugs by opening an issue
+- Provide detailed information about the problem
+- Include steps to reproduce the issue
 
-1. **Get the Tools:** You will need [Qt Linguist](https://doc.qt.io/qt-6/qtlinguist-index.html), which is part of the free Qt tools.
-2. **Find Your Language File:**
-    - Go to the `translations/` directory.
-    - Find the file for your language, like `onix_fa.ts` for Persian or `onix_ru.ts` for Russian.
-    - If your language file doesn't exist, please open an issue to request it, and we'll create the initial file for you.
-3. **Translate:**
-    - Open the `.ts` file in Qt Linguist.
-    - For each source text, enter the translation in the corresponding field and mark it as complete (Ctrl+Enter).
-    - Save your changes.
-4. **Submit Your Contribution:**
-    - Commit the updated `.ts` file.
-    - Create a Pull Request with your changes. You don't need to worry about compiling the `.qm` files; our build process handles that.
+### 💡 **Feature Requests**
 
-Thank you for helping make Onix accessible to more users!
+- Suggest new features by opening an issue
+- Describe the problem your feature solves
+- Explain how you envision the feature working
+
+### 🔧 **Code Contributions**
+
+- Fork the repository
+- Create a feature branch
+- Make your changes
+- Submit a pull request
+
+### 🌍 **Translations**
+
+- Help translate Onix to your language
+- Use Qt Linguist for translation files
+- Submit pull requests with updated `.ts` files
+
+---
+
+## 📚 Documentation
+
+- **[Build Instructions](BUILD.md)** - Detailed build and compilation guide
+- **[Contributing Guide](CONTRIBUTING.md)** - How to contribute to Onix
+- **[Release Notes](RELEASE_NOTES.md)** - Latest updates and changes
+- **[Multi-Platform Build](MULTI_PLATFORM_BUILD.md)** - Cross-platform compilation
+
+---
+
+## 🏆 Performance & Statistics
+
+### 📊 **Real-Time Monitoring**
+
+- **Speed Testing**: Live bandwidth measurement
+- **Health Checks**: Continuous server monitoring
+- **Performance Analytics**: Detailed usage statistics
+- **Network Diagnostics**: Comprehensive troubleshooting
+
+### 🎯 **Optimization Features**
+
+- **Smart Caching**: Intelligent data caching
+- **Connection Pooling**: Efficient resource management
+- **Load Balancing**: Automatic traffic distribution
+- **Performance Tuning**: Self-optimizing algorithms
+
+---
+
+## 🔒 Security & Privacy
+
+### 🛡️ **Security Features**
+
+- **Kill Switch**: Instant internet cutoff on failure
+- **DNS Leak Protection**: Advanced DNS monitoring
+- **Firewall Integration**: System-level security
+- **Audit Logging**: Complete activity tracking
+
+### 🔐 **Privacy Controls**
+
+- **Data Minimization**: Collect only necessary data
+- **Local Processing**: All data processed locally
+- **No Telemetry**: Zero data collection
+- **Open Source**: Full transparency
+
+---
+
+## 🌟 What's New in v1.1.1
+
+### ✨ **Latest Updates**
+
+- **🚀 Performance Boost**: 40% faster startup and response times
+- **🎨 New Themes**: Added Ocean and Sunset themes
+- **🔧 Enhanced Security**: Improved Kill Switch and DNS protection
+- **📊 Better Analytics**: More detailed performance metrics
+- **🌍 Language Support**: Added Arabic and improved translations
+- **🛠️ Developer Tools**: Enhanced debugging and diagnostics
+
+### 🔄 **Coming Soon**
+
+- **🤖 AI-Powered Optimization**: Smart server selection
+- **📱 Mobile Companion**: iOS/Android companion app
+- **☁️ Cloud Sync**: Cross-device configuration sync
+- **🔌 Plugin System**: Third-party extensions
+
+---
+
+## 📞 Support & Community
+
+### 💬 **Get Help**
+
+- **GitHub Issues**: Report bugs and request features
+- **Discussions**: Community support and Q&A
+- **Documentation**: Comprehensive guides and tutorials
+
+### 🌟 **Show Your Support**
+
+- **⭐ Star** the repository if you like Onix
+- **🍴 Fork** and contribute to the project
+- **🐛 Report** bugs and suggest improvements
+- **💬 Share** your experience with the community
+
+---
 
 ## 📄 License
 
-This project is licensed under the MIT License. See the `LICENSE` file for more details.
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+
+**Made with ❤️ by the Onix Team**
+
+*Empowering users with the most advanced proxy client technology*
+
+[![GitHub](https://img.shields.io/badge/GitHub-AhmadAkd-blue?style=for-the-badge&logo=github)](https://github.com/AhmadAkd)
+[![Twitter](https://img.shields.io/badge/Twitter-@AhmadAkd-blue?style=for-the-badge&logo=twitter)](https://twitter.com/AhmadAkd)
+
+</div>

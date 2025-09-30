@@ -4,7 +4,7 @@ This document explains how to build Onix for different platforms.
 
 ## Prerequisites
 
-- Python 3.8 or higher
+- Python 3.9 or higher (Python 3.12 recommended)
 - pip (Python package manager)
 - Git
 
