@@ -103,8 +103,7 @@ def download_cores():
 
     # Download xray if needed
     if not run_command(
-        [sys.executable, "-c",
-            "import utils; utils.download_core_if_needed('xray')"]
+        [sys.executable, "-c", "import utils; utils.download_core_if_needed('xray')"]
     ):
         print("Warning: Failed to download xray, continuing...")
 
@@ -212,8 +211,7 @@ def create_package():
 
     # Create archive
     archive_name = f"onix-v1.0.0-{platform_name}-{arch_name}.zip"
-    shutil.make_archive(
-        f"dist/{archive_name[:-4]}", "zip", "dist", package_dir.name)
+    shutil.make_archive(f"dist/{archive_name[:-4]}", "zip", "dist", package_dir.name)
 
     print(f"Package created: dist/{archive_name}")
     return archive_name

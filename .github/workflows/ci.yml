@@ -103,7 +103,7 @@ jobs:
     
     - name: Run safety check
       run: |
-        safety check --json --output json
+        safety check --json
     
     - name: Run bandit security linter
       run: |
@@ -183,6 +183,7 @@ jobs:
 
   dependency-review:
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     
     steps:
     - uses: actions/checkout@v4
